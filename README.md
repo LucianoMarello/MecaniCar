@@ -1,17 +1,16 @@
-# Proyecto MDW 2026 — <NOMBRE DEL SISTEMA>
-
-> Reemplazá este bloque en la clase 1.
+# Proyecto MDW 2026 — MecaniCar
 
 **Equipo:**
 
-- Nombre Apellido — responsable del repositorio (creó el repo y tiene la cuenta de Vercel)
-- Nombre Apellido
-- Nombre Apellido
-- Nombre Apellido
+- Luciano Marello — responsable del repositorio (creó el repo y tiene la cuenta de Vercel)
+- Pedro Cabral
+- Mauro Gobernatori
 
-**Producción:** https://<tu-proyecto>.vercel.app
-**Problema que resuelve:** una oración.
-**Flujo principal:** una oración.
+**Producción:** [https://mecani-car.vercel.app/](https://mecani-car.vercel.app/)
+
+**Problema que resuelve:** Los talleres mecánicos gestionan reparaciones, repuestos y clientes mediante herramientas manuales dispersas, dificultando la organización interna y el seguimiento para el cliente.
+
+**Flujo principal:** El cliente solicita un turno, el mecánico genera un diagnóstico y presupuesto, el cliente lo aprueba online, y el taller ejecuta el trabajo descontando los repuestos del stock.
 
 ---
 
@@ -37,16 +36,16 @@ npx auth secret
 
 ## Comandos
 
-| Comando | Para qué |
-|---|---|
-| `npm run dev` | Levantar en desarrollo |
-| `npm run build` | Build de producción (lo mismo que corre Vercel) |
-| `npm run lint` | Lint |
-| `npm run typecheck` | Chequeo de tipos sin emitir |
-| `npm test` | Tests |
-| `npx prisma migrate dev` | Crear y aplicar una migración |
-| `npx prisma studio` | Ver y editar los datos a mano |
-| `npm run db:seed` | Cargar datos de ejemplo |
+| Comando                  | Para qué                                        |
+| ------------------------ | ----------------------------------------------- |
+| `npm run dev`            | Levantar en desarrollo                          |
+| `npm run build`          | Build de producción (lo mismo que corre Vercel) |
+| `npm run lint`           | Lint                                            |
+| `npm run typecheck`      | Chequeo de tipos sin emitir                     |
+| `npm test`               | Tests                                           |
+| `npx prisma migrate dev` | Crear y aplicar una migración                   |
+| `npx prisma studio`      | Ver y editar los datos a mano                   |
+| `npm run db:seed`        | Cargar datos de ejemplo                         |
 
 ## Estructura
 
