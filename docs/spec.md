@@ -440,3 +440,5 @@ Las siguientes funcionalidades no forman parte del alcance del proyecto:
 - Gestión de pagos o documentación de proveedores.
 
 El sistema solamente contemplará una gestión básica de proveedores para identificar el origen de los repuestos y una gestión básica de stock mediante movimientos de entrada, salida y ajuste.
+
+> El alcance definido puede ampliarse en futuras versiones del sistema, pero las funcionalidades excluidas en este documento no forman parte de la implementación actual.
