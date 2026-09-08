@@ -8,9 +8,16 @@
 
 **Producción:** [https://mecani-car.vercel.app/](https://mecani-car.vercel.app/)
 
-**Problema que resuelve:** Los talleres mecánicos gestionan reparaciones, repuestos y clientes mediante herramientas manuales dispersas, dificultando la organización interna y el seguimiento para el cliente.
+**Problema que resuelve:** La gestión de clientes, vehículos, turnos y presupuestos se realiza mediante anotaciones manuales o WhatsApp, dificultando el seguimiento de cada reparación y la comunicación.
 
-**Flujo principal:** El cliente solicita un turno, el mecánico genera un diagnóstico y presupuesto, el cliente lo aprueba online, y el taller ejecuta el trabajo descontando los repuestos del stock.
+**Flujo principal:** El cliente registra su vehículo y solicita un turno. El mecánico registra el ingreso, genera una orden de trabajo y arma un presupuesto. El cliente lo aprueba online, el taller ejecuta el trabajo y finaliza la orden.
+
+**Alcance del MVP:**
+
+- Gestión de vehículos y turnos.
+- Gestión de órdenes de trabajo (con diagnósticos).
+- Catálogo de servicios y repuestos (como lista de precios, sin control de stock físico).
+- Generación, aprobación y rechazo de presupuestos.
 
 ---
 
