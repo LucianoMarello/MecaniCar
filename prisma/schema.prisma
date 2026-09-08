@@ -1,8 +1,3 @@
-// Modelo de datos del proyecto.
-//
-// Lo que hay acá abajo es un EJEMPLO MÍNIMO para que el proyecto arranque.
-// En la clase 3 lo reemplazan por el modelo de su propio dominio.
-//
 // Después de cualquier cambio en este archivo:
 //   npx prisma migrate dev --name <descripcion-del-cambio>
 
@@ -22,40 +17,127 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// ¿El equipo eligió MongoDB? Se cambia el provider a "mongodb", se usa una
-// connection string de MongoDB Atlas y se sincroniza con `prisma db push`
-// en lugar de `prisma migrate dev`. El resto del proyecto no cambia.
-// Ojo: con Mongo los ids llevan @map("_id") @db.ObjectId y la integridad
-// referencial la garantiza el código, no la base.
-
 enum Rol {
-  ADMIN
-  USUARIO
+  CLIENTE
+  MECANICO
+}
+
+enum EstadoTurno {
+  PENDIENTE
+  CONFIRMADO
+  CANCELADO
+}
+
+enum EstadoOrdenTrabajo {
+  ABIERTA
+  EN_REPARACION
+  FINALIZADA
+}
+
+enum EstadoPresupuesto {
+  PENDIENTE
+  APROBADO
+  RECHAZADO
 }
 
 model Usuario {
   id        String   @id @default(cuid())
   email     String   @unique
   nombre    String
-  rol       Rol      @default(USUARIO)
+  apellido  String
+  rol       Rol
   creadoEn  DateTime @default(now())
-
-  notas     Nota[]
+  telefono  String
+  direccion String
 }
 
-// Entidad de ejemplo: bórrenla en la clase 3.
-// Muestra el patrón de una relación 1-N con su índice.
-model Nota {
-  id            String   @id @default(cuid())
-  titulo        String
-  contenido     String
-  creadaEn      DateTime @default(now())
-  actualizadaEn DateTime @updatedAt
+model Vehiculo {
+  id          Int      @id @default(autoincrement())
+  patente     String   @unique
+  marca       String
+  modelo      String
+  anio        Int
 
-  autor         Usuario  @relation(fields: [autorId], references: [id], onDelete: Cascade)
-  autorId       String
+  clienteId   Int
+  cliente     Cliente  @relation(fields: [clienteId], references: [id])
 
-  // Índice sobre la foreign key: sin esto, listar las notas de un usuario
-  // obliga a Postgres a recorrer la tabla entera.
-  @@index([autorId])
+  turnos      Turno[]
+  ordenes     OrdenTrabajo[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Turno {
+  id          Int          @id @default(autoincrement())
+
+  clienteId   Int
+  cliente     Cliente      @relation(fields: [clienteId], references: [id])
+
+  vehiculoId  Int
+  vehiculo    Vehiculo     @relation(fields: [vehiculoId], references: [id])
+
+  fechaHora   DateTime
+  motivo      String
+  estado      EstadoTurno @default(PENDIENTE)
+
+  fechaCreacion DateTime   @default(now())
+
+  ordenTrabajo OrdenTrabajo?
+}
+
+model OrdenTrabajo {
+  id             Int                 @id @default(autoincrement())
+
+  turnoId        Int                 @unique
+  turno          Turno               @relation(fields: [turnoId], references: [id])
+
+  vehiculoId     Int
+  vehiculo       Vehiculo            @relation(fields: [vehiculoId], references: [id])
+
+  fechaIngreso   DateTime
+  estado         EstadoOrdenTrabajo  @default(ABIERTA)
+
+  fechaCreacion  DateTime            @default(now())
+
+  presupuestos   Presupuesto[]
+}
+
+model Servicio {
+  id          Int      @id @default(autoincrement())
+  nombre      String
+  descripcion String?
+  precioActual Decimal
+
+  detalles    DetallePresupuesto[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Presupuesto {
+  id              Int                 @id @default(autoincrement())
+
+  ordenTrabajoId  Int
+  ordenTrabajo    OrdenTrabajo        @relation(fields: [ordenTrabajoId], references: [id])
+
+  estado          EstadoPresupuesto   @default(PENDIENTE)
+
+  fechaCreacion   DateTime            @default(now())
+
+  detalles        DetallePresupuesto[]
+}
+
+model DetallePresupuesto {
+  id              Int         @id @default(autoincrement())
+
+  presupuestoId   Int
+  presupuesto     Presupuesto @relation(fields: [presupuestoId], references: [id])
+
+  servicioId      Int
+  servicio        Servicio    @relation(fields: [servicioId], references: [id])
+
+  precioAplicado  Decimal
+
+  @@unique([presupuestoId, servicioId])
 }
