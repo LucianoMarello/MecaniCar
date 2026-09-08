@@ -11,13 +11,13 @@ MecaniCar es una aplicación web destinada a facilitar la gestión de un taller 
 - **Roles:** Cliente (solicita turnos, consulta estado de órdenes y aprueba presupuestos) y Mecánico/Taller (gestiona vehículos, turnos, diagnósticos, repuestos y emite presupuestos).
 - **Flujo principal:** El cliente solicita un turno, el taller realiza el diagnóstico y genera un presupuesto, el cliente lo aprueba y el taller ejecuta y finaliza el trabajo.
 
-## La especificación
+## Especificación y Alcance
 
-Lo que el sistema tiene que hacer está en [`docs/spec.md`](./docs/spec.md): entidades, historias de usuario con sus criterios de aceptación, el flujo principal y las reglas de negocio.
+Lo que el sistema tiene que hacer está en [`docs/spec.md`](./docs/spec.md).
 
-- **Antes de escribir lógica de dominio, leelo.** Las reglas de la sección 6 no se deducen del código.
-- **Si algo no está ahí, no lo inventes: preguntá.** Una regla de negocio adivinada es un error que compila y que nadie detecta hasta producción.
-- Las reglas no se copian a este archivo: viven en un solo lugar y se leen desde ahí.
+- **Entidades permitidas:** Vehiculo, Turno, OrdenTrabajo, Presupuesto, Servicio, DetallePresupuesto. No agregues entidades nuevas para inflar la complejidad.
+- **Fuera de alcance:** Control de stock físico, compras, proveedores y facturación. No escribas código para esto.
+- **Antes de escribir lógica de dominio, leelo.** Si algo no está ahí, preguntá antes de inventarlo.
 
 ## Stack
 
@@ -58,6 +58,9 @@ Después de tocar `prisma/schema.prisma`, siempre generar una migración. Nunca 
 - **Todo acceso a la base pasa por `lib/db/`.** Está prohibido importar el cliente de Prisma en componentes o en `app/`.
 - El cliente de Prisma se importa solo desde `lib/db/client.ts`.
 - Toda consulta que devuelva listas tiene paginación o límite explícito.
+- Los importes monetarios deben utilizar `Decimal` y no `Float` en el schema.
+- No almacenar información derivada cuando pueda calcularse de forma segura a partir de otros datos (ej: el estado de una vacuna, o el total de un presupuesto).
+- No utilizar datos del negocio (como una patente o DNI) como claves primarias.
 
 ### Validación
 
@@ -67,6 +70,11 @@ Después de tocar `prisma/schema.prisma`, siempre generar una migración. Nunca 
 - Todo campo con un conjunto conocido de valores —estados, roles, categorías— va como **unión literal** (`z.enum`), nunca `string`.
 - Las fechas relativas a "ahora" se validan con `.refine()`, no con `.max(new Date())`: ese `new Date()` se evalúa al construir el schema y queda congelado al arrancar el servidor.
 - Prohibido `any`. Si no se conoce el tipo, usar `unknown` y validar.
+
+## API
+
+- Los endpoints REST deben utilizar sustantivos para representar recursos (`POST /api/turnos`). Prohibidos los verbos en la URL (`/api/crearTurno`).
+- Los Route Handlers deben mantener este orden estricto de ejecución: 1. Validar, 2. Autorizar, 3. Ejecutar operación, 4. Responder.
 
 ### Seguridad
 
@@ -97,3 +105,4 @@ Después de tocar `prisma/schema.prisma`, siempre generar una migración. Nunca 
 - Cambios chicos y enfocados. No refactorices archivos que no tienen que ver con la tarea.
 - Antes de crear un helper nuevo, buscá si ya existe uno en `lib/`.
 - Cuando toques algo de seguridad o del modelo de datos, explicá el porqué del cambio: son las dos áreas que se revisan línea por línea.
+- No consideres terminada una tarea si introduce errores. Antes de finalizar un cambio, debes verificar que `npm run typecheck`, `npm test` y `npm run build` se ejecuten sin errores.
