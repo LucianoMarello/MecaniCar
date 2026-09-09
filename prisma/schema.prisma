@@ -49,32 +49,37 @@ model Usuario {
   creadoEn  DateTime @default(now())
   telefono  String
   direccion String
+
+  vehiculos Vehiculo[]
+  turnos    Turno[]
 }
 
 model Vehiculo {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(cuid())
   patente     String   @unique
   marca       String
   modelo      String
   anio        Int
 
-  clienteId   Int
-  cliente     Cliente  @relation(fields: [clienteId], references: [id])
+  usuarioId   String
+  usuario     Usuario  @relation(fields: [usuarioId], references: [id])
 
   turnos      Turno[]
   ordenes     OrdenTrabajo[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([usuarioId])
 }
 
 model Turno {
-  id          Int          @id @default(autoincrement())
+  id          String          @id @default(cuid())
 
-  clienteId   Int
-  cliente     Cliente      @relation(fields: [clienteId], references: [id])
+  usuarioId   String
+  usuario     Usuario      @relation(fields: [usuarioId], references: [id])
 
-  vehiculoId  Int
+  vehiculoId  String
   vehiculo    Vehiculo     @relation(fields: [vehiculoId], references: [id])
 
   fechaHora   DateTime
@@ -84,15 +89,18 @@ model Turno {
   fechaCreacion DateTime   @default(now())
 
   ordenTrabajo OrdenTrabajo?
+
+  @@index([usuarioId])
+  @@index([vehiculoId])
 }
 
 model OrdenTrabajo {
-  id             Int                 @id @default(autoincrement())
+  id             String                 @id @default(cuid())
 
-  turnoId        Int                 @unique
+  turnoId        String                 @unique
   turno          Turno               @relation(fields: [turnoId], references: [id])
 
-  vehiculoId     Int
+  vehiculoId     String
   vehiculo       Vehiculo            @relation(fields: [vehiculoId], references: [id])
 
   fechaIngreso   DateTime
@@ -101,10 +109,12 @@ model OrdenTrabajo {
   fechaCreacion  DateTime            @default(now())
 
   presupuestos   Presupuesto[]
+
+  @@index([vehiculoId])
 }
 
 model Servicio {
-  id          Int      @id @default(autoincrement())
+  id          String      @id @default(cuid())
   nombre      String
   descripcion String?
   precioActual Decimal
@@ -116,9 +126,9 @@ model Servicio {
 }
 
 model Presupuesto {
-  id              Int                 @id @default(autoincrement())
+  id              String                 @id @default(cuid())
 
-  ordenTrabajoId  Int
+  ordenTrabajoId  String
   ordenTrabajo    OrdenTrabajo        @relation(fields: [ordenTrabajoId], references: [id])
 
   estado          EstadoPresupuesto   @default(PENDIENTE)
@@ -129,12 +139,12 @@ model Presupuesto {
 }
 
 model DetallePresupuesto {
-  id              Int         @id @default(autoincrement())
+  id              String         @id @default(cuid())
 
-  presupuestoId   Int
+  presupuestoId   String
   presupuesto     Presupuesto @relation(fields: [presupuestoId], references: [id])
 
-  servicioId      Int
+  servicioId      String
   servicio        Servicio    @relation(fields: [servicioId], references: [id])
 
   precioAplicado  Decimal

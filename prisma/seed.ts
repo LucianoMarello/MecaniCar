@@ -22,15 +22,6 @@ async function main() {
     },
   });
 
-  await prisma.nota.deleteMany({ where: { autorId: admin.id } });
-
-  await prisma.nota.createMany({
-    data: [
-      { titulo: "Primera nota", contenido: "Datos de ejemplo.", autorId: admin.id },
-      { titulo: "Segunda nota", contenido: "Borrar en la clase 3.", autorId: admin.id },
-    ],
-  });
-
   console.log("Seed completo.");
 }
 
