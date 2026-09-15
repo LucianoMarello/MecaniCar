@@ -23,7 +23,10 @@ export const vehiculoSchema = z.object({
     .number()
     .int("El año debe ser un número entero")
     .min(1900, "El año no puede ser anterior a 1900")
-    .max(new Date().getFullYear() + 1, "El año del vehículo no es válido")
+    .refine(
+      (val) => val <= new Date().getFullYear() + 1,
+      "El año del vehículo no es válido",
+    )
     .optional(),
 });
 
