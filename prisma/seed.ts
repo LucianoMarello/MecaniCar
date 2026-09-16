@@ -12,23 +12,17 @@ import { PrismaClient, Rol } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  const admin = await prisma.usuario.upsert({
-    where: { email: "admin@ejemplo.com" },
+  const mecanico = await prisma.usuario.upsert({
+    where: { email: "mecanico@ejemplo.com" },
     update: {},
     create: {
-      email: "admin@ejemplo.com",
-      nombre: "Admin de ejemplo",
-      rol: Rol.ADMIN,
+      email: "mecanico@ejemplo.com",
+      nombre: "Mecanico",
+      apellido: "Ejemplo",
+      rol: Rol.MECANICO,
+      telefono: "3411234567",
+      direccion: "Rosario, Santa Fe",
     },
-  });
-
-  await prisma.nota.deleteMany({ where: { autorId: admin.id } });
-
-  await prisma.nota.createMany({
-    data: [
-      { titulo: "Primera nota", contenido: "Datos de ejemplo.", autorId: admin.id },
-      { titulo: "Segunda nota", contenido: "Borrar en la clase 3.", autorId: admin.id },
-    ],
   });
 
   console.log("Seed completo.");
