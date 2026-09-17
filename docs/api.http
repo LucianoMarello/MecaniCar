@@ -1,0 +1,74 @@
+@base = http://localhost:3000
+# @base = https://mecani-car.vercel.app
+
+### SERVICIOS — crear: 201
+# @name crearServicio
+POST {{base}}/api/servicios
+Content-Type: application/json
+
+{
+  "nombre": "PRUEBA-Alineación",
+  "descripcion": "Alineación de las cuatro ruedas",
+  "precio": 35000
+}
+
+### SERVICIOS — crear con precio inválido: 400
+POST {{base}}/api/servicios
+Content-Type: application/json
+
+{
+  "nombre": "PRUEBA-Servicio inválido",
+  "precio": 0
+}
+
+### SERVICIOS — listar: 200
+GET {{base}}/api/servicios
+
+### SERVICIOS — consultar el recién creado: 200
+GET {{base}}/api/servicios/{{crearServicio.response.body.$.id}}
+
+### SERVICIOS — consultar inexistente: 404
+GET {{base}}/api/servicios/no-existe
+
+### SERVICIOS — modificar el recién creado: 200
+PATCH {{base}}/api/servicios/{{crearServicio.response.body.$.id}}
+Content-Type: application/json
+
+{
+  "precio": 38000
+}
+
+### SERVICIOS — modificar sin campos: 400
+PATCH {{base}}/api/servicios/{{crearServicio.response.body.$.id}}
+Content-Type: application/json
+
+{}
+
+### SERVICIOS — modificar inexistente: 404
+PATCH {{base}}/api/servicios/no-existe
+Content-Type: application/json
+
+{
+  "nombre": "PRUEBA-No existe"
+}
+
+### SERVICIOS — eliminar el recién creado: 204
+DELETE {{base}}/api/servicios/{{crearServicio.response.body.$.id}}
+
+### SERVICIOS — eliminar inexistente: 404
+DELETE {{base}}/api/servicios/no-existe
+
+### SERVICIOS — eliminar servicio usado en presupuesto: 409
+DELETE {{base}}/api/servicios/servicio-demo
+
+### TURNOS — listar los turnos del cliente de demostración: 200
+GET {{base}}/api/turnos
+
+### PRESUPUESTOS — aprobar el presupuesto pendiente: 200
+POST {{base}}/api/presupuestos/presupuesto-demo/aprobacion
+
+### PRESUPUESTOS — volver a aprobarlo: 409
+POST {{base}}/api/presupuestos/presupuesto-demo/aprobacion
+
+### PRESUPUESTOS — aprobar uno inexistente: 404
+POST {{base}}/api/presupuestos/no-existe/aprobacion
