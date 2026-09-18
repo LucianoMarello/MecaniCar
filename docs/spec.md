@@ -32,6 +32,7 @@ Puede:
 * Registrar vehículos.
 * Consultar sus vehículos.
 * Modificar los datos permitidos de sus vehículos.
+* Dar de baja sus vehículos cuando no posean turnos ni órdenes asociados.
 * Solicitar turnos.
 * Consultar sus turnos.
 * Cancelar sus turnos cuando corresponda.
@@ -50,6 +51,8 @@ Puede:
 
 * Iniciar sesión.
 * Consultar los turnos solicitados.
+* Consultar y modificar los vehículos registrados.
+* Dar de baja vehículos cuando no posean turnos ni órdenes asociados.
 * Confirmar turnos.
 * Cancelar turnos.
 * Registrar el ingreso de un vehículo.
@@ -595,7 +598,7 @@ Este flujo constituye el proceso de negocio principal del sistema y no un simple
 
 **RN02.** La patente debe ser única dentro del sistema.
 
-**RN03.** Un cliente solamente puede administrar sus propios vehículos.
+**RN03.** Un cliente solamente puede administrar sus propios vehículos. Tanto el cliente propietario como el mecánico pueden dar de baja un vehículo únicamente cuando no posee turnos ni órdenes de trabajo asociados.
 
 ### Turnos
 

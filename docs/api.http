@@ -1,0 +1,219 @@
+@base = http://localhost:3000
+# @base = https://mecani-car.vercel.app
+
+### SERVICIOS — crear: 201
+# @name crearServicio
+POST {{base}}/api/servicios
+Content-Type: application/json
+
+{
+  "nombre": "PRUEBA-Alineación",
+  "descripcion": "Alineación de las cuatro ruedas",
+  "precio": 35000
+}
+
+### SERVICIOS — crear con precio inválido: 400
+POST {{base}}/api/servicios
+Content-Type: application/json
+
+{
+  "nombre": "PRUEBA-Servicio inválido",
+  "precio": 0
+}
+
+### SERVICIOS — listar: 200
+GET {{base}}/api/servicios
+
+### SERVICIOS — consultar el recién creado: 200
+GET {{base}}/api/servicios/{{crearServicio.response.body.$.id}}
+
+### SERVICIOS — consultar inexistente: 404
+GET {{base}}/api/servicios/no-existe
+
+### SERVICIOS — modificar el recién creado: 200
+PATCH {{base}}/api/servicios/{{crearServicio.response.body.$.id}}
+Content-Type: application/json
+
+{
+  "precio": 38000
+}
+
+### SERVICIOS — modificar sin campos: 400
+PATCH {{base}}/api/servicios/{{crearServicio.response.body.$.id}}
+Content-Type: application/json
+
+{}
+
+### SERVICIOS — modificar inexistente: 404
+PATCH {{base}}/api/servicios/no-existe
+Content-Type: application/json
+
+{
+  "nombre": "PRUEBA-No existe"
+}
+
+### SERVICIOS — eliminar el recién creado: 204
+DELETE {{base}}/api/servicios/{{crearServicio.response.body.$.id}}
+
+### SERVICIOS — eliminar inexistente: 404
+DELETE {{base}}/api/servicios/no-existe
+
+### SERVICIOS — eliminar servicio usado en presupuesto: 409
+DELETE {{base}}/api/servicios/servicio-demo
+
+### TURNOS — listar los turnos del cliente de demostración: 200
+GET {{base}}/api/turnos
+
+### PRESUPUESTOS — aprobar el presupuesto pendiente: 200
+POST {{base}}/api/presupuestos/presupuesto-demo/aprobacion
+
+### PRESUPUESTOS — volver a aprobarlo: 409
+POST {{base}}/api/presupuestos/presupuesto-demo/aprobacion
+
+### PRESUPUESTOS — aprobar uno inexistente: 404
+POST {{base}}/api/presupuestos/no-existe/aprobacion
+
+### FLUJO COMPLETO — crear vehículo: 201
+# @name crearVehiculo
+POST {{base}}/api/vehiculos
+Content-Type: application/json
+
+{ "patente": "PRB123", "marca": "Toyota", "modelo": "Etios", "anio": 2022 }
+
+### FLUJO COMPLETO — patente duplicada: 409
+POST {{base}}/api/vehiculos
+Content-Type: application/json
+
+{ "patente": "PRB123", "marca": "Toyota", "modelo": "Etios", "anio": 2022 }
+
+### FLUJO COMPLETO — listar vehículos: 200
+GET {{base}}/api/vehiculos
+
+### FLUJO COMPLETO — consultar vehículo: 200
+GET {{base}}/api/vehiculos/{{crearVehiculo.response.body.$.id}}
+
+### FLUJO COMPLETO — modificar vehículo: 200
+PATCH {{base}}/api/vehiculos/{{crearVehiculo.response.body.$.id}}
+Content-Type: application/json
+
+{ "modelo": "Etios XLS" }
+
+### FLUJO COMPLETO — solicitar turno: 201
+# @name crearTurno
+POST {{base}}/api/turnos
+Content-Type: application/json
+
+{ "vehiculoId": "{{crearVehiculo.response.body.$.id}}", "fechaHora": "2027-11-20T13:00:00.000Z", "motivo": "PRUEBA revisión general" }
+
+### FLUJO COMPLETO — consultar turno: 200
+GET {{base}}/api/turnos/{{crearTurno.response.body.$.id}}
+
+### FLUJO COMPLETO — confirmar turno: 200
+POST {{base}}/api/turnos/{{crearTurno.response.body.$.id}}/confirmacion
+
+### FLUJO COMPLETO — registrar ingreso: 201
+# @name crearOrden
+POST {{base}}/api/turnos/{{crearTurno.response.body.$.id}}/ingreso
+
+### FLUJO COMPLETO — listar órdenes: 200
+GET {{base}}/api/ordenes-trabajo
+
+### FLUJO COMPLETO — consultar orden: 200
+GET {{base}}/api/ordenes-trabajo/{{crearOrden.response.body.$.id}}
+
+### FLUJO COMPLETO — crear presupuesto: 201
+# @name crearPresupuesto
+POST {{base}}/api/presupuestos
+Content-Type: application/json
+
+{ "ordenTrabajoId": "{{crearOrden.response.body.$.id}}", "serviciosIds": ["servicio-demo"] }
+
+### FLUJO COMPLETO — listar presupuestos: 200
+GET {{base}}/api/presupuestos
+
+### FLUJO COMPLETO — consultar presupuesto: 200
+GET {{base}}/api/presupuestos/{{crearPresupuesto.response.body.$.id}}
+
+### FLUJO COMPLETO — aprobar presupuesto: 200
+POST {{base}}/api/presupuestos/{{crearPresupuesto.response.body.$.id}}/aprobacion
+
+### FLUJO COMPLETO — finalizar orden: 200
+POST {{base}}/api/ordenes-trabajo/{{crearOrden.response.body.$.id}}/finalizacion
+
+### VEHÍCULOS — eliminar vehículo con historial: 409
+DELETE {{base}}/api/vehiculos/{{crearVehiculo.response.body.$.id}}
+
+### ERRORES — vehículo inexistente: 404
+GET {{base}}/api/vehiculos/no-existe
+
+### ERRORES — turno inválido: 400
+POST {{base}}/api/turnos
+Content-Type: application/json
+
+{ "vehiculoId": "", "fechaHora": "2020-01-01T00:00:00.000Z", "motivo": "x" }
+
+### ERRORES — orden inexistente: 404
+GET {{base}}/api/ordenes-trabajo/no-existe
+
+### ERRORES — presupuesto inválido: 400
+POST {{base}}/api/presupuestos
+Content-Type: application/json
+
+{ "ordenTrabajoId": "orden-demo", "serviciosIds": [] }
+
+### CANCELACIÓN — crear turno pendiente: 201
+# @name turnoCancelable
+POST {{base}}/api/turnos
+Content-Type: application/json
+
+{ "vehiculoId": "vehiculo-demo", "fechaHora": "2027-12-01T13:00:00.000Z", "motivo": "PRUEBA turno cancelable" }
+
+### CANCELACIÓN — cancelar turno pendiente: 200
+POST {{base}}/api/turnos/{{turnoCancelable.response.body.$.id}}/cancelacion
+
+### CANCELACIÓN — volver a cancelarlo: 409
+POST {{base}}/api/turnos/{{turnoCancelable.response.body.$.id}}/cancelacion
+
+### CANCELACIÓN — turno inexistente: 404
+POST {{base}}/api/turnos/no-existe/cancelacion
+
+### RECHAZO — crear presupuesto pendiente: 201
+# @name presupuestoRechazable
+POST {{base}}/api/presupuestos
+Content-Type: application/json
+
+{ "ordenTrabajoId": "orden-demo", "serviciosIds": ["servicio-demo"] }
+
+### RECHAZO — rechazar presupuesto pendiente: 200
+POST {{base}}/api/presupuestos/{{presupuestoRechazable.response.body.$.id}}/rechazo
+
+### RECHAZO — volver a rechazarlo: 409
+POST {{base}}/api/presupuestos/{{presupuestoRechazable.response.body.$.id}}/rechazo
+
+### RECHAZO — presupuesto inexistente: 404
+POST {{base}}/api/presupuestos/no-existe/rechazo
+
+### BAJA — crear vehículo sin historial: 201
+# @name vehiculoEliminable
+POST {{base}}/api/vehiculos
+Content-Type: application/json
+
+{ "patente": "DEL123", "marca": "Fiat", "modelo": "Uno", "anio": 2018 }
+
+### BAJA — eliminar vehículo sin historial: 204
+DELETE {{base}}/api/vehiculos/{{vehiculoEliminable.response.body.$.id}}
+
+### BAJA — volver a eliminarlo: 404
+DELETE {{base}}/api/vehiculos/{{vehiculoEliminable.response.body.$.id}}
+
+### MECÁNICO — reiniciar el servidor con DEMO_ROLE=MECANICO y listar todos
+GET {{base}}/api/vehiculos
+
+### MECÁNICO — listar todos los turnos
+GET {{base}}/api/turnos
+
+### MECÁNICO — listar todas las órdenes
+GET {{base}}/api/ordenes-trabajo
+
+### MECÁNICO — listar todos los presupuestos
+GET {{base}}/api/presupuestos
