@@ -31,3 +31,10 @@ export const vehiculoSchema = z.object({
 });
 
 export type VehiculoInput = z.infer<typeof vehiculoSchema>;
+
+export const actualizarVehiculoSchema = vehiculoSchema.partial().refine(
+  (datos) => Object.keys(datos).length > 0,
+  { message: "Debe indicar al menos un campo para modificar" },
+);
+
+export type ActualizarVehiculoInput = z.infer<typeof actualizarVehiculoSchema>;

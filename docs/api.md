@@ -41,9 +41,10 @@ La API utiliza JSON para recibir y devolver información.
 | Método y ruta | Qué hace | Rol | Respuesta exitosa | Errores |
 |---|---|---|---|---|
 | `POST /api/vehiculos` | Registra un vehículo asociado al cliente autenticado | Cliente | `201` con el vehículo creado | `400` datos inválidos; `401` sin sesión; `403` rol incorrecto; `409` patente duplicada |
-| `GET /api/vehiculos` | Lista únicamente los vehículos del cliente autenticado | Cliente | `200` con la lista | `401` sin sesión; `403` rol incorrecto |
-| `GET /api/vehiculos/:id` | Consulta un vehículo propio | Cliente | `200` con el vehículo | `401` sin sesión; `403` vehículo de otro cliente; `404` inexistente |
-| `PATCH /api/vehiculos/:id` | Modifica los datos permitidos de un vehículo propio | Cliente | `200` con el vehículo actualizado | `400` datos inválidos; `401` sin sesión; `403` vehículo de otro cliente; `404` inexistente; `409` patente duplicada |
+| `GET /api/vehiculos` | Lista los vehículos propios del cliente o todos los vehículos para el mecánico | Cliente o Mecánico | `200` con la lista | `401` sin sesión |
+| `GET /api/vehiculos/:id` | Consulta un vehículo propio o, para el mecánico, cualquier vehículo | Cliente o Mecánico | `200` con el vehículo | `401` sin sesión; `403` vehículo de otro cliente; `404` inexistente |
+| `PATCH /api/vehiculos/:id` | Modifica un vehículo propio o, para el mecánico, cualquier vehículo | Cliente o Mecánico | `200` con el vehículo actualizado | `400` datos inválidos; `401` sin sesión; `403` vehículo de otro cliente; `404` inexistente; `409` patente duplicada |
+| `DELETE /api/vehiculos/:id` | Da de baja un vehículo si no posee turnos ni órdenes asociados | Cliente o Mecánico | `204` sin contenido | `401` sin sesión; `403` vehículo de otro cliente; `404` inexistente; `409` vehículo con historial asociado |
 
 ---
 
@@ -135,3 +136,7 @@ La autenticación y determinadas reglas de negocio se completarán en clases pos
 ```
 
 MecaniCar no posee actualmente un recurso que deba exponerse mediante un `GET` público.
+
+Hasta implementar la sesión real, `DEMO_ROLE=CLIENTE` utiliza el cliente de demostración y
+`DEMO_ROLE=MECANICO` permite verificar los listados y permisos del mecánico. Esta selección
+es exclusivamente temporal y deberá eliminarse en la Clase 6.
