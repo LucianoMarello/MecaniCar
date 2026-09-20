@@ -19,3 +19,13 @@ export const servicioSchema = z.object({
 });
 
 export type ServicioInput = z.infer<typeof servicioSchema>;
+
+export const actualizarServicioSchema = servicioSchema
+  .partial()
+  .refine((datos) => Object.keys(datos).length > 0, {
+    message: "Debe indicar al menos un campo para modificar",
+  });
+
+export type ActualizarServicioInput = z.infer<
+  typeof actualizarServicioSchema
+>;
