@@ -1,39 +1,44 @@
 import { NextResponse } from "next/server";
-import { aprobarPresupuesto } from "@/lib/db/presupuestos";
+import { obtenerSesionDemo } from "@/lib/auth-demo";
+import {
+  buscarPresupuestoParaValidar,
+  marcarPresupuestoAprobado,
+} from "@/lib/db/presupuestos";
+import { validarAprobacionPresupuesto } from "@/lib/presupuestos";
 
-type ContextoRuta = {
-  params: Promise<{ id: string }>;
-};
+type ContextoRuta = { params: Promise<{ id: string }> };
 
 export async function POST(_request: Request, contexto: ContextoRuta) {
   const { id } = await contexto.params;
+  const sesion = obtenerSesionDemo(); // Reemplaza al usuarioId hardcodeado que dejó el PR
 
-  // TODO (clase 6): obtener el usuario y su rol desde la sesión.
-  const usuarioId = "usuario-cliente-demo";
+  // 1. LEER
+  const presupuestoActual = await buscarPresupuestoParaValidar(id);
 
-  // TODO (clase 5): centralizar las reglas de transición de estados.
-  const resultado = await aprobarPresupuesto(id, usuarioId);
-
-  if (resultado.resultado === "NO_EXISTE") {
+  if (!presupuestoActual) {
     return NextResponse.json(
       { error: "El presupuesto no existe" },
       { status: 404 },
     );
   }
 
-  if (resultado.resultado === "PROHIBIDO") {
+  if (presupuestoActual.ordenTrabajo.vehiculo.usuarioId !== sesion.usuarioId) {
     return NextResponse.json(
       { error: "El presupuesto pertenece a otro cliente" },
       { status: 403 },
     );
   }
 
-  if (resultado.resultado === "ESTADO_INVALIDO") {
-    return NextResponse.json(
-      { error: "Solamente puede aprobarse un presupuesto pendiente" },
-      { status: 409 },
-    );
+  // 2. VALIDAR
+  const errores = validarAprobacionPresupuesto(presupuestoActual);
+  if (errores.length > 0) {
+    return NextResponse.json({ error: errores.join(". ") }, { status: 409 });
   }
 
-  return NextResponse.json(resultado.presupuesto);
+  // 3. MUTAR (Pasando el id de la orden para la transacción)
+  const presupuestoAprobado = await marcarPresupuestoAprobado(
+    id,
+    presupuestoActual.ordenTrabajoId,
+  );
+  return NextResponse.json(presupuestoAprobado);
 }
