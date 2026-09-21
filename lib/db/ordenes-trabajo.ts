@@ -33,8 +33,9 @@ export async function buscarOrden(id: string, usuarioId: string, rol: Rol) {
   return { resultado: "OK", orden } as const;
 }
 
-export async function registrarIngreso(turnoId: string) {
-  const turno = await prisma.turno.findUnique({
+export async function buscarTurnoParaIngreso(turnoId: string) {
+  // Solo lee los datos del turno que el negocio necesita evaluar
+  return prisma.turno.findUnique({
     where: { id: turnoId },
     select: {
       estado: true,
@@ -42,14 +43,17 @@ export async function registrarIngreso(turnoId: string) {
       ordenTrabajo: { select: { id: true } },
     },
   });
-  if (!turno) return { resultado: "NO_EXISTE" } as const;
-  if (turno.estado !== "CONFIRMADO" || turno.ordenTrabajo)
-    return { resultado: "ESTADO_INVALIDO" } as const;
-  const orden = await prisma.ordenTrabajo.create({
-    data: { turnoId, vehiculoId: turno.vehiculoId, fechaIngreso: new Date() },
+}
+
+export async function insertarOrdenDesdeTurno(
+  turnoId: string,
+  vehiculoId: string,
+) {
+  // Mutación pura
+  return prisma.ordenTrabajo.create({
+    data: { turnoId, vehiculoId, fechaIngreso: new Date(), estado: "ABIERTA" },
     select: ordenSelect,
   });
-  return { resultado: "CREADA", orden } as const;
 }
 
 export async function buscarOrdenParaValidar(id: string) {
