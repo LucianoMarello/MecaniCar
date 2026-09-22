@@ -1,4 +1,4 @@
-import type { EstadoTurno } from "@prisma/client";
+type EstadoTurno = "PENDIENTE" | "CONFIRMADO" | "CANCELADO";
 
 type DatosTurnoConfirmacion = {
   estado: EstadoTurno;

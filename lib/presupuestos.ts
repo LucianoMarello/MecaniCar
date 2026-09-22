@@ -1,4 +1,5 @@
-import type { EstadoPresupuesto, EstadoOrdenTrabajo } from "@prisma/client";
+type EstadoPresupuesto = "PENDIENTE" | "APROBADO" | "RECHAZADO";
+type EstadoOrdenTrabajo = "ABIERTA" | "EN_REPARACION" | "FINALIZADA";
 
 // Solo necesitamos el estado actual para tomar la decisión
 type DatosPresupuesto = {

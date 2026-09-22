@@ -27,4 +27,12 @@ describe("Regla: Finalización de Orden", () => {
     });
     expect(errores).toContain("La orden no tiene ningún presupuesto aprobado");
   });
+
+  it("falla en el borde de una lista de presupuestos vacía", () => {
+    const errores = validarFinalizacionOrden({
+      estado: "EN_REPARACION",
+      presupuestos: [],
+    });
+    expect(errores).toContain("La orden no tiene ningún presupuesto aprobado");
+  });
 });

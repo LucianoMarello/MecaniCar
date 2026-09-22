@@ -36,6 +36,32 @@ La API utiliza JSON para recibir y devolver información.
 
 ---
 
+## Errores, en detalle
+
+Este catálogo vincula los casos de error de la especificación con la capa que los resuelve. Los controles que dependen de la identidad o del rol permanecen identificados para la Clase 6; las reglas de estado se resuelven en funciones puras y se comprueban en `docs/api.http`.
+
+| Operación | Situación | Origen | Capa | Status | Mensaje |
+|---|---|---|---|---|---|
+| `POST /api/vehiculos` | La patente ya está registrada | HU01 / RN02 | Base | `409` | `La patente ya está registrada` |
+| `DELETE /api/vehiculos/:id` | El vehículo posee turnos u órdenes asociados | RN03 | Regla | `409` | `El vehículo tiene turnos u órdenes asociados` |
+| `POST /api/turnos` | La fecha y hora no son futuras | HU02 / RN06 | Zod | `400` | `Datos inválidos` |
+| `POST /api/turnos/:id/confirmacion` | El turno no está pendiente | HU04 / RN09 | Regla | `409` | `Solo puede confirmarse un turno pendiente` |
+| `POST /api/turnos/:id/cancelacion` | El turno ya está cancelado | HU05 / RN32 | Regla | `409` | `El turno ya se encuentra cancelado` |
+| `POST /api/turnos/:id/cancelacion` | El turno ya generó una orden | HU05 / RN10 | Regla | `409` | `No se puede cancelar un turno que ya ingresó al taller (tiene orden de trabajo)` |
+| `POST /api/turnos/:id/ingreso` | El turno no está confirmado | HU06 / RN31 | Regla | `409` | `El turno debe estar CONFIRMADO para registrar el ingreso` |
+| `POST /api/turnos/:id/ingreso` | El turno ya posee una orden | HU06 / RN12 / RN31 | Regla | `409` | `Este turno ya tiene una orden de trabajo asociada` |
+| `DELETE /api/servicios/:id` | El servicio está incluido en un presupuesto | HU07 / RN33 | Base | `409` | `El servicio está incluido en un presupuesto` |
+| `POST /api/presupuestos` | No se seleccionó ningún servicio | HU08 / RN21 | Zod | `400` | `Datos inválidos` |
+| `POST /api/presupuestos` | La orden ya está finalizada | RN16 | Regla | `409` | `No se puede presupuestar una orden finalizada` |
+| `POST /api/presupuestos/:id/aprobacion` | El presupuesto no está pendiente | HU10 / RN26 / RN29 | Regla | `409` | `Solamente puede aprobarse un presupuesto pendiente` |
+| `POST /api/presupuestos/:id/rechazo` | El presupuesto no está pendiente | HU11 / RN26 / RN28 | Regla | `409` | `Solo puede rechazarse un presupuesto pendiente` |
+| `POST /api/ordenes-trabajo/:id/finalizacion` | La orden no está en reparación | HU12 / RN15 / RN16 | Regla | `409` | `La orden debe estar EN_REPARACION para poder finalizarse` |
+| `POST /api/ordenes-trabajo/:id/finalizacion` | La orden no posee un presupuesto aprobado | HU12 / RN14 | Regla | `409` | `La orden no tiene ningún presupuesto aprobado` |
+
+Los errores de sesión documentados en las tablas de cada recurso (`401` y `403`) se implementarán y probarán en la Clase 6. Ninguna identidad ni rol se toma del body.
+
+---
+
 ## Vehículos
 
 | Método y ruta | Qué hace | Rol | Respuesta exitosa | Errores |
@@ -128,10 +154,9 @@ Durante la Clase 4 se implementará:
 - La validación de entradas mediante los schemas de Zod.
 - Los casos de prueba HTTP dentro de `docs/api.http`.
 
-La autenticación y determinadas reglas de negocio se completarán en clases posteriores. Mientras tanto, deberán quedar identificadas en el código mediante comentarios explícitos:
+La autenticación se completará en la Clase 6. Hasta entonces, las decisiones que dependen de la identidad o del rol del usuario quedan identificadas mediante comentarios explícitos:
 
 ```ts
-// TODO (clase 5): validar regla de negocio pendiente.
 // TODO (clase 6): obtener identidad y rol desde la sesión.
 ```
 

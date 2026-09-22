@@ -53,4 +53,9 @@ describe("Regla: Creación de Presupuesto", () => {
     const errores = validarCreacionPresupuesto({ estado: "FINALIZADA" });
     expect(errores).toContain("No se puede presupuestar una orden finalizada");
   });
+
+  it("acepta el borde de una orden que ya está EN_REPARACION", () => {
+    const errores = validarCreacionPresupuesto({ estado: "EN_REPARACION" });
+    expect(errores).toHaveLength(0);
+  });
 });

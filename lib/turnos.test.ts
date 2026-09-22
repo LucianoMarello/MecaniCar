@@ -11,10 +11,13 @@ describe("Reglas: Turnos", () => {
       expect(validarConfirmacionTurno({ estado: "PENDIENTE" })).toHaveLength(0);
     });
 
-    it("falla si ya está CONFIRMADO o CANCELADO", () => {
+    it("falla si ya está CONFIRMADO", () => {
       expect(validarConfirmacionTurno({ estado: "CONFIRMADO" })).toContain(
         "Solo puede confirmarse un turno pendiente",
       );
+    });
+
+    it("falla en el borde de un turno CANCELADO", () => {
       expect(validarConfirmacionTurno({ estado: "CANCELADO" })).toContain(
         "Solo puede confirmarse un turno pendiente",
       );
@@ -57,10 +60,13 @@ describe("Ingreso al Taller", () => {
     ).toHaveLength(0);
   });
 
-  it("falla si no está confirmado o ya tiene orden", () => {
+  it("falla si el turno todavía está PENDIENTE", () => {
     expect(
       validarIngresoTaller({ estado: "PENDIENTE", ordenTrabajo: null }),
     ).toContain("El turno debe estar CONFIRMADO para registrar el ingreso");
+  });
+
+  it("falla en el borde de un turno que ya tiene orden", () => {
     expect(
       validarIngresoTaller({
         estado: "CONFIRMADO",
