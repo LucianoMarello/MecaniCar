@@ -662,6 +662,14 @@ Este flujo constituye el proceso de negocio principal del sistema y no un simple
 
 **RN30.** La aprobación de un presupuesto permite que la orden correspondiente pase a `EN_REPARACION`.
 
+### Reglas de integridad del flujo
+
+**RN31.** Solamente un turno `CONFIRMADO` y sin una orden asociada puede registrar el ingreso del vehículo al taller.
+
+**RN32.** Un turno que ya se encuentra `CANCELADO` no puede volver a cancelarse.
+
+**RN33.** Un servicio incluido en un presupuesto no puede eliminarse, porque su detalle forma parte del historial de la operación.
+
 ---
 
 ## 8. Requisitos no funcionales
