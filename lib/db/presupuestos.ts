@@ -39,16 +39,16 @@ export async function buscarPresupuesto(
   usuarioId: string,
   rol: Rol,
 ) {
-  const presupuesto = await prisma.presupuesto.findUnique({
-    where: { id },
+  const presupuesto = await prisma.presupuesto.findFirst({
+    where: {
+      id,
+      ...(rol === "CLIENTE"
+        ? { ordenTrabajo: { vehiculo: { usuarioId } } }
+        : {}),
+    },
     select: presupuestoSelect,
   });
   if (!presupuesto) return { resultado: "NO_EXISTE" } as const;
-  if (
-    rol === "CLIENTE" &&
-    presupuesto.ordenTrabajo.vehiculo.usuarioId !== usuarioId
-  )
-    return { resultado: "PROHIBIDO" } as const;
   return { resultado: "OK", presupuesto } as const;
 }
 
@@ -90,10 +90,12 @@ export async function insertarPresupuesto(
   });
 }
 
-export async function buscarPresupuestoParaValidar(id: string) {
-  // Solo lee.
-  return prisma.presupuesto.findUnique({
-    where: { id },
+export async function buscarPresupuestoParaValidar(
+  id: string,
+  usuarioId: string,
+) {
+  return prisma.presupuesto.findFirst({
+    where: { id, ordenTrabajo: { vehiculo: { usuarioId } } },
     select: {
       estado: true,
       ordenTrabajoId: true,

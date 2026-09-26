@@ -5,13 +5,14 @@ import {
 } from "@/lib/db/ordenes-trabajo";
 import { validarIngresoTaller } from "@/lib/turnos";
 import { responderError } from "@/lib/errores";
+import { requerirUsuario } from "@/lib/auth";
 
 type Contexto = { params: Promise<{ id: string }> };
 
 export async function POST(_request: Request, { params }: Contexto) {
   try {
     const { id } = await params;
-    // TODO (clase 6): exigir rol MECANICO.
+    await requerirUsuario("MECANICO");
 
   // 1. LEER
     const turnoActual = await buscarTurnoParaIngreso(id);

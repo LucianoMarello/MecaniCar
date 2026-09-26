@@ -9,9 +9,11 @@ export function listarVehiculos(usuarioId: string, rol: Rol) {
 }
 
 export async function buscarVehiculo(id: string, usuarioId: string, rol: Rol) {
-  const vehiculo = await prisma.vehiculo.findUnique({ where: { id }, select: vehiculoSelect });
+  const vehiculo = await prisma.vehiculo.findFirst({
+    where: { id, ...(rol === "CLIENTE" ? { usuarioId } : {}) },
+    select: vehiculoSelect,
+  });
   if (!vehiculo) return { resultado: "NO_EXISTE" } as const;
-  if (rol === "CLIENTE" && vehiculo.usuarioId !== usuarioId) return { resultado: "PROHIBIDO" } as const;
   return { resultado: "OK", vehiculo } as const;
 }
 

@@ -3,10 +3,11 @@ import { crearServicio, listarServicios } from "@/lib/db/servicios";
 import { servicioSchema } from "@/lib/schemas/servicio";
 import { responderError } from "@/lib/errores";
 import { leerJson } from "@/lib/http";
+import { requerirUsuario } from "@/lib/auth";
 
 export async function GET() {
   try {
-    // TODO (clase 6): verificar la sesión y el rol MECANICO.
+    await requerirUsuario("MECANICO");
     const servicios = await listarServicios();
     return NextResponse.json(servicios);
   } catch (error) {
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // TODO (clase 6): verificar la sesión y el rol MECANICO.
+    await requerirUsuario("MECANICO");
     const servicio = await crearServicio(resultado.data);
     return NextResponse.json(servicio, { status: 201 });
   } catch (error) {

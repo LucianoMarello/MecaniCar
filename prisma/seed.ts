@@ -14,10 +14,57 @@ import {
   PrismaClient,
   Rol,
 } from "@prisma/client";
+import { configuracionAdminInicialSchema } from "../lib/schemas/configuracion-auth";
 
 const prisma = new PrismaClient();
 
+async function asegurarAdministradorInicial() {
+  const configuracion = configuracionAdminInicialSchema.parse({ email: process.env.BOOTSTRAP_ADMIN_EMAIL });
+  const administradorExistente = await prisma.usuario.findFirst({
+    where: { rol: Rol.ADMIN },
+    select: { id: true, email: true },
+  });
+
+  if (administradorExistente) {
+    if (administradorExistente.email !== configuracion.email) {
+      const ocupado = await prisma.usuario.findUnique({ where: { email: configuracion.email }, select: { id: true } });
+      if (ocupado && ocupado.id !== administradorExistente.id) throw new Error("BOOTSTRAP_ADMIN_EMAIL pertenece a otro usuario existente");
+      await prisma.usuario.update({ where: { id: administradorExistente.id }, data: { email: configuracion.email } });
+      console.log(`Correo del administrador actualizado: ${configuracion.email}`);
+      return;
+    }
+    console.log(
+      `Administrador inicial ya configurado: ${administradorExistente.email}`,
+    );
+    return;
+  }
+
+  const usuarioConMismoEmail = await prisma.usuario.findUnique({
+    where: { email: configuracion.email },
+    select: { id: true },
+  });
+
+  if (usuarioConMismoEmail) {
+    throw new Error(
+      "BOOTSTRAP_ADMIN_EMAIL pertenece a un usuario existente que no es ADMIN",
+    );
+  }
+
+  await prisma.usuario.create({
+    data: {
+      email: configuracion.email,
+      nombre: "Administrador",
+      apellido: "Inicial",
+      rol: Rol.ADMIN,
+    },
+  });
+
+  console.log("Administrador inicial creado.");
+}
+
 async function main() {
+  await asegurarAdministradorInicial();
+
   await prisma.usuario.upsert({
     where: { email: "mecanico@ejemplo.com" },
     update: {

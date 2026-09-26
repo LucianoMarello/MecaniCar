@@ -20,6 +20,7 @@ datasource db {
 enum Rol {
   CLIENTE
   MECANICO
+  ADMIN
 }
 
 enum EstadoTurno {
@@ -41,14 +42,17 @@ enum EstadoPresupuesto {
 }
 
 model Usuario {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  nombre    String
-  apellido  String
-  rol       Rol
-  creadoEn  DateTime @default(now())
-  telefono  String
-  direccion String
+  id                         String                  @id @default(cuid())
+  email                      String                  @unique
+  nombre                     String
+  apellido                   String?
+  rol                        Rol                     @default(CLIENTE)
+  activo                     Boolean                 @default(true)
+  imagen                     String?
+  telefono                   String?
+  direccion                  String?
+  creadoEn                   DateTime                @default(now())
+  actualizadoEn              DateTime                @default(now())                @updatedAt
 
   vehiculos Vehiculo[]
   turnos    Turno[]
