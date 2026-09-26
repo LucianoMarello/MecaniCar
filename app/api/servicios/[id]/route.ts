@@ -7,6 +7,7 @@ import {
 import { actualizarServicioSchema } from "@/lib/schemas/servicio";
 import { responderError } from "@/lib/errores";
 import { leerJson } from "@/lib/http";
+import { requerirUsuario } from "@/lib/auth";
 
 type ContextoRuta = {
   params: Promise<{ id: string }>;
@@ -16,7 +17,7 @@ export async function GET(_request: Request, contexto: ContextoRuta) {
   try {
     const { id } = await contexto.params;
 
-  // TODO (clase 6): verificar la sesión y el rol MECANICO.
+    await requerirUsuario("MECANICO");
     const servicio = await buscarServicioPorId(id);
 
     if (!servicio) {
@@ -52,7 +53,7 @@ export async function PATCH(request: Request, contexto: ContextoRuta) {
       );
     }
 
-  // TODO (clase 6): verificar la sesión y el rol MECANICO.
+    await requerirUsuario("MECANICO");
     const servicio = await actualizarServicio(id, resultado.data);
 
     if (!servicio) {
@@ -72,7 +73,7 @@ export async function DELETE(_request: Request, contexto: ContextoRuta) {
   try {
     const { id } = await contexto.params;
 
-  // TODO (clase 6): verificar la sesión y el rol MECANICO.
+    await requerirUsuario("MECANICO");
     const resultado = await eliminarServicio(id);
 
     if (resultado === "NO_EXISTE") {

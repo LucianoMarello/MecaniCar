@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { obtenerSesionDemo } from "@/lib/auth-demo";
+import { requerirUsuario } from "@/lib/auth";
 import {
   buscarTurnoParaValidarCancelacion,
   marcarTurnoCancelado,
@@ -12,20 +12,12 @@ type Contexto = { params: Promise<{ id: string }> };
 export async function POST(_request: Request, { params }: Contexto) {
   try {
     const { id } = await params;
-    const sesion = obtenerSesionDemo();
+    const sesion = await requerirUsuario("CLIENTE");
 
   // 1. LEER
-    const turnoActual = await buscarTurnoParaValidarCancelacion(id);
+    const turnoActual = await buscarTurnoParaValidarCancelacion(id, sesion.id);
     if (!turnoActual) {
       return NextResponse.json({ error: "El turno no existe" }, { status: 404 });
-    }
-
-  // Verificar pertenencia (Seguridad)
-    if (turnoActual.usuarioId !== sesion.usuarioId) {
-      return NextResponse.json(
-        { error: "El turno pertenece a otro cliente" },
-        { status: 403 },
-      );
     }
 
   // 2. REGLA DE NEGOCIO

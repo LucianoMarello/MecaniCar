@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { obtenerSesionDemo } from "@/lib/auth-demo";
+import { requerirUsuario } from "@/lib/auth";
 import {
   buscarPresupuestoParaValidar,
   marcarPresupuestoAprobado,
@@ -12,22 +12,15 @@ type ContextoRuta = { params: Promise<{ id: string }> };
 export async function POST(_request: Request, contexto: ContextoRuta) {
   try {
     const { id } = await contexto.params;
-    const sesion = obtenerSesionDemo(); // Reemplaza al usuarioId hardcodeado que dejó el PR
+    const sesion = await requerirUsuario("CLIENTE");
 
   // 1. LEER
-    const presupuestoActual = await buscarPresupuestoParaValidar(id);
+    const presupuestoActual = await buscarPresupuestoParaValidar(id, sesion.id);
 
     if (!presupuestoActual) {
       return NextResponse.json(
         { error: "El presupuesto no existe" },
         { status: 404 },
-      );
-    }
-
-    if (presupuestoActual.ordenTrabajo.vehiculo.usuarioId !== sesion.usuarioId) {
-      return NextResponse.json(
-        { error: "El presupuesto pertenece a otro cliente" },
-        { status: 403 },
       );
     }
 

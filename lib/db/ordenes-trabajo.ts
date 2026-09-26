@@ -23,13 +23,14 @@ export function listarOrdenes(usuarioId: string, rol: Rol) {
 }
 
 export async function buscarOrden(id: string, usuarioId: string, rol: Rol) {
-  const orden = await prisma.ordenTrabajo.findUnique({
-    where: { id },
+  const orden = await prisma.ordenTrabajo.findFirst({
+    where: {
+      id,
+      ...(rol === "CLIENTE" ? { vehiculo: { usuarioId } } : {}),
+    },
     select: ordenSelect,
   });
   if (!orden) return { resultado: "NO_EXISTE" } as const;
-  if (rol === "CLIENTE" && orden.vehiculo.usuarioId !== usuarioId)
-    return { resultado: "PROHIBIDO" } as const;
   return { resultado: "OK", orden } as const;
 }
 
