@@ -78,13 +78,13 @@ POST {{base}}/api/presupuestos/no-existe/aprobacion
 POST {{base}}/api/vehiculos
 Content-Type: application/json
 
-{ "patente": "PRB123", "marca": "Toyota", "modelo": "Etios", "anio": 2022 }
+{ "patente": "C5A123", "marca": "Toyota", "modelo": "Etios", "anio": 2022 }
 
 ### FLUJO COMPLETO — patente duplicada: 409
 POST {{base}}/api/vehiculos
 Content-Type: application/json
 
-{ "patente": "PRB123", "marca": "Toyota", "modelo": "Etios", "anio": 2022 }
+{ "patente": "C5A123", "marca": "Toyota", "modelo": "Etios", "anio": 2022 }
 
 ### FLUJO COMPLETO — listar vehículos: 200
 GET {{base}}/api/vehiculos
@@ -231,7 +231,7 @@ POST {{base}}/api/presupuestos/no-existe/rechazo
 POST {{base}}/api/vehiculos
 Content-Type: application/json
 
-{ "patente": "DEL123", "marca": "Fiat", "modelo": "Uno", "anio": 2018 }
+{ "patente": "C5D123", "marca": "Fiat", "modelo": "Uno", "anio": 2018 }
 
 ### BAJA — eliminar vehículo sin historial: 204
 DELETE {{base}}/api/vehiculos/{{vehiculoEliminable.response.body.$.id}}

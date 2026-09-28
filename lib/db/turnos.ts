@@ -23,24 +23,20 @@ export function listarTurnos(usuarioId: string, rol: Rol) {
 }
 
 export async function buscarTurno(id: string, usuarioId: string, rol: Rol) {
-  const turno = await prisma.turno.findUnique({
-    where: { id },
+  const turno = await prisma.turno.findFirst({
+    where: { id, ...(rol === "CLIENTE" ? { usuarioId } : {}) },
     select: turnoSelect,
   });
   if (!turno) return { resultado: "NO_EXISTE" } as const;
-  if (rol === "CLIENTE" && turno.usuarioId !== usuarioId)
-    return { resultado: "PROHIBIDO" } as const;
   return { resultado: "OK", turno } as const;
 }
 
 export async function crearTurno(datos: TurnoInput, usuarioId: string) {
-  const vehiculo = await prisma.vehiculo.findUnique({
-    where: { id: datos.vehiculoId },
-    select: { usuarioId: true },
+  const vehiculo = await prisma.vehiculo.findFirst({
+    where: { id: datos.vehiculoId, usuarioId },
+    select: { id: true },
   });
   if (!vehiculo) return { resultado: "VEHICULO_NO_EXISTE" } as const;
-  if (vehiculo.usuarioId !== usuarioId)
-    return { resultado: "PROHIBIDO" } as const;
   const turno = await prisma.turno.create({
     data: { ...datos, usuarioId },
     select: turnoSelect,
@@ -56,10 +52,12 @@ export async function buscarTurnoParaValidarConfirmacion(id: string) {
   });
 }
 
-export async function buscarTurnoParaValidarCancelacion(id: string) {
-  // Solo lee para cancelar, incluyendo seguridad de pertenencia
-  return prisma.turno.findUnique({
-    where: { id },
+export async function buscarTurnoParaValidarCancelacion(
+  id: string,
+  usuarioId: string,
+) {
+  return prisma.turno.findFirst({
+    where: { id, usuarioId },
     select: {
       estado: true,
       usuarioId: true,

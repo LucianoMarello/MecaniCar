@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { obtenerSesionDemo } from "@/lib/auth-demo";
+import { requerirUsuario } from "@/lib/auth";
 import {
   actualizarVehiculo,
   buscarVehiculo,
@@ -11,25 +11,20 @@ import { actualizarVehiculoSchema } from "@/lib/schemas/vehiculo";
 
 type Contexto = { params: Promise<{ id: string }> };
 
-function errorAcceso(resultado: "NO_EXISTE" | "PROHIBIDO") {
+function errorNoExiste() {
   return NextResponse.json(
-    {
-      error:
-        resultado === "NO_EXISTE"
-          ? "El vehículo no existe"
-          : "No puede acceder a este vehículo",
-    },
-    { status: resultado === "NO_EXISTE" ? 404 : 403 },
+    { error: "El vehículo no existe" },
+    { status: 404 },
   );
 }
 
 export async function GET(_request: Request, { params }: Contexto) {
   try {
     const { id } = await params;
-    const sesion = obtenerSesionDemo();
-    const resultado = await buscarVehiculo(id, sesion.usuarioId, sesion.rol);
+    const sesion = await requerirUsuario();
+    const resultado = await buscarVehiculo(id, sesion.id, sesion.rol);
     if (resultado.resultado !== "OK") {
-      return errorAcceso(resultado.resultado);
+      return errorNoExiste();
     }
     return NextResponse.json(resultado.vehiculo);
   } catch (error) {
@@ -40,7 +35,6 @@ export async function GET(_request: Request, { params }: Contexto) {
 export async function PATCH(request: Request, { params }: Contexto) {
   try {
     const { id } = await params;
-    const sesion = obtenerSesionDemo();
     const lectura = await leerJson(request);
     if (!lectura.exito) {
       return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
@@ -52,17 +46,15 @@ export async function PATCH(request: Request, { params }: Contexto) {
         { status: 400 },
       );
     }
+    const sesion = await requerirUsuario();
     const resultado = await actualizarVehiculo(
       id,
       validacion.data,
-      sesion.usuarioId,
+      sesion.id,
       sesion.rol,
     );
-    if (
-      resultado.resultado === "NO_EXISTE" ||
-      resultado.resultado === "PROHIBIDO"
-    ) {
-      return errorAcceso(resultado.resultado);
+    if (resultado.resultado === "NO_EXISTE") {
+      return errorNoExiste();
     }
     if (resultado.resultado === "PATENTE_DUPLICADA") {
       return NextResponse.json(
@@ -79,17 +71,14 @@ export async function PATCH(request: Request, { params }: Contexto) {
 export async function DELETE(_request: Request, { params }: Contexto) {
   try {
     const { id } = await params;
-    const sesion = obtenerSesionDemo();
+    const sesion = await requerirUsuario();
     const resultado = await eliminarVehiculo(
       id,
-      sesion.usuarioId,
+      sesion.id,
       sesion.rol,
     );
-    if (
-      resultado.resultado === "NO_EXISTE" ||
-      resultado.resultado === "PROHIBIDO"
-    ) {
-      return errorAcceso(resultado.resultado);
+    if (resultado.resultado === "NO_EXISTE") {
+      return errorNoExiste();
     }
     if (resultado.resultado === "EN_USO") {
       return NextResponse.json(

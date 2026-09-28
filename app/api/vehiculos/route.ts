@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { obtenerSesionDemo } from "@/lib/auth-demo";
+import { requerirUsuario } from "@/lib/auth";
 import { crearVehiculo, listarVehiculos } from "@/lib/db/vehiculos";
 import { responderError } from "@/lib/errores";
 import { leerJson } from "@/lib/http";
@@ -7,9 +7,9 @@ import { vehiculoSchema } from "@/lib/schemas/vehiculo";
 
 export async function GET() {
   try {
-    const sesion = obtenerSesionDemo();
+    const sesion = await requerirUsuario();
     return NextResponse.json(
-      await listarVehiculos(sesion.usuarioId, sesion.rol),
+      await listarVehiculos(sesion.id, sesion.rol),
     );
   } catch (error) {
     return responderError("GET /api/vehiculos", error);
@@ -18,7 +18,6 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const sesion = obtenerSesionDemo();
     const lectura = await leerJson(request);
     if (!lectura.exito) {
       return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
@@ -30,8 +29,8 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
-    // TODO (clase 6): exigir rol CLIENTE desde la sesión real.
-    const resultado = await crearVehiculo(validacion.data, sesion.usuarioId);
+    const sesion = await requerirUsuario("CLIENTE");
+    const resultado = await crearVehiculo(validacion.data, sesion.id);
     if (resultado.resultado === "PATENTE_DUPLICADA") {
       return NextResponse.json(
         { error: "La patente ya está registrada" },

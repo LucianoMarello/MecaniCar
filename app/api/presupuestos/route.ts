@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { obtenerSesionDemo } from "@/lib/auth-demo";
+import { requerirUsuario } from "@/lib/auth";
 import {
   buscarOrdenYServiciosParaPresupuesto,
   insertarPresupuesto,
@@ -12,9 +12,9 @@ import { leerJson } from "@/lib/http";
 
 export async function GET() {
   try {
-    const sesion = obtenerSesionDemo();
+    const sesion = await requerirUsuario();
     return NextResponse.json(
-      await listarPresupuestos(sesion.usuarioId, sesion.rol),
+      await listarPresupuestos(sesion.id, sesion.rol),
     );
   } catch (error) {
     return responderError("GET /api/presupuestos", error);
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       );
     }
 
-  // TODO (clase 6): exigir rol MECANICO.
+    await requerirUsuario("MECANICO");
     const datos = validacion.data;
 
   // 1. LEER (sin tomar decisiones lógicas)
