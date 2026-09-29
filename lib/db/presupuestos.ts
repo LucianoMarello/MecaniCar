@@ -147,3 +147,24 @@ export async function marcarPresupuestoAprobado(
     });
   });
 }
+
+export function buscarEmailDePresupuesto(id: string) {
+  return prisma.presupuesto.findUnique({
+    where: { id },
+    select: {
+      ordenTrabajo: {
+        select: {
+          turno: {
+            select: {
+              usuario: {
+                select: {
+                  email: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+}

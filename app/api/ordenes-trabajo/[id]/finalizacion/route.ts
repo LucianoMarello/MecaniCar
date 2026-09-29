@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import {
+  buscarEmailDeOrden,
   buscarOrdenParaValidar,
   marcarOrdenFinalizada,
 } from "@/lib/db/ordenes-trabajo";
 import { validarFinalizacionOrden } from "@/lib/ordenes";
 import { responderError } from "@/lib/errores";
 import { requerirUsuario } from "@/lib/auth";
+import { enviarNotificacion } from "@/lib/servicios/notificaciones";
 
 type Contexto = { params: Promise<{ id: string }> };
 
@@ -28,6 +30,15 @@ export async function POST(_request: Request, { params }: Contexto) {
 
   // 3. MUTAR LA BASE (escribir)
     const ordenFinalizada = await marcarOrdenFinalizada(id);
+    const contacto = await buscarEmailDeOrden(id);
+
+if (contacto) {
+  await enviarNotificacion({
+    destinatario: contacto.turno.usuario.email,
+    asunto: "Tu vehículo está listo - MecaniCar",
+    mensaje: `La orden ${id} fue finalizada. Tu vehículo está listo para retirar.`,
+  });
+}
     return NextResponse.json(ordenFinalizada);
   } catch (error) {
     return responderError("POST /api/ordenes-trabajo/:id/finalizacion", error);

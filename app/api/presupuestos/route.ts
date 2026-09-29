@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requerirUsuario } from "@/lib/auth";
 import {
+  buscarEmailDePresupuesto,
   buscarOrdenYServiciosParaPresupuesto,
   insertarPresupuesto,
   listarPresupuestos,
@@ -9,6 +10,7 @@ import { validarCreacionPresupuesto } from "@/lib/presupuestos";
 import { presupuestoSchema } from "@/lib/schemas/presupuesto";
 import { responderError } from "@/lib/errores";
 import { leerJson } from "@/lib/http";
+import { enviarNotificacion } from "@/lib/servicios/notificaciones";
 
 export async function GET() {
   try {
@@ -64,6 +66,15 @@ export async function POST(request: Request) {
       datos.ordenTrabajoId,
       servicios,
     );
+    const contacto = await buscarEmailDePresupuesto(presupuesto.id);
+
+if (contacto) {
+  await enviarNotificacion({
+    destinatario: contacto.ordenTrabajo.turno.usuario.email,
+    asunto: "Nuevo presupuesto disponible - MecaniCar",
+    mensaje: `Ya está disponible el presupuesto ${presupuesto.id} para tu vehículo.`,
+  });
+}
     return NextResponse.json(presupuesto, { status: 201 });
   } catch (error) {
     return responderError("POST /api/presupuestos", error);
