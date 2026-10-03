@@ -83,3 +83,16 @@ export async function marcarTurnoCancelado(id: string) {
     select: turnoSelect,
   });
 }
+
+export function buscarEmailDelTurno(id: string) {
+  return prisma.turno.findUnique({
+    where: { id },
+    select: {
+      usuario: {
+        select: {
+          email: true,
+        },
+      },
+    },
+  });
+}

@@ -80,3 +80,20 @@ export async function marcarOrdenFinalizada(id: string) {
   });
   return actualizada;
 }
+
+export function buscarEmailDeOrden(id: string) {
+  return prisma.ordenTrabajo.findUnique({
+    where: { id },
+    select: {
+      turno: {
+        select: {
+          usuario: {
+            select: {
+              email: true,
+            },
+          },
+        },
+      },
+    },
+  });
+}
