@@ -713,16 +713,38 @@ Este flujo constituye el proceso de negocio principal del sistema y no un simple
 
 ## 9. Integración externa
 
-El MVP incorporará al menos una integración con un servicio externo.
+El MVP integra un servicio externo: **Resend**, un proveedor de envío de correo electrónico.
 
-La integración prevista consiste en enviar una notificación por correo electrónico asociada a un evento relevante del flujo principal.
+### 9.1. Para qué se usa
 
-Posibles eventos:
+Para avisarle al cliente por correo cuando el taller hace avanzar su atención. El aviso se envía al correo de la cuenta con la que el cliente solicitó el turno.
 
-* Confirmación de un turno.
-* Disponibilidad de un nuevo presupuesto para el cliente.
+| Operación | Quién la ejecuta | Aviso que recibe el cliente |
+| --- | --- | --- |
+| Confirmar un turno (HU04) | Mecánico | El turno fue confirmado |
+| Crear un presupuesto (HU08) | Mecánico | Hay un presupuesto disponible para consultar |
+| Finalizar una orden de trabajo (HU12) | Mecánico | El vehículo está listo para retirar |
 
-El proveedor concreto se definirá durante la implementación de la integración.
+### 9.2. Esencial o accesorio
+
+El servicio es **accesorio** en las tres operaciones: confirmar un turno, crear un presupuesto y finalizar una orden tienen sentido aunque el correo no se envíe, porque el cliente puede consultar el mismo estado ingresando al sistema (HU03, HU09 y HU13).
+
+Por eso el aviso se envía siempre **después** de que la operación quedó guardada, y su falla nunca la deshace ni la convierte en un error.
+
+### 9.3. Qué pasa si Resend no responde
+
+El comportamiento es el mismo en las tres operaciones, tanto si Resend falla o rechaza el envío como si tarda más de 5 segundos, que es el tiempo máximo de espera:
+
+| Quién | Qué pasa |
+| --- | --- |
+| La operación | Se completa igual: el turno queda `CONFIRMADO`, el presupuesto queda creado en `PENDIENTE` o la orden queda `FINALIZADA` |
+| El mecánico | Recibe la misma respuesta exitosa que cuando el correo se envía. A lo sumo espera hasta 5 segundos más |
+| El cliente | No recibe el correo. Conoce el estado al consultar sus turnos, presupuestos u órdenes en el sistema |
+| El taller | La falla queda registrada en el log del servidor. El envío no se reintenta |
+
+### 9.4. Mejora prevista
+
+Hoy el mecánico no se entera de que el aviso no pudo enviarse. Queda previsto informarlo en la respuesta de la operación, para que pueda avisarle al cliente por otro medio.
 
 ---
 
