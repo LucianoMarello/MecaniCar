@@ -56,7 +56,7 @@ Puede:
 * Consultar y modificar los vehículos registrados.
 * Dar de baja vehículos cuando no posean turnos ni órdenes asociados.
 * Confirmar turnos.
-* Cancelar turnos.
+* Cancelar turnos (previsto para una entrega posterior; hoy solo el cliente cancela sus turnos, HU05).
 * Registrar el ingreso de un vehículo.
 * Crear órdenes de trabajo.
 * Consultar órdenes de trabajo.
