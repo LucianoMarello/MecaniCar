@@ -250,3 +250,34 @@ GET {{base}}/api/ordenes-trabajo
 
 ### MECÁNICO — listar todos los presupuestos
 GET {{base}}/api/presupuestos
+
+### ============================================================
+### CLASE 7 — FALLA DEL SERVICIO EXTERNO (Resend, docs/spec.md sección 9)
+### ============================================================
+# Resend es ACCESORIO: si falla, la operación se completa igual.
+#
+# Preparación A (el que falla): cambiar una letra de RESEND_API_KEY en
+# .env.local y reiniciar el servidor.
+# Preparación B (sin configurar): dejar RESEND_API_KEY vacía y reiniciar.
+#
+# En los dos casos se espera la MISMA respuesta que con Resend funcionando,
+# y la falla escrita en la consola del servidor:
+#   A → notificaciones: Resend rechazó el mensaje { status: 401 }
+#   B → notificaciones: Resend no está configurado
+#
+# El que tarda (timeout de 5 s) está cubierto en
+# lib/servicios/notificaciones.test.ts.
+
+### FALLA RESEND — crear un turno para confirmar (como CLIENTE): 201
+# @name turnoConAviso
+POST {{base}}/api/turnos
+Content-Type: application/json
+
+{ "vehiculoId": "vehiculo-demo", "fechaHora": "2027-12-10T13:00:00.000Z", "motivo": "PRUEBA aviso con Resend caído" }
+
+### FALLA RESEND — confirmarlo con la credencial rota (como MECANICO): 200
+# El turno vuelve en estado CONFIRMADO aunque el correo no se haya enviado.
+POST {{base}}/api/turnos/{{turnoConAviso.response.body.$.id}}/confirmacion
+
+### FALLA RESEND — el turno quedó confirmado de verdad: 200
+GET {{base}}/api/turnos/{{turnoConAviso.response.body.$.id}}

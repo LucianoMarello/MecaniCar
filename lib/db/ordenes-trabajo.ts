@@ -58,7 +58,8 @@ export async function insertarOrdenDesdeTurno(
 }
 
 export async function buscarOrdenParaValidar(id: string) {
-  // Solo lee. Extrae exactamente lo que necesita la función pura.
+  // Solo lee. Extrae lo que necesita la función pura y el email del cliente,
+  // para avisarle sin consultar la base después de finalizar.
   const orden = await prisma.ordenTrabajo.findUnique({
     where: { id },
     select: {
@@ -66,6 +67,7 @@ export async function buscarOrdenParaValidar(id: string) {
       presupuestos: {
         select: { estado: true },
       },
+      turno: { select: { usuario: { select: { email: true } } } },
     },
   });
   return orden;
@@ -79,21 +81,4 @@ export async function marcarOrdenFinalizada(id: string) {
     select: ordenSelect,
   });
   return actualizada;
-}
-
-export function buscarEmailDeOrden(id: string) {
-  return prisma.ordenTrabajo.findUnique({
-    where: { id },
-    select: {
-      turno: {
-        select: {
-          usuario: {
-            select: {
-              email: true,
-            },
-          },
-        },
-      },
-    },
-  });
 }

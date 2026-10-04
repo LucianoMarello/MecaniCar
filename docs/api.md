@@ -123,6 +123,20 @@ El catálogo de servicios constituye el CRUD completo requerido para el MVP.
 
 ---
 
+## Avisos por correo
+
+Tres operaciones le envían un correo al cliente mediante Resend, **después** de completarse. La decisión y el detalle están en la sección 9 de `docs/spec.md`.
+
+| Operación | Aviso al cliente |
+|---|---|
+| `POST /api/turnos/:id/confirmacion` | El turno fue confirmado |
+| `POST /api/presupuestos` | Hay un presupuesto disponible |
+| `POST /api/ordenes-trabajo/:id/finalizacion` | El vehículo está listo para retirar |
+
+El servicio es accesorio, así que **no agrega ningún código de error al contrato**: si Resend falla, rechaza el envío o tarda más de 5 segundos, la operación responde igual (`200` o `201`) y la falla queda en el log del servidor. La prueba está al final de `docs/api.http`.
+
+---
+
 ## Correspondencia con las historias de usuario
 
 | Historia de usuario | Operación de la API |
