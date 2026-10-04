@@ -20,7 +20,9 @@ El objetivo del MVP es implementar un flujo de negocio completo manteniendo un a
 
 ## 2. Roles
 
-El sistema contempla dos roles.
+El sistema contempla tres roles: Cliente, Mecánico y Administrador.
+
+Toda persona que inicia sesión por primera vez queda registrada como Cliente.
 
 ### 2.1. Cliente
 
@@ -64,6 +66,25 @@ Puede:
 * Administrar el catálogo de servicios.
 * Actualizar el estado de una orden de trabajo.
 * Finalizar una reparación.
+
+### 2.3. Administrador
+
+Es un mecánico que además puede asignar roles.
+
+Existe para resolver el alta del primer mecánico: como toda persona nueva ingresa como Cliente, alguien tiene que poder convertirla en Mecánico.
+
+Puede:
+
+* Todo lo que puede un Mecánico. Donde esta especificación dice "mecánico", incluye al administrador.
+* Consultar los usuarios registrados.
+* Asignar a otro usuario el rol Cliente o Mecánico.
+
+No puede:
+
+* Modificar su propio rol.
+* Asignar el rol Administrador.
+
+El administrador inicial no se da de alta desde la aplicación: se define en la configuración del sistema al instalarlo.
 
 ---
 
@@ -669,6 +690,14 @@ Este flujo constituye el proceso de negocio principal del sistema y no un simple
 **RN32.** Un turno que ya se encuentra `CANCELADO` no puede volver a cancelarse.
 
 **RN33.** Un servicio incluido en un presupuesto no puede eliminarse, porque su detalle forma parte del historial de la operación.
+
+### Usuarios y roles
+
+**RN34.** Todo usuario nuevo se registra con el rol Cliente.
+
+**RN35.** Solamente un administrador puede asignar roles, y únicamente los roles Cliente o Mecánico.
+
+**RN36.** Un administrador no puede modificar su propio rol.
 
 ---
 
