@@ -176,7 +176,7 @@ El servicio es accesorio, así que **no agrega ningún código de error al contr
 
 ## Autenticación
 
-El inicio de sesión se hace con una cuenta de Google, mediante Auth.js. La decisión está en `docs/adr/`.
+El inicio de sesión se hace con una cuenta de Google, mediante Auth.js. La decisión está en `docs/adr/0003-identidad-y-sesion.md`.
 
 | Ruta | Para qué |
 |---|---|
