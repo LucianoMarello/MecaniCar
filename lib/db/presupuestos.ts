@@ -57,9 +57,13 @@ export async function buscarOrdenYServiciosParaPresupuesto(
   serviciosIds: string[],
 ) {
   // Solo lee. Trae la orden y los servicios solicitados para ver si existen y cuánto valen.
+  // El email del cliente se trae acá para avisarle sin consultar la base después de crear.
   const orden = await prisma.ordenTrabajo.findUnique({
     where: { id: ordenId },
-    select: { estado: true },
+    select: {
+      estado: true,
+      turno: { select: { usuario: { select: { email: true } } } },
+    },
   });
 
   const idsUnicos = [...new Set(serviciosIds)];
@@ -145,26 +149,5 @@ export async function marcarPresupuestoAprobado(
       data: { estado: "APROBADO" },
       select: presupuestoAprobadoSelect, // Ya existe arriba en tu archivo
     });
-  });
-}
-
-export function buscarEmailDePresupuesto(id: string) {
-  return prisma.presupuesto.findUnique({
-    where: { id },
-    select: {
-      ordenTrabajo: {
-        select: {
-          turno: {
-            select: {
-              usuario: {
-                select: {
-                  email: true,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
   });
 }

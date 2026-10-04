@@ -45,10 +45,11 @@ export async function crearTurno(datos: TurnoInput, usuarioId: string) {
 }
 
 export async function buscarTurnoParaValidarConfirmacion(id: string) {
-  // Solo lee para confirmar
+  // Solo lee para confirmar. El email del cliente se trae acá, antes de
+  // confirmar, para no consultar la base después de la operación.
   return prisma.turno.findUnique({
     where: { id },
-    select: { estado: true },
+    select: { estado: true, usuario: { select: { email: true } } },
   });
 }
 
@@ -81,18 +82,5 @@ export async function marcarTurnoCancelado(id: string) {
     where: { id },
     data: { estado: "CANCELADO" },
     select: turnoSelect,
-  });
-}
-
-export function buscarEmailDelTurno(id: string) {
-  return prisma.turno.findUnique({
-    where: { id },
-    select: {
-      usuario: {
-        select: {
-          email: true,
-        },
-      },
-    },
   });
 }

@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { requerirUsuario } from "@/lib/auth";
 import {
-  buscarEmailDePresupuesto,
   buscarOrdenYServiciosParaPresupuesto,
   insertarPresupuesto,
   listarPresupuestos,
@@ -66,15 +65,15 @@ export async function POST(request: Request) {
       datos.ordenTrabajoId,
       servicios,
     );
-    const contacto = await buscarEmailDePresupuesto(presupuesto.id);
 
-if (contacto) {
-  await enviarNotificacion({
-    destinatario: contacto.ordenTrabajo.turno.usuario.email,
-    asunto: "Nuevo presupuesto disponible - MecaniCar",
-    mensaje: `Ya está disponible el presupuesto ${presupuesto.id} para tu vehículo.`,
-  });
-}
+    // 4. AVISAR AL CLIENTE. Resend es accesorio (docs/spec.md, sección 9):
+    // de acá para abajo nada puede lanzar. Si el correo falla,
+    // enviarNotificacion devuelve false y se responde igual.
+    await enviarNotificacion({
+      destinatario: orden.turno.usuario.email,
+      asunto: "Nuevo presupuesto disponible - MecaniCar",
+      mensaje: `Ya está disponible el presupuesto ${presupuesto.id} para tu vehículo.`,
+    });
     return NextResponse.json(presupuesto, { status: 201 });
   } catch (error) {
     return responderError("POST /api/presupuestos", error);

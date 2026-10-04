@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import {
-  buscarEmailDeOrden,
   buscarOrdenParaValidar,
   marcarOrdenFinalizada,
 } from "@/lib/db/ordenes-trabajo";
@@ -30,15 +29,15 @@ export async function POST(_request: Request, { params }: Contexto) {
 
   // 3. MUTAR LA BASE (escribir)
     const ordenFinalizada = await marcarOrdenFinalizada(id);
-    const contacto = await buscarEmailDeOrden(id);
 
-if (contacto) {
-  await enviarNotificacion({
-    destinatario: contacto.turno.usuario.email,
-    asunto: "Tu vehículo está listo - MecaniCar",
-    mensaje: `La orden ${id} fue finalizada. Tu vehículo está listo para retirar.`,
-  });
-}
+    // 4. AVISAR AL CLIENTE. Resend es accesorio (docs/spec.md, sección 9):
+    // de acá para abajo nada puede lanzar. Si el correo falla,
+    // enviarNotificacion devuelve false y se responde igual.
+    await enviarNotificacion({
+      destinatario: ordenActual.turno.usuario.email,
+      asunto: "Tu vehículo está listo - MecaniCar",
+      mensaje: `La orden ${id} fue finalizada. Tu vehículo está listo para retirar.`,
+    });
     return NextResponse.json(ordenFinalizada);
   } catch (error) {
     return responderError("POST /api/ordenes-trabajo/:id/finalizacion", error);
