@@ -31,14 +31,14 @@ export async function POST(_request: Request, { params }: Contexto) {
     const turnoConfirmado = await marcarTurnoConfirmado(id);
 
     // 4. AVISAR AL CLIENTE. Resend es accesorio (docs/spec.md, sección 9):
-    // de acá para abajo nada puede lanzar. Si el correo falla,
-    // enviarNotificacion devuelve false y se responde igual.
-    await enviarNotificacion({
+    // de acá para abajo nada puede lanzar. Si el correo falla, la operación
+    // queda hecha igual y avisoEnviado le informa al mecánico que no salió.
+    const avisoEnviado = await enviarNotificacion({
       destinatario: turnoActual.usuario.email,
       asunto: "Turno confirmado - MecaniCar",
       mensaje: `Tu turno ${id} fue confirmado por el taller.`,
     });
-    return NextResponse.json(turnoConfirmado);
+    return NextResponse.json({ ...turnoConfirmado, avisoEnviado });
   } catch (error) {
     return responderError("POST /api/turnos/:id/confirmacion", error);
   }

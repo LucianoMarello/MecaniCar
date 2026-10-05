@@ -31,14 +31,14 @@ export async function POST(_request: Request, { params }: Contexto) {
     const ordenFinalizada = await marcarOrdenFinalizada(id);
 
     // 4. AVISAR AL CLIENTE. Resend es accesorio (docs/spec.md, sección 9):
-    // de acá para abajo nada puede lanzar. Si el correo falla,
-    // enviarNotificacion devuelve false y se responde igual.
-    await enviarNotificacion({
+    // de acá para abajo nada puede lanzar. Si el correo falla, la operación
+    // queda hecha igual y avisoEnviado le informa al mecánico que no salió.
+    const avisoEnviado = await enviarNotificacion({
       destinatario: ordenActual.turno.usuario.email,
       asunto: "Tu vehículo está listo - MecaniCar",
       mensaje: `La orden ${id} fue finalizada. Tu vehículo está listo para retirar.`,
     });
-    return NextResponse.json(ordenFinalizada);
+    return NextResponse.json({ ...ordenFinalizada, avisoEnviado });
   } catch (error) {
     return responderError("POST /api/ordenes-trabajo/:id/finalizacion", error);
   }
