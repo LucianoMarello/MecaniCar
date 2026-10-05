@@ -133,7 +133,24 @@ Tres operaciones le envían un correo al cliente mediante Resend, **después** d
 | `POST /api/presupuestos` | Hay un presupuesto disponible |
 | `POST /api/ordenes-trabajo/:id/finalizacion` | El vehículo está listo para retirar |
 
-El servicio es accesorio, así que **no agrega ningún código de error al contrato**: si Resend falla, rechaza el envío o tarda más de 5 segundos, la operación responde igual (`200` o `201`) y la falla queda en el log del servidor. La prueba está al final de `docs/api.http`.
+El servicio es accesorio, así que **no agrega ningún código de error al contrato**: si Resend falla, rechaza el envío o tarda más de 5 segundos, la operación responde igual (`200` o `201`) y la falla queda en el log del servidor.
+
+La respuesta de estas tres operaciones suma el campo `avisoEnviado`, para que quien la ejecuta sepa si el correo salió:
+
+```json
+{
+  "id": "turno-demo",
+  "estado": "CONFIRMADO",
+  "avisoEnviado": false
+}
+```
+
+| Valor | Significado |
+|---|---|
+| `true` | Resend aceptó el correo |
+| `false` | El correo no se envió. La operación quedó guardada; conviene avisarle al cliente por otro medio |
+
+Las pruebas están en `app/api/avisoEnviado.test.ts` y al final de `docs/api.http`.
 
 ---
 

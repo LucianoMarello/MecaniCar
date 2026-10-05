@@ -260,8 +260,8 @@ GET {{base}}/api/presupuestos
 # .env.local y reiniciar el servidor.
 # Preparación B (sin configurar): dejar RESEND_API_KEY vacía y reiniciar.
 #
-# En los dos casos se espera la MISMA respuesta que con Resend funcionando,
-# y la falla escrita en la consola del servidor:
+# En los dos casos se espera el MISMO status que con Resend funcionando,
+# "avisoEnviado": false en el body, y la falla en la consola del servidor:
 #   A → notificaciones: Resend rechazó el mensaje { status: 401 }
 #   B → notificaciones: Resend no está configurado
 #
@@ -276,7 +276,7 @@ Content-Type: application/json
 { "vehiculoId": "vehiculo-demo", "fechaHora": "2027-12-10T13:00:00.000Z", "motivo": "PRUEBA aviso con Resend caído" }
 
 ### FALLA RESEND — confirmarlo con la credencial rota (como MECANICO): 200
-# El turno vuelve en estado CONFIRMADO aunque el correo no se haya enviado.
+# El turno vuelve en estado CONFIRMADO y con "avisoEnviado": false.
 POST {{base}}/api/turnos/{{turnoConAviso.response.body.$.id}}/confirmacion
 
 ### FALLA RESEND — el turno quedó confirmado de verdad: 200
