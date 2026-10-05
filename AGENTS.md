@@ -39,7 +39,7 @@ npm test         # tests
 npx prisma migrate dev --name <nombre>
 ```
 
-Después de tocar `prisma/schema.prisma`, siempre generar una migración. Nunca editar SQL de migraciones ya aplicadas.
+Después de tocar `prisma/schema.prisma`, siempre generar una migración. Nunca editar SQL de migraciones ya aplicadas. El índice parcial `Usuario_admin_unico` se mantiene en SQL: antes de futuras migraciones, usar `--create-only` y revisar que el SQL generado no lo elimine.
 
 ## Estructura y dónde va cada cosa
 

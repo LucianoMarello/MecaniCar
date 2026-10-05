@@ -231,7 +231,9 @@ Representa la propuesta económica realizada por el taller para una orden de tra
 
 #### Reglas
 
-* Todo presupuesto debe pertenecer a una orden de trabajo.
+* Todo presupuesto debe pertenecer a una orden de trabajo; cada orden admite como máximo uno.
+* Al editar sus servicios, conserva su ID, vuelve a `PENDIENTE` y la orden a `ABIERTA`. Requiere nueva aprobación y avisa por correo.
+* Una orden `FINALIZADA` no admite edición, aprobación ni rechazo de su presupuesto.
 * Un presupuesto debe contener al menos un servicio.
 * Todo presupuesto nuevo se crea en estado `PENDIENTE`.
 * Solamente un presupuesto pendiente puede ser aprobado o rechazado.
@@ -471,7 +473,7 @@ Esta funcionalidad constituye el CRUD completo requerido para el MVP.
 
 **Camino exitoso**
 
-Dado que la orden de trabajo existe, cuando el mecánico selecciona uno o más servicios y crea el presupuesto, entonces se genera un presupuesto en estado `PENDIENTE`.
+Dado que la orden de trabajo existe y aún no tiene presupuesto, cuando el mecánico selecciona uno o más servicios y crea el presupuesto, entonces se genera un presupuesto en estado `PENDIENTE`.
 
 Por cada servicio seleccionado se genera un detalle que conserva el precio vigente del servicio al momento de crear el presupuesto.
 
@@ -482,6 +484,8 @@ El total se obtiene sumando los precios aplicados de sus detalles.
 Dado que no se seleccionó ningún servicio, cuando el mecánico intenta crear el presupuesto, entonces el presupuesto no se guarda y se informa que debe contener al menos un servicio.
 
 ---
+
+Si la orden ya tiene presupuesto, crear otro se rechaza con 409. El mecánico modifica el existente seleccionando la lista completa de servicios; conserva los precios de los servicios retenidos y usa el precio actual para los nuevos. Toda edición exige nueva aprobación, incluso si disminuye el total.
 
 ### HU09 — Consultar presupuesto
 
@@ -581,6 +585,16 @@ Dado que la orden pertenece al vehículo de otro cliente, cuando intenta consult
 
 ---
 
+### Reglas complementarias (2026-10-05)
+**RN34.** Cada orden tiene como máximo un presupuesto. Crear un segundo responde 409.
+**RN35.** Mecánico y Administrador editan el único presupuesto mediante PATCH. El body contiene la lista completa de servicios; omitir uno lo elimina, agregar uno lo incorpora.
+**RN36.** Los servicios conservados mantienen sus precios históricos; los agregados toman el precio actual del catálogo.
+**RN37.** Toda edición vuelve el presupuesto a PENDIENTE y la orden a ABIERTA, de forma atómica. El cliente debe aprobar nuevamente, aunque el importe disminuya.
+**RN38.** Una orden FINALIZADA no permite editar, aprobar ni rechazar su presupuesto.
+**RN39.** El total se calcula con Decimal y se devuelve como cadena con dos decimales, sin almacenarlo.
+**RN40.** Todos los listados admiten pagina y limite, por defecto 1 y 20, con máximo 100 por página. Devuelven un array; una página vacía indica el fin de resultados.
+**RN41.** Existe como máximo un Administrador, protegido por un índice único parcial de la base. El seed configura el inicial.
+
 ## 6. Flujo principal del sistema
 
 El recorrido principal del MVP es:
@@ -677,9 +691,9 @@ Este flujo constituye el proceso de negocio principal del sistema y no un simple
 
 **RN27.** Solamente el cliente propietario del vehículo puede aprobar o rechazar el presupuesto correspondiente.
 
-**RN28.** Un presupuesto `APROBADO` no puede pasar a `RECHAZADO`.
+**RN28.** Un presupuesto `APROBADO` no puede rechazarse directamente. Una edición lo devuelve a `PENDIENTE` antes de una nueva decisión.
 
-**RN29.** Un presupuesto `RECHAZADO` no puede pasar a `APROBADO`.
+**RN29.** Un presupuesto `RECHAZADO` no puede aprobarse directamente. Una edición lo devuelve a `PENDIENTE` antes de una nueva decisión.
 
 **RN30.** La aprobación de un presupuesto permite que la orden correspondiente pase a `EN_REPARACION`.
 
@@ -752,11 +766,12 @@ Para avisarle al cliente por correo cuando el taller hace avanzar su atención. 
 | --- | --- | --- |
 | Confirmar un turno (HU04) | Mecánico | El turno fue confirmado |
 | Crear un presupuesto (HU08) | Mecánico | Hay un presupuesto disponible para consultar |
+| Editar un presupuesto (HU08) | Mecánico | El presupuesto fue actualizado y requiere nueva aprobación |
 | Finalizar una orden de trabajo (HU12) | Mecánico | El vehículo está listo para retirar |
 
 ### 9.2. Esencial o accesorio
 
-El servicio es **accesorio** en las tres operaciones: confirmar un turno, crear un presupuesto y finalizar una orden tienen sentido aunque el correo no se envíe, porque el cliente puede consultar el mismo estado ingresando al sistema (HU03, HU09 y HU13).
+El servicio es **accesorio** en las cuatro operaciones: confirmar un turno, crear o editar un presupuesto y finalizar una orden tienen sentido aunque el correo no se envíe, porque el cliente puede consultar el mismo estado ingresando al sistema (HU03, HU09 y HU13).
 
 Por eso el aviso se envía siempre **después** de que la operación quedó guardada, y su falla nunca la deshace ni la convierte en un error.
 
@@ -823,13 +838,3 @@ El MVP se considerará funcional cuando pueda completarse el siguiente recorrido
 11. El cliente puede consultar que la reparación se encuentra finalizada.
 
 Todo el recorrido debe respetar las reglas de negocio y permisos establecidos en esta especificación.
-
-## Reglas acordadas de presupuesto y consultas (2026-10-05)
-- Cada orden tiene como máximo un presupuesto. Crear un segundo responde 409.
-- Mecánico y Administrador editan el único presupuesto mediante PATCH. El body contiene la lista completa de servicios; omitir uno lo elimina, agregar uno lo incorpora.
-- Los servicios conservados mantienen sus precios históricos; los agregados toman el precio actual del catálogo.
-- Toda edición vuelve el presupuesto a PENDIENTE y la orden a ABIERTA, de forma atómica. El cliente debe aprobar nuevamente, aunque el importe disminuya.
-- Una orden FINALIZADA no permite editar, aprobar ni rechazar su presupuesto.
-- El total se calcula con Decimal y se devuelve como cadena con dos decimales, sin almacenarlo.
-- Todos los listados admiten pagina y limite, por defecto 1 y 20, con máximo 100 por página. Devuelven un array; una página vacía indica el fin de resultados.
-- Existe como máximo un Administrador, protegido por un índice único parcial de la base. El seed configura el inicial.
