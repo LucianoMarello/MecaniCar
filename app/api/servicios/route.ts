@@ -1,3 +1,4 @@
+import { leerPaginacion } from "@/lib/http";
 import { NextResponse } from "next/server";
 import { crearServicio, listarServicios } from "@/lib/db/servicios";
 import { servicioSchema } from "@/lib/schemas/servicio";
@@ -5,10 +6,10 @@ import { responderError } from "@/lib/errores";
 import { leerJson } from "@/lib/http";
 import { requerirUsuario } from "@/lib/auth";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     await requerirUsuario("MECANICO");
-    const servicios = await listarServicios();
+    const servicios = await listarServicios(leerPaginacion(request));
     return NextResponse.json(servicios);
   } catch (error) {
     return responderError("GET /api/servicios", error);
@@ -17,6 +18,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    await requerirUsuario("MECANICO");
     const lectura = await leerJson(request);
     if (!lectura.exito) {
       return NextResponse.json(
@@ -34,7 +36,7 @@ export async function POST(request: Request) {
       );
     }
 
-    await requerirUsuario("MECANICO");
+
     const servicio = await crearServicio(resultado.data);
     return NextResponse.json(servicio, { status: 201 });
   } catch (error) {

@@ -1,3 +1,6 @@
+import { Prisma } from "@prisma/client";
+import { ConflictoNegocio } from "./presupuestos";
+import type { Paginacion } from "@/lib/schemas/http";
 import type { Rol } from "@prisma/client";
 import { prisma } from "@/lib/db/client";
 
@@ -13,12 +16,12 @@ const ordenSelect = {
   },
 } as const;
 
-export function listarOrdenes(usuarioId: string, rol: Rol) {
+export function listarOrdenes(usuarioId: string, rol: Rol, paginacion: Paginacion = { pagina: 1, limite: 20 }) {
   return prisma.ordenTrabajo.findMany({
     where: rol === "CLIENTE" ? { vehiculo: { usuarioId } } : undefined,
     select: ordenSelect,
     orderBy: { fechaCreacion: "desc" },
-    take: 100,
+    skip: (paginacion.pagina - 1) * paginacion.limite, take: paginacion.limite,
   });
 }
 
@@ -74,11 +77,9 @@ export async function buscarOrdenParaValidar(id: string) {
 }
 
 export async function marcarOrdenFinalizada(id: string) {
-  // Mutación pura. Asume que la validación ya autorizó este cambio.
-  const actualizada = await prisma.ordenTrabajo.update({
-    where: { id },
-    data: { estado: "FINALIZADA" },
-    select: ordenSelect,
-  });
-  return actualizada;
+ return prisma.$transaction(async tx => {
+  const actual = await tx.ordenTrabajo.findUniqueOrThrow({ where: { id }, include: { presupuestos: true } });
+  if (actual.estado !== "EN_REPARACION" || !actual.presupuestos.some(p => p.estado === "APROBADO")) throw new ConflictoNegocio("La orden debe estar en reparación y tener presupuesto aprobado");
+  return tx.ordenTrabajo.update({ where: { id }, data: { estado: "FINALIZADA" }, select: ordenSelect });
+ }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
 }

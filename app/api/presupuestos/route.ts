@@ -1,3 +1,4 @@
+import { leerPaginacion } from "@/lib/http";
 import { NextResponse } from "next/server";
 import { requerirUsuario } from "@/lib/auth";
 import {
@@ -11,11 +12,11 @@ import { responderError } from "@/lib/errores";
 import { leerJson } from "@/lib/http";
 import { enviarNotificacion } from "@/lib/servicios/notificaciones";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const sesion = await requerirUsuario();
     return NextResponse.json(
-      await listarPresupuestos(sesion.id, sesion.rol),
+      await listarPresupuestos(sesion.id, sesion.rol, leerPaginacion(request)),
     );
   } catch (error) {
     return responderError("GET /api/presupuestos", error);
@@ -24,6 +25,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    await requerirUsuario("MECANICO");
     const lectura = await leerJson(request);
     if (!lectura.exito) {
       return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
@@ -37,7 +39,7 @@ export async function POST(request: Request) {
       );
     }
 
-    await requerirUsuario("MECANICO");
+
     const datos = validacion.data;
 
   // 1. LEER (sin tomar decisiones lógicas)

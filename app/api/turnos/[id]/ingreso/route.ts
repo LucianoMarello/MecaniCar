@@ -1,3 +1,4 @@
+import { idSchema } from "@/lib/schemas/http";
 import { NextResponse } from "next/server";
 import {
   buscarTurnoParaIngreso,
@@ -11,8 +12,9 @@ type Contexto = { params: Promise<{ id: string }> };
 
 export async function POST(_request: Request, { params }: Contexto) {
   try {
-    const { id } = await params;
     await requerirUsuario("MECANICO");
+    const id = idSchema.parse((await params).id);
+
 
   // 1. LEER
     const turnoActual = await buscarTurnoParaIngreso(id);
