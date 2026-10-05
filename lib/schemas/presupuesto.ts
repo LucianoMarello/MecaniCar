@@ -1,3 +1,4 @@
+import { idSchema } from "./http";
 import { z } from "zod";
 
 export const estadoPresupuestoSchema = z.enum([
@@ -11,13 +12,11 @@ export type EstadoPresupuesto = z.infer<
 >;
 
 export const presupuestoSchema = z.object({
-  ordenTrabajoId: z
-    .string()
-    .min(1, "Debe indicar una orden de trabajo"),
+  ordenTrabajoId: idSchema,
 
   serviciosIds: z
     .array(
-      z.string().min(1, "El identificador del servicio no es válido"),
+      idSchema,
     )
     .min(1, "El presupuesto debe contener al menos un servicio"),
 });
@@ -25,3 +24,4 @@ export const presupuestoSchema = z.object({
 export type PresupuestoInput = z.infer<
   typeof presupuestoSchema
 >;
+export const editarPresupuestoSchema = presupuestoSchema.pick({ serviciosIds: true });

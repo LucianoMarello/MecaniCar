@@ -75,7 +75,7 @@ Después de tocar `prisma/schema.prisma`, siempre generar una migración. Nunca 
 ## API
 
 - Los endpoints REST deben utilizar sustantivos para representar recursos (`POST /api/turnos`). Prohibidos los verbos en la URL (`/api/crearTurno`).
-- Los Route Handlers deben mantener este orden estricto de ejecución: 1. Validar, 2. Autorizar, 3. Ejecutar operación, 4. Responder.
+- Los Route Handlers deben mantener este orden estricto de ejecución: 1. Verificar sesión y rol, 2. Validar entrada, 3. Verificar acceso al recurso y reglas de negocio, 4. Ejecutar operación, 5. Responder.
 
 ### Seguridad
 

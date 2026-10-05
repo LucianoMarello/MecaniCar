@@ -21,7 +21,7 @@ La cátedra pedía resolver la identidad con Auth.js.
 | Opción | A favor | En contra |
 |---|---|---|
 | Solo Google | No guardamos contraseñas: no hay nada que cifrar, recuperar ni que pueda filtrarse. Menos código | Quien no tiene cuenta de Google no puede entrar. Si Google no responde, nadie inicia sesión |
-| Email y contraseña propios | No depende de un tercero | Hay que guardar contraseñas cifradas y resolver su recuperación y su cambio |
+| Email y contraseña propios | No depende de un tercero | Hay que guardar contraseñas almacenadas mediante hash y resolver su recuperación y su cambio |
 | Mixto: Google para clientes, contraseña e invitación para mecánicos | El taller da de alta a sus mecánicos sin depender de sus cuentas de Google | Suma todo lo anterior: dos caminos de ingreso para mantener y probar |
 
 El esquema mixto llegó a implementarse (migraciones `agrega_autenticacion_hibrida` y `agrega_invitaciones_mecanicos`) y se retiró dos días después (`simplifica_auth_google`).

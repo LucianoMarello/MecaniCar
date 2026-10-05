@@ -1,3 +1,4 @@
+import { idSchema } from "@/lib/schemas/http";
 import { NextResponse } from "next/server";
 import { requerirUsuario } from "@/lib/auth";
 import {
@@ -11,8 +12,10 @@ type ContextoRuta = { params: Promise<{ id: string }> };
 
 export async function POST(_request: Request, contexto: ContextoRuta) {
   try {
-    const { id } = await contexto.params;
     const sesion = await requerirUsuario("CLIENTE");
+    const { id: idRecibido } = await contexto.params;
+    const id = idSchema.parse(idRecibido);
+
 
   // 1. LEER
     const presupuestoActual = await buscarPresupuestoParaValidar(id, sesion.id);

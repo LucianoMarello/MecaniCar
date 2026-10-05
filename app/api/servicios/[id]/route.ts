@@ -1,3 +1,4 @@
+import { idSchema } from "@/lib/schemas/http";
 import { NextResponse } from "next/server";
 import {
   actualizarServicio,
@@ -15,7 +16,8 @@ type ContextoRuta = {
 
 export async function GET(_request: Request, contexto: ContextoRuta) {
   try {
-    const { id } = await contexto.params;
+    const { id: idRecibido } = await contexto.params;
+    const id = idSchema.parse(idRecibido);
 
     await requerirUsuario("MECANICO");
     const servicio = await buscarServicioPorId(id);
@@ -35,7 +37,9 @@ export async function GET(_request: Request, contexto: ContextoRuta) {
 
 export async function PATCH(request: Request, contexto: ContextoRuta) {
   try {
-    const { id } = await contexto.params;
+    await requerirUsuario("MECANICO");
+    const { id: idRecibido } = await contexto.params;
+    const id = idSchema.parse(idRecibido);
     const lectura = await leerJson(request);
     if (!lectura.exito) {
       return NextResponse.json(
@@ -53,7 +57,7 @@ export async function PATCH(request: Request, contexto: ContextoRuta) {
       );
     }
 
-    await requerirUsuario("MECANICO");
+
     const servicio = await actualizarServicio(id, resultado.data);
 
     if (!servicio) {
@@ -71,7 +75,8 @@ export async function PATCH(request: Request, contexto: ContextoRuta) {
 
 export async function DELETE(_request: Request, contexto: ContextoRuta) {
   try {
-    const { id } = await contexto.params;
+    const { id: idRecibido } = await contexto.params;
+    const id = idSchema.parse(idRecibido);
 
     await requerirUsuario("MECANICO");
     const resultado = await eliminarServicio(id);

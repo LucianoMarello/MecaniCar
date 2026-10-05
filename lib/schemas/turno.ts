@@ -1,3 +1,4 @@
+import { idSchema } from "./http";
 import { z } from "zod";
 
 export const estadoTurnoSchema = z.enum([
@@ -9,9 +10,7 @@ export const estadoTurnoSchema = z.enum([
 export type EstadoTurno = z.infer<typeof estadoTurnoSchema>;
 
 export const turnoSchema = z.object({
-  vehiculoId: z
-    .string()
-    .min(1, "Debe seleccionar un vehículo"),
+  vehiculoId: idSchema,
 
   fechaHora: z.coerce
     .date()

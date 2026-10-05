@@ -1,11 +1,12 @@
+import type { Paginacion } from "@/lib/schemas/http";
 import type { Rol } from "@prisma/client";
 import { prisma } from "@/lib/db/client";
 import type { ActualizarVehiculoInput, VehiculoInput } from "@/lib/schemas/vehiculo";
 
 const vehiculoSelect = { id: true, patente: true, marca: true, modelo: true, anio: true, usuarioId: true, createdAt: true, updatedAt: true } as const;
 
-export function listarVehiculos(usuarioId: string, rol: Rol) {
-  return prisma.vehiculo.findMany({ where: rol === "CLIENTE" ? { usuarioId } : undefined, select: vehiculoSelect, orderBy: { patente: "asc" }, take: 100 });
+export function listarVehiculos(usuarioId: string, rol: Rol, paginacion: Paginacion = { pagina: 1, limite: 20 }) {
+  return prisma.vehiculo.findMany({ where: rol === "CLIENTE" ? { usuarioId } : undefined, select: vehiculoSelect, orderBy: { patente: "asc" }, skip: (paginacion.pagina - 1) * paginacion.limite, take: paginacion.limite });
 }
 
 export async function buscarVehiculo(id: string, usuarioId: string, rol: Rol) {

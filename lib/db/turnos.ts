@@ -1,3 +1,4 @@
+import type { Paginacion } from "@/lib/schemas/http";
 import type { Rol } from "@prisma/client";
 import { prisma } from "@/lib/db/client";
 import type { TurnoInput } from "@/lib/schemas/turno";
@@ -13,12 +14,12 @@ const turnoSelect = {
   ordenTrabajo: { select: { id: true } },
 } as const;
 
-export function listarTurnos(usuarioId: string, rol: Rol) {
+export function listarTurnos(usuarioId: string, rol: Rol, paginacion: Paginacion = { pagina: 1, limite: 20 }) {
   return prisma.turno.findMany({
     where: rol === "CLIENTE" ? { usuarioId } : undefined,
     select: turnoSelect,
     orderBy: { fechaHora: "asc" },
-    take: 100,
+    skip: (paginacion.pagina - 1) * paginacion.limite, take: paginacion.limite,
   });
 }
 

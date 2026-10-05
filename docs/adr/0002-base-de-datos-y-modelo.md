@@ -52,3 +52,5 @@ Sobre esa base, el modelo (`prisma/schema.prisma`) toma estas decisiones:
 - **Índices faltantes.** `Presupuesto.ordenTrabajoId` y `DetallePresupuesto.servicioId` no tienen índice. Con el volumen actual no se nota; habría que agregarlos si crecen los datos.
 - **`onDelete` sin declarar.** Ninguna relación indica qué pasa al borrar. Vale el comportamiento por defecto de Prisma para relaciones obligatorias, que impide borrar un registro con datos asociados. Es lo que el sistema necesita (RN03 y RN33), pero está implícito y debería quedar escrito en el schema.
 - **Datos repetidos.** `OrdenTrabajo.vehiculoId` puede obtenerse a través del turno, y `Turno.usuarioId` a través del vehículo. Simplifican las consultas, pero nada impide que queden desincronizados si algún día un vehículo cambia de dueño.
+
+Actualización 2026-10-05: ordenTrabajoId es único en Presupuesto. El índice parcial Usuario_admin_unico limita a un Administrador. Las mutaciones de presupuesto y la finalización usan transacciones Serializable; los conflictos se devuelven como 409.
