@@ -15,23 +15,27 @@
 **Alcance del MVP:**
 
 - Gestión de vehículos y turnos.
-- Gestión de órdenes de trabajo (con diagnósticos).
-- Catálogo de servicios y repuestos (como lista de precios, sin control de stock físico).
+- Gestión de órdenes de trabajo.
+- Catálogo de servicios (como lista de precios).
 - Generación, aprobación y rechazo de presupuestos.
+- Avisos por correo al cliente cuando el taller hace avanzar su atención.
+- Inicio de sesión con Google y tres roles: Cliente, Mecánico y Administrador.
 
 ---
 
 ## Puesta en marcha
 
-Requisitos: Node 20+, npm, y una base de datos: **Postgres** (Supabase) o **MongoDB** (Atlas). Las dos tienen plan gratuito.
+Requisitos: Node 20+, npm, una base de datos **Postgres** (usamos Supabase) y una credencial de OAuth de Google.
 
 ```bash
 npm install
-cp .env.example .env.local     # completar DATABASE_URL y AUTH_SECRET
-npx prisma migrate dev --name init
+cp .env.example .env.local     # completar las variables; cada una está explicada en el archivo
+npx prisma migrate dev
 npm run db:seed
 npm run dev                       # http://localhost:3000
 ```
+
+El seed crea al administrador inicial con el correo de `BOOTSTRAP_ADMIN_EMAIL`: tiene que ser la cuenta de Google con la que esa persona va a iniciar sesión.
 
 Generar el `AUTH_SECRET`:
 
@@ -65,12 +69,14 @@ components/             componentes de UI
 lib/
   db/                   acceso a datos — ÚNICO lugar que habla con Prisma
   schemas/              schemas de Zod (validación + tipos)
+  servicios/            integraciones con servicios externos (Resend)
   auth.ts               configuración de sesión y roles
 prisma/
   schema.prisma         modelo de datos
   seed.ts               datos de ejemplo
 docs/
   spec.md               qué hace el sistema (requerimientos)
+  api.md                contrato de la API REST
   adr/                  decisiones técnicas y por qué
 ```
 

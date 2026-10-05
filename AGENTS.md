@@ -8,8 +8,8 @@ Este archivo lo lee tu asistente de IA (Cursor, Copilot, Claude Code, etc.) ante
 
 MecaniCar es una aplicación web destinada a facilitar la gestión de un taller mecánico y centralizar la información de las reparaciones.
 
-- **Roles:** Cliente (solicita turnos, consulta estado de órdenes y aprueba presupuestos) y Mecánico/Taller (gestiona vehículos, turnos, diagnósticos, repuestos y emite presupuestos).
-- **Flujo principal:** El cliente solicita un turno, el taller realiza el diagnóstico y genera un presupuesto, el cliente lo aprueba y el taller ejecuta y finaliza el trabajo.
+- **Roles:** Cliente (registra vehículos, solicita turnos, consulta el estado de sus órdenes y aprueba o rechaza presupuestos), Mecánico (gestiona turnos, órdenes de trabajo y el catálogo de servicios, y emite presupuestos) y Administrador (un mecánico que además asigna roles).
+- **Flujo principal:** El cliente solicita un turno, el taller lo confirma, registra el ingreso del vehículo y genera un presupuesto, el cliente lo aprueba y el taller ejecuta y finaliza el trabajo.
 
 ## Especificación y Alcance
 
@@ -22,9 +22,10 @@ Lo que el sistema tiene que hacer está en [`docs/spec.md`](./docs/spec.md).
 ## Stack
 
 - Next.js (App Router) + TypeScript
-- Postgres + Prisma (o MongoDB Atlas + Prisma, si el equipo lo eligió y lo documentó en un ADR)
+- Postgres (Supabase) + Prisma
 - Zod para validación
-- Auth.js para sesión y roles
+- Auth.js para sesión y roles, con Google como proveedor
+- Resend para los avisos por correo
 - Tailwind + shadcn/ui
 - Deploy en Vercel
 
@@ -59,7 +60,7 @@ Después de tocar `prisma/schema.prisma`, siempre generar una migración. Nunca 
 - El cliente de Prisma se importa solo desde `lib/db/client.ts`.
 - Toda consulta que devuelva listas tiene paginación o límite explícito.
 - Los importes monetarios deben utilizar `Decimal` y no `Float` en el schema.
-- No almacenar información derivada cuando pueda calcularse de forma segura a partir de otros datos (ej: el estado de una vacuna, o el total de un presupuesto).
+- No almacenar información derivada cuando pueda calcularse de forma segura a partir de otros datos (ej: el total de un presupuesto).
 - No utilizar datos del negocio (como una patente o DNI) como claves primarias.
 
 ### Validación

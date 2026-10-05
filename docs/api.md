@@ -9,9 +9,12 @@ La API utiliza JSON para recibir y devolver información.
 - Todas las rutas comienzan con `/api`.
 - Las rutas representan recursos mediante sustantivos en plural.
 - Los datos recibidos se validan con Zod.
-- La identidad y el rol del usuario deben obtenerse desde la sesión y nunca desde el body.
-- Las operaciones privadas requieren autenticación.
-- Los clientes solamente pueden acceder a recursos asociados a sus propios vehículos.
+- La identidad y el rol del usuario se obtienen desde la sesión y nunca desde el body.
+- Todas las operaciones requieren autenticación. La sesión se inicia con Google (ver [Autenticación](#autenticación)).
+- Donde una tabla dice "Mecánico", también puede operar el Administrador. Las operaciones marcadas solo como "Cliente" responden `403` a los otros dos roles.
+- Los clientes solamente pueden acceder a recursos asociados a sus propios vehículos. Un recurso ajeno responde `404`, igual que uno inexistente, para no revelar que existe.
+- En las operaciones con body, los datos se validan antes de verificar la sesión (salvo en `/api/usuarios`): un body inválido responde `400` aunque no haya sesión.
+- Las listas de vehículos, turnos, órdenes, servicios y presupuestos devuelven como máximo 100 elementos.
 - Las respuestas de error utilizan el siguiente formato:
 
 ```json
@@ -27,10 +30,10 @@ La API utiliza JSON para recibir y devolver información.
 | `200 OK` | Consulta o modificación realizada correctamente |
 | `201 Created` | Recurso creado correctamente |
 | `204 No Content` | Recurso eliminado correctamente |
-| `400 Bad Request` | Datos de entrada inválidos |
+| `400 Bad Request` | Datos de entrada inválidos o body que no es JSON |
 | `401 Unauthorized` | No existe una sesión autenticada |
-| `403 Forbidden` | El usuario no posee el rol o la propiedad requerida |
-| `404 Not Found` | El recurso solicitado no existe |
+| `403 Forbidden` | El usuario no posee el rol requerido |
+| `404 Not Found` | El recurso solicitado no existe o pertenece a otro cliente |
 | `409 Conflict` | La operación contradice el estado actual o una regla de negocio |
 | `500 Internal Server Error` | Error inesperado del servidor |
 
@@ -38,7 +41,7 @@ La API utiliza JSON para recibir y devolver información.
 
 ## Errores, en detalle
 
-Este catálogo vincula los casos de error de la especificación con la capa que los resuelve. Los controles que dependen de la identidad o del rol permanecen identificados para la Clase 6; las reglas de estado se resuelven en funciones puras y se comprueban en `docs/api.http`.
+Este catálogo vincula los casos de error de la especificación con la capa que los resuelve. Las reglas de estado se resuelven en funciones puras (`lib/turnos.ts`, `lib/ordenes.ts` y `lib/presupuestos.ts`), cada una con sus tests.
 
 | Operación | Situación | Origen | Capa | Status | Mensaje |
 |---|---|---|---|---|---|
@@ -57,8 +60,9 @@ Este catálogo vincula los casos de error de la especificación con la capa que 
 | `POST /api/presupuestos/:id/rechazo` | El presupuesto no está pendiente | HU11 / RN26 / RN28 | Regla | `409` | `Solo puede rechazarse un presupuesto pendiente` |
 | `POST /api/ordenes-trabajo/:id/finalizacion` | La orden no está en reparación | HU12 / RN15 / RN16 | Regla | `409` | `La orden debe estar EN_REPARACION para poder finalizarse` |
 | `POST /api/ordenes-trabajo/:id/finalizacion` | La orden no posee un presupuesto aprobado | HU12 / RN14 | Regla | `409` | `La orden no tiene ningún presupuesto aprobado` |
+| `PATCH /api/usuarios/:id/rol` | El administrador intenta cambiar su propio rol | RN36 | Regla | `409` | `El administrador no puede modificar su propio rol` |
 
-Los errores de sesión documentados en las tablas de cada recurso (`401` y `403`) se implementarán y probarán en la Clase 6. Ninguna identidad ni rol se toma del body.
+Los errores de sesión (`401`, mensaje `No autenticado`) y de rol (`403`, mensaje `No autorizado`) son iguales en todas las operaciones: los resuelve `requerirUsuario` en `lib/auth.ts`.
 
 ---
 
@@ -68,9 +72,9 @@ Los errores de sesión documentados en las tablas de cada recurso (`401` y `403`
 |---|---|---|---|---|
 | `POST /api/vehiculos` | Registra un vehículo asociado al cliente autenticado | Cliente | `201` con el vehículo creado | `400` datos inválidos; `401` sin sesión; `403` rol incorrecto; `409` patente duplicada |
 | `GET /api/vehiculos` | Lista los vehículos propios del cliente o todos los vehículos para el mecánico | Cliente o Mecánico | `200` con la lista | `401` sin sesión |
-| `GET /api/vehiculos/:id` | Consulta un vehículo propio o, para el mecánico, cualquier vehículo | Cliente o Mecánico | `200` con el vehículo | `401` sin sesión; `403` vehículo de otro cliente; `404` inexistente |
-| `PATCH /api/vehiculos/:id` | Modifica un vehículo propio o, para el mecánico, cualquier vehículo | Cliente o Mecánico | `200` con el vehículo actualizado | `400` datos inválidos; `401` sin sesión; `403` vehículo de otro cliente; `404` inexistente; `409` patente duplicada |
-| `DELETE /api/vehiculos/:id` | Da de baja un vehículo si no posee turnos ni órdenes asociados | Cliente o Mecánico | `204` sin contenido | `401` sin sesión; `403` vehículo de otro cliente; `404` inexistente; `409` vehículo con historial asociado |
+| `GET /api/vehiculos/:id` | Consulta un vehículo propio o, para el mecánico, cualquier vehículo | Cliente o Mecánico | `200` con el vehículo | `401` sin sesión; `404` inexistente o de otro cliente |
+| `PATCH /api/vehiculos/:id` | Modifica un vehículo propio o, para el mecánico, cualquier vehículo | Cliente o Mecánico | `200` con el vehículo actualizado | `400` datos inválidos; `401` sin sesión; `404` inexistente o de otro cliente; `409` patente duplicada |
+| `DELETE /api/vehiculos/:id` | Da de baja un vehículo si no posee turnos ni órdenes asociados | Cliente o Mecánico | `204` sin contenido | `401` sin sesión; `404` inexistente o de otro cliente; `409` vehículo con historial asociado |
 
 ---
 
@@ -78,11 +82,11 @@ Los errores de sesión documentados en las tablas de cada recurso (`401` y `403`
 
 | Método y ruta | Qué hace | Rol | Respuesta exitosa | Errores |
 |---|---|---|---|---|
-| `POST /api/turnos` | Solicita un turno para un vehículo del cliente | Cliente | `201` con el turno en estado `PENDIENTE` | `400` datos inválidos o fecha no futura; `401` sin sesión; `403` vehículo de otro cliente; `404` vehículo inexistente |
+| `POST /api/turnos` | Solicita un turno para un vehículo del cliente | Cliente | `201` con el turno en estado `PENDIENTE` | `400` datos inválidos o fecha no futura; `401` sin sesión; `403` rol incorrecto; `404` vehículo inexistente o de otro cliente |
 | `GET /api/turnos` | Lista los turnos permitidos para el usuario autenticado. El cliente recibe solamente sus turnos y el mecánico puede consultar los turnos del taller | Cliente o Mecánico | `200` con la lista | `401` sin sesión |
-| `GET /api/turnos/:id` | Consulta un turno determinado | Cliente o Mecánico | `200` con el turno | `401` sin sesión; `403` turno de otro cliente; `404` inexistente |
+| `GET /api/turnos/:id` | Consulta un turno determinado | Cliente o Mecánico | `200` con el turno | `401` sin sesión; `404` inexistente o de otro cliente |
 | `POST /api/turnos/:id/confirmacion` | Confirma un turno pendiente | Mecánico | `200` con el turno en estado `CONFIRMADO` | `401` sin sesión; `403` rol incorrecto; `404` turno inexistente; `409` turno cancelado o no pendiente |
-| `POST /api/turnos/:id/cancelacion` | Cancela un turno propio que todavía no generó una orden | Cliente | `200` con el turno en estado `CANCELADO` | `401` sin sesión; `403` turno de otro cliente; `404` inexistente; `409` ya está cancelado o ya generó una orden |
+| `POST /api/turnos/:id/cancelacion` | Cancela un turno propio que todavía no generó una orden | Cliente | `200` con el turno en estado `CANCELADO` | `401` sin sesión; `403` rol incorrecto; `404` inexistente o de otro cliente; `409` ya está cancelado o ya generó una orden |
 
 ---
 
@@ -92,7 +96,7 @@ Los errores de sesión documentados en las tablas de cada recurso (`401` y `403`
 |---|---|---|---|---|
 | `POST /api/turnos/:id/ingreso` | Registra el ingreso del vehículo y crea una orden de trabajo | Mecánico | `201` con la orden en estado `ABIERTA` | `401` sin sesión; `403` rol incorrecto; `404` turno inexistente; `409` turno no confirmado, cancelado o con orden existente |
 | `GET /api/ordenes-trabajo` | Lista las órdenes permitidas para el usuario. El cliente recibe las correspondientes a sus vehículos y el mecánico recibe las órdenes del taller | Cliente o Mecánico | `200` con la lista | `401` sin sesión |
-| `GET /api/ordenes-trabajo/:id` | Consulta una orden de trabajo | Cliente o Mecánico | `200` con la orden | `401` sin sesión; `403` orden correspondiente a otro cliente; `404` inexistente |
+| `GET /api/ordenes-trabajo/:id` | Consulta una orden de trabajo | Cliente o Mecánico | `200` con la orden | `401` sin sesión; `404` inexistente o de otro cliente |
 | `POST /api/ordenes-trabajo/:id/finalizacion` | Finaliza una reparación que se encuentra en curso | Mecánico | `200` con la orden en estado `FINALIZADA` | `401` sin sesión; `403` rol incorrecto; `404` orden inexistente; `409` orden abierta, sin presupuesto aprobado o ya finalizada |
 
 ---
@@ -117,9 +121,22 @@ El catálogo de servicios constituye el CRUD completo requerido para el MVP.
 |---|---|---|---|---|
 | `POST /api/presupuestos` | Crea un presupuesto para una orden utilizando uno o más servicios | Mecánico | `201` con el presupuesto en estado `PENDIENTE`, sus detalles y el total | `400` datos inválidos o sin servicios; `401` sin sesión; `403` rol incorrecto; `404` orden o servicio inexistente; `409` orden finalizada |
 | `GET /api/presupuestos` | Lista los presupuestos permitidos para el usuario. El cliente recibe los correspondientes a sus vehículos y el mecánico recibe los presupuestos del taller | Cliente o Mecánico | `200` con la lista | `401` sin sesión |
-| `GET /api/presupuestos/:id` | Consulta los servicios, precios aplicados, total y estado de un presupuesto | Cliente o Mecánico | `200` con el presupuesto | `401` sin sesión; `403` presupuesto correspondiente a otro cliente; `404` inexistente |
-| `POST /api/presupuestos/:id/aprobacion` | Aprueba un presupuesto pendiente y pasa la orden asociada a `EN_REPARACION` | Cliente | `200` con el presupuesto aprobado y la orden actualizada | `401` sin sesión; `403` presupuesto de otro cliente; `404` inexistente; `409` presupuesto ya aprobado o rechazado |
-| `POST /api/presupuestos/:id/rechazo` | Rechaza un presupuesto pendiente | Cliente | `200` con el presupuesto en estado `RECHAZADO` | `401` sin sesión; `403` presupuesto de otro cliente; `404` inexistente; `409` presupuesto ya aprobado o rechazado |
+| `GET /api/presupuestos/:id` | Consulta los servicios, precios aplicados, total y estado de un presupuesto | Cliente o Mecánico | `200` con el presupuesto | `401` sin sesión; `404` inexistente o de otro cliente |
+| `POST /api/presupuestos/:id/aprobacion` | Aprueba un presupuesto pendiente y pasa la orden asociada a `EN_REPARACION` | Cliente | `200` con el presupuesto aprobado y la orden actualizada | `401` sin sesión; `403` rol incorrecto; `404` inexistente o de otro cliente; `409` presupuesto ya aprobado o rechazado |
+| `POST /api/presupuestos/:id/rechazo` | Rechaza un presupuesto pendiente | Cliente | `200` con el presupuesto en estado `RECHAZADO` | `401` sin sesión; `403` rol incorrecto; `404` inexistente o de otro cliente; `409` presupuesto ya aprobado o rechazado |
+
+---
+
+## Usuarios
+
+Permiten que el Administrador dé de alta a los mecánicos (sección 2.3 de `docs/spec.md`).
+
+| Método y ruta | Qué hace | Rol | Respuesta exitosa | Errores |
+|---|---|---|---|---|
+| `GET /api/usuarios` | Lista los usuarios registrados con su rol | Administrador | `200` con la lista | `401` sin sesión; `403` rol incorrecto |
+| `PATCH /api/usuarios/:id/rol` | Asigna a otro usuario el rol `CLIENTE` o `MECANICO`. Body: `{ "rol": "MECANICO" }` | Administrador | `200` con el usuario actualizado | `400` rol distinto de `CLIENTE` o `MECANICO`; `401` sin sesión; `403` rol incorrecto; `404` usuario inexistente; `409` intenta cambiar su propio rol |
+
+El cambio de rol se aplica en el siguiente request del usuario afectado, sin que tenga que volver a iniciar sesión.
 
 ---
 
@@ -174,25 +191,18 @@ Las pruebas están en `app/api/avisoEnviado.test.ts` y al final de `docs/api.htt
 
 ---
 
-## Implementación mínima de la Clase 4
+## Autenticación
 
-Durante la Clase 4 se implementará:
+El inicio de sesión se hace con una cuenta de Google, mediante Auth.js. La decisión está en `docs/adr/0003-identidad-y-sesion.md`.
 
-- El CRUD completo de servicios.
-- El listado de turnos filtrado según el usuario autenticado.
-- La aprobación de un presupuesto como operación principal que no es un ABM.
-- El acceso a datos exclusivamente mediante archivos ubicados en `lib/db/`.
-- La validación de entradas mediante los schemas de Zod.
-- Los casos de prueba HTTP dentro de `docs/api.http`.
+| Ruta | Para qué |
+|---|---|
+| `GET /api/auth/signin` | Página para iniciar sesión con Google |
+| `GET /api/auth/session` | Devuelve el usuario de la sesión actual, con su rol |
+| `GET /api/auth/signout` | Página para cerrar la sesión |
 
-La autenticación se completará en la Clase 6. Hasta entonces, las decisiones que dependen de la identidad o del rol del usuario quedan identificadas mediante comentarios explícitos:
+Estas rutas las provee Auth.js; no forman parte de los recursos del negocio.
 
-```ts
-// TODO (clase 6): obtener identidad y rol desde la sesión.
-```
+La sesión viaja en una cookie que el navegador envía sola. Para probar la API desde Postman hay que iniciar sesión en el navegador y copiar esa cookie en el request: se llama `authjs.session-token` en local y `__Secure-authjs.session-token` en producción.
 
-MecaniCar no posee actualmente un recurso que deba exponerse mediante un `GET` público.
-
-Hasta implementar la sesión real, `DEMO_ROLE=CLIENTE` utiliza el cliente de demostración y
-`DEMO_ROLE=MECANICO` permite verificar los listados y permisos del mecánico. Esta selección
-es exclusivamente temporal y deberá eliminarse en la Clase 6.
+MecaniCar no expone ningún recurso mediante un `GET` público.
