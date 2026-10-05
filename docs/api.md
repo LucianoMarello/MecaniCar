@@ -13,8 +13,8 @@ La API utiliza JSON para recibir y devolver información.
 - Todas las operaciones requieren autenticación. La sesión se inicia con Google (ver [Autenticación](#autenticación)).
 - Donde una tabla dice "Mecánico", también puede operar el Administrador. Las operaciones marcadas solo como "Cliente" responden `403` a los otros dos roles.
 - Los clientes solamente pueden acceder a recursos asociados a sus propios vehículos. Un recurso ajeno responde `404`, igual que uno inexistente, para no revelar que existe.
-- En las operaciones con body, los datos se validan antes de verificar la sesión (salvo en `/api/usuarios`): un body inválido responde `400` aunque no haya sesión.
-- Las listas de vehículos, turnos, órdenes, servicios y presupuestos devuelven como máximo 100 elementos.
+- En las operaciones con body se comprueba primero la sesión y el rol, luego se valida la entrada y se verifica el acceso al recurso.
+- Todos los listados, incluidos usuarios, aceptan `?pagina=1&limite=20` (máximo 100 por página) y devuelven arrays. Parámetros inválidos responden 400.
 - Las respuestas de error utilizan el siguiente formato:
 
 ```json
@@ -206,3 +206,8 @@ Estas rutas las provee Auth.js; no forman parte de los recursos del negocio.
 La sesión viaja en una cookie que el navegador envía sola. Para probar la API desde Postman hay que iniciar sesión en el navegador y copiar esa cookie en el request: se llama `authjs.session-token` en local y `__Secure-authjs.session-token` en producción.
 
 MecaniCar no expone ningún recurso mediante un `GET` público.
+
+### Edición del presupuesto único
+`PATCH /api/presupuestos/:id`, Mecánico o Administrador. Body: `{ "serviciosIds": ["servicio-demo"] }`.
+200 devuelve el presupuesto PENDIENTE, total decimal como cadena y orden ABIERTA; 400 datos inválidos; 401 sin sesión; 403 rol incorrecto; 404 presupuesto inexistente; 409 orden finalizada, servicio inexistente o conflicto concurrente.
+POST sobre una orden que ya tiene presupuesto responde 409. Los totales se devuelven en creación, edición, listado, consulta, aprobación y rechazo.

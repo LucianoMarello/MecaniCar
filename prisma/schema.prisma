@@ -132,7 +132,7 @@ model Servicio {
 model Presupuesto {
   id              String                 @id @default(cuid())
 
-  ordenTrabajoId  String
+  ordenTrabajoId  String @unique
   ordenTrabajo    OrdenTrabajo        @relation(fields: [ordenTrabajoId], references: [id])
 
   estado          EstadoPresupuesto   @default(PENDIENTE)

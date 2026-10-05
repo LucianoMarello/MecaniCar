@@ -1,3 +1,4 @@
+import { idSchema } from "@/lib/schemas/http";
 import { NextResponse } from "next/server";
 import { requerirUsuario } from "@/lib/auth";
 import {
@@ -20,7 +21,7 @@ function errorNoExiste() {
 
 export async function GET(_request: Request, { params }: Contexto) {
   try {
-    const { id } = await params;
+    const id = idSchema.parse((await params).id);
     const sesion = await requerirUsuario();
     const resultado = await buscarVehiculo(id, sesion.id, sesion.rol);
     if (resultado.resultado !== "OK") {
@@ -34,7 +35,8 @@ export async function GET(_request: Request, { params }: Contexto) {
 
 export async function PATCH(request: Request, { params }: Contexto) {
   try {
-    const { id } = await params;
+    const sesion = await requerirUsuario();
+    const id = idSchema.parse((await params).id);
     const lectura = await leerJson(request);
     if (!lectura.exito) {
       return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
@@ -46,7 +48,7 @@ export async function PATCH(request: Request, { params }: Contexto) {
         { status: 400 },
       );
     }
-    const sesion = await requerirUsuario();
+
     const resultado = await actualizarVehiculo(
       id,
       validacion.data,
@@ -70,7 +72,7 @@ export async function PATCH(request: Request, { params }: Contexto) {
 
 export async function DELETE(_request: Request, { params }: Contexto) {
   try {
-    const { id } = await params;
+    const id = idSchema.parse((await params).id);
     const sesion = await requerirUsuario();
     const resultado = await eliminarVehiculo(
       id,

@@ -1,3 +1,4 @@
+import type { Paginacion } from "@/lib/schemas/http";
 import type {
   ActualizarServicioInput,
   ServicioInput,
@@ -13,11 +14,11 @@ const servicioSelect = {
   updatedAt: true,
 } as const;
 
-export function listarServicios() {
+export function listarServicios(paginacion: Paginacion = { pagina: 1, limite: 20 }) {
   return prisma.servicio.findMany({
     select: servicioSelect,
     orderBy: { nombre: "asc" },
-    take: 100,
+    skip: (paginacion.pagina - 1) * paginacion.limite, take: paginacion.limite,
   });
 }
 

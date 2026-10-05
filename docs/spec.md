@@ -280,7 +280,7 @@ Las principales relaciones del dominio son:
 * Un turno puede generar como máximo una orden de trabajo.
 * Una orden de trabajo corresponde a un vehículo.
 * Un vehículo puede tener varias órdenes de trabajo.
-* Una orden de trabajo puede tener uno o más presupuestos.
+* Una orden de trabajo puede tener como máximo un presupuesto, que se modifica cuando cambian los trabajos propuestos.
 * Un presupuesto puede contener varios servicios.
 * Un servicio puede aparecer en varios presupuestos.
 * Detalle de Presupuesto resuelve la relación muchos a muchos entre Presupuesto y Servicio.
@@ -298,7 +298,7 @@ Turno 1 ───── 0..1 OrdenTrabajo
 
 Vehiculo 1 ───── N OrdenTrabajo
 
-OrdenTrabajo 1 ───── N Presupuesto
+OrdenTrabajo 1 ───── 0..1 Presupuesto
 
 Presupuesto 1 ───── N DetallePresupuesto
 
@@ -825,3 +825,13 @@ El MVP se considerará funcional cuando pueda completarse el siguiente recorrido
 11. El cliente puede consultar que la reparación se encuentra finalizada.
 
 Todo el recorrido debe respetar las reglas de negocio y permisos establecidos en esta especificación.
+
+## Reglas acordadas de presupuesto y consultas (2026-10-05)
+- Cada orden tiene como máximo un presupuesto. Crear un segundo responde 409.
+- Mecánico y Administrador editan el único presupuesto mediante PATCH. El body contiene la lista completa de servicios; omitir uno lo elimina, agregar uno lo incorpora.
+- Los servicios conservados mantienen sus precios históricos; los agregados toman el precio actual del catálogo.
+- Toda edición vuelve el presupuesto a PENDIENTE y la orden a ABIERTA, de forma atómica. El cliente debe aprobar nuevamente, aunque el importe disminuya.
+- Una orden FINALIZADA no permite editar, aprobar ni rechazar su presupuesto.
+- El total se calcula con Decimal y se devuelve como cadena con dos decimales, sin almacenarlo.
+- Todos los listados admiten pagina y limite, por defecto 1 y 20, con máximo 100 por página. Devuelven un array; una página vacía indica el fin de resultados.
+- Existe como máximo un Administrador, protegido por un índice único parcial de la base. El seed configura el inicial.

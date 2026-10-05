@@ -1,3 +1,4 @@
+import type { Paginacion } from "@/lib/schemas/http";
 import { Prisma, Rol } from "@prisma/client";
 import { prisma } from "@/lib/db/client";
 const usuarioAuthSelect = { id: true, email: true, nombre: true, apellido: true, rol: true, activo: true } satisfies Prisma.UsuarioSelect;
@@ -11,10 +12,11 @@ export async function obtenerOCrearClienteGoogle(datos: { email: string; nombre:
     throw error;
   }
 }
-export function listarUsuarios() { return prisma.usuario.findMany({ orderBy: [{ rol: "asc" }, { nombre: "asc" }], select: usuarioAuthSelect }); }
+export function listarUsuarios(paginacion: Paginacion = { pagina: 1, limite: 20 }) { return prisma.usuario.findMany({ skip: (paginacion.pagina - 1) * paginacion.limite, take: paginacion.limite, orderBy: [{ rol: "asc" }, { nombre: "asc" }], select: usuarioAuthSelect }); }
 export async function cambiarRolUsuario(datos: { usuarioId: string; administradorId: string; rol: "CLIENTE" | "MECANICO" }) {
   if (datos.usuarioId === datos.administradorId) return { resultado: "MISMO_USUARIO" } as const;
-  const usuario = await prisma.usuario.findUnique({ where: { id: datos.usuarioId }, select: { id: true } });
+  const usuario = await prisma.usuario.findUnique({ where: { id: datos.usuarioId }, select: { id: true, rol: true } });
+  if (usuario?.rol === "ADMIN") return { resultado: "MISMO_USUARIO" } as const;
   if (!usuario) return { resultado: "NO_EXISTE" } as const;
   const actualizado = await prisma.usuario.update({ where: { id: datos.usuarioId }, data: { rol: datos.rol }, select: usuarioAuthSelect });
   return { resultado: "ACTUALIZADO", usuario: actualizado } as const;

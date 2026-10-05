@@ -1,3 +1,4 @@
+import { leerPaginacion } from "@/lib/http";
 import { NextResponse } from "next/server";
 import { requerirUsuario } from "@/lib/auth";
 import { crearVehiculo, listarVehiculos } from "@/lib/db/vehiculos";
@@ -5,11 +6,11 @@ import { responderError } from "@/lib/errores";
 import { leerJson } from "@/lib/http";
 import { vehiculoSchema } from "@/lib/schemas/vehiculo";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const sesion = await requerirUsuario();
     return NextResponse.json(
-      await listarVehiculos(sesion.id, sesion.rol),
+      await listarVehiculos(sesion.id, sesion.rol, leerPaginacion(request)),
     );
   } catch (error) {
     return responderError("GET /api/vehiculos", error);
@@ -18,6 +19,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const sesion = await requerirUsuario("CLIENTE");
     const lectura = await leerJson(request);
     if (!lectura.exito) {
       return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
@@ -29,7 +31,7 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
-    const sesion = await requerirUsuario("CLIENTE");
+
     const resultado = await crearVehiculo(validacion.data, sesion.id);
     if (resultado.resultado === "PATENTE_DUPLICADA") {
       return NextResponse.json(

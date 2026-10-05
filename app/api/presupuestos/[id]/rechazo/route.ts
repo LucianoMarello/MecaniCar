@@ -1,3 +1,4 @@
+import { idSchema } from "@/lib/schemas/http";
 import { NextResponse } from "next/server";
 import { requerirUsuario } from "@/lib/auth";
 import {
@@ -11,8 +12,9 @@ type Contexto = { params: Promise<{ id: string }> };
 
 export async function POST(_request: Request, { params }: Contexto) {
   try {
-    const { id } = await params;
     const sesion = await requerirUsuario("CLIENTE");
+    const id = idSchema.parse((await params).id);
+
 
   // 1. LEER
     const presupuestoActual = await buscarPresupuestoParaValidar(id, sesion.id);
