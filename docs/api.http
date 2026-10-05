@@ -239,7 +239,7 @@ DELETE {{base}}/api/vehiculos/{{vehiculoEliminable.response.body.$.id}}
 ### BAJA — volver a eliminarlo: 404
 DELETE {{base}}/api/vehiculos/{{vehiculoEliminable.response.body.$.id}}
 
-### MECÁNICO — reiniciar el servidor con DEMO_ROLE=MECANICO y listar todos
+### MECÁNICO — con sesión de mecánico, listar todos
 GET {{base}}/api/vehiculos
 
 ### MECÁNICO — listar todos los turnos
