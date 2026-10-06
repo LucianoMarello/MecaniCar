@@ -16,10 +16,9 @@ type ContextoRuta = {
 
 export async function GET(_request: Request, contexto: ContextoRuta) {
   try {
+    await requerirUsuario("MECANICO");
     const { id: idRecibido } = await contexto.params;
     const id = idSchema.parse(idRecibido);
-
-    await requerirUsuario("MECANICO");
     const servicio = await buscarServicioPorId(id);
 
     if (!servicio) {
@@ -57,7 +56,6 @@ export async function PATCH(request: Request, contexto: ContextoRuta) {
       );
     }
 
-
     const servicio = await actualizarServicio(id, resultado.data);
 
     if (!servicio) {
@@ -75,10 +73,9 @@ export async function PATCH(request: Request, contexto: ContextoRuta) {
 
 export async function DELETE(_request: Request, contexto: ContextoRuta) {
   try {
+    await requerirUsuario("MECANICO");
     const { id: idRecibido } = await contexto.params;
     const id = idSchema.parse(idRecibido);
-
-    await requerirUsuario("MECANICO");
     const resultado = await eliminarServicio(id);
 
     if (resultado === "NO_EXISTE") {

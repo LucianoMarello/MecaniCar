@@ -9,20 +9,18 @@ import {
 import { responderError } from "@/lib/errores";
 import { leerJson } from "@/lib/http";
 import { actualizarVehiculoSchema } from "@/lib/schemas/vehiculo";
-
-type Contexto = { params: Promise<{ id: string }> };
-
+type Contexto = {
+  params: Promise<{
+    id: string;
+  }>;
+};
 function errorNoExiste() {
-  return NextResponse.json(
-    { error: "El vehículo no existe" },
-    { status: 404 },
-  );
+  return NextResponse.json({ error: "El vehículo no existe" }, { status: 404 });
 }
-
 export async function GET(_request: Request, { params }: Contexto) {
   try {
-    const id = idSchema.parse((await params).id);
     const sesion = await requerirUsuario();
+    const id = idSchema.parse((await params).id);
     const resultado = await buscarVehiculo(id, sesion.id, sesion.rol);
     if (resultado.resultado !== "OK") {
       return errorNoExiste();
@@ -32,7 +30,6 @@ export async function GET(_request: Request, { params }: Contexto) {
     return responderError("GET /api/vehiculos/:id", error);
   }
 }
-
 export async function PATCH(request: Request, { params }: Contexto) {
   try {
     const sesion = await requerirUsuario();
@@ -48,7 +45,6 @@ export async function PATCH(request: Request, { params }: Contexto) {
         { status: 400 },
       );
     }
-
     const resultado = await actualizarVehiculo(
       id,
       validacion.data,
@@ -69,16 +65,11 @@ export async function PATCH(request: Request, { params }: Contexto) {
     return responderError("PATCH /api/vehiculos/:id", error);
   }
 }
-
 export async function DELETE(_request: Request, { params }: Contexto) {
   try {
-    const id = idSchema.parse((await params).id);
     const sesion = await requerirUsuario();
-    const resultado = await eliminarVehiculo(
-      id,
-      sesion.id,
-      sesion.rol,
-    );
+    const id = idSchema.parse((await params).id);
+    const resultado = await eliminarVehiculo(id, sesion.id, sesion.rol);
     if (resultado.resultado === "NO_EXISTE") {
       return errorNoExiste();
     }
