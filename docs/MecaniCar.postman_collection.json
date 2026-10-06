@@ -1,0 +1,754 @@
+{
+  "info": {
+    "_postman_id": "0e297f93-9a83-4fec-a54e-cb4db160b6af",
+    "name": "MecaniCar",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "30577953"
+  },
+  "item": [
+    {
+      "name": "GET Usuarios",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesion}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/usuarios",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "usuarios"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "PATCH Usuarios/[:id]/rol",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesion}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"rol\": \"CLIENTE\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{url}}/api/usuarios/{{idUsuario}}/rol",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "usuarios",
+            "{{idUsuario}}",
+            "rol"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET Vehiculos",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesion}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/vehiculos",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "vehiculos"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST Vehiculos",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesionCliente}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"patente\": \"AB123CD\",\r\n  \"marca\": \"Toyota\",\r\n  \"modelo\": \"Corolla\",\r\n  \"anio\": 2022,\r\n  \"clienteId\": \"{{idUsuario}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{url}}/api/vehiculos",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "vehiculos"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET Vehiculos/[:id]",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesion}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/vehiculos/cmuvpjvm80001jt046dq9ev4u",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "vehiculos",
+            "cmuvpjvm80001jt046dq9ev4u"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "PATCH Vehiculos/[:id]",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesion}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"patente\": \"AB123CD\",\r\n  \"marca\": \"Toyota\",\r\n  \"modelo\": \"Corolla Cross\",\r\n  \"anio\": 2023,\r\n  \"clienteId\": \"{{idUsuario}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{url}}/api/vehiculos/cmuvpjvm80001jt046dq9ev4u",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "vehiculos",
+            "cmuvpjvm80001jt046dq9ev4u"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "DELETE Vehiculos/[:id]",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesion}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/vehiculos/cmuvpjvm80001jt046dq9ev4u",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "vehiculos",
+            "cmuvpjvm80001jt046dq9ev4u"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET Servicios",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesion}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/servicios",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "servicios"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST Servicios",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesion}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"nombre\": \"Cambio de Aceite y Filtro\",\r\n  \"descripcion\": \"Sustitución de aceite sintético 5W30 y filtro de aceite.\",\r\n  \"precio\": 45000\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{url}}/api/servicios",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "servicios"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET Servicios/[:id]",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesion}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/servicios/cmuvpv68t0002jt04wzllgz3a",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "servicios",
+            "cmuvpv68t0002jt04wzllgz3a"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "PATCH Servicios/[:id]",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesion}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"precio\": 42500\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{url}}/api/servicios/cmuvpv68t0002jt04wzllgz3a",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "servicios",
+            "cmuvpv68t0002jt04wzllgz3a"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "DELETE Servicios/[:id]",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesion}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/servicios/cmuvpv68t0002jt04wzllgz3a",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "servicios",
+            "cmuvpv68t0002jt04wzllgz3a"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET Turnos",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesion}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/turnos",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "turnos"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST Turnos",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesionCliente}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"vehiculoId\": \"cmuvpjvm80001jt046dq9ev4u\",\r\n  \"fechaHora\": \"2026-10-10T09:00:00.000Z\",\r\n  \"motivo\": \"El auto hace un ruido al frenar.\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{url}}/api/turnos",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "turnos"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET Turnos/[:id]",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesion}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/turnos/cmuvq5tlf0004jt04cisllev3",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "turnos",
+            "cmuvq5tlf0004jt04cisllev3"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST Turnos/[:id]/confirmacion",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesion}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/turnos/cmuvq5tlf0004jt04cisllev3/confirmacion",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "turnos",
+            "cmuvq5tlf0004jt04cisllev3",
+            "confirmacion"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST Turnos/[:id]/ingreso",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesion}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/turnos/cmuvq5tlf0004jt04cisllev3/ingreso",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "turnos",
+            "cmuvq5tlf0004jt04cisllev3",
+            "ingreso"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST Turnos/[:id]/cancelacion",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesionCliente}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/turnos/cmuvq5tlf0004jt04cisllev3/cancelacion",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "turnos",
+            "cmuvq5tlf0004jt04cisllev3",
+            "cancelacion"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET Presupuestos",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesion}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/presupuestos",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "presupuestos"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST Presupuestos",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesion}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"ordenTrabajoId\": \"cmuvqsl3d0001lh046ylh04hy\",\r\n  \"serviciosIds\": [\r\n    \"servicio-demo\"\r\n  ]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{url}}/api/presupuestos",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "presupuestos"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET Presupuestos/[:id]",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesion}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/presupuestos/cmuvtw0z30001id0459zao9na",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "presupuestos",
+            "cmuvtw0z30001id0459zao9na"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET Presupuestos/[:id]",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesion}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"serviciosIds\": [\r\n        \"servicio-demo\",\r\n        \"cmuvpv68t0002jt04wzllgz3a\"\r\n    ]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{url}}/api/presupuestos/cmuvtw0z30001id0459zao9na",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "presupuestos",
+            "cmuvtw0z30001id0459zao9na"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST Presupuestos/[:id]/aprobacion",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesionCliente}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/presupuestos/cmuvtw0z30001id0459zao9na/aprobacion",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "presupuestos",
+            "cmuvtw0z30001id0459zao9na",
+            "aprobacion"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST Presupuestos/[:id]/rechazo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesionCliente}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/presupuestos/cmuvtw0z30001id0459zao9na/rechazo",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "presupuestos",
+            "cmuvtw0z30001id0459zao9na",
+            "rechazo"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET Ordenes-trabajo",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesion}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/ordenes-trabajo",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "ordenes-trabajo"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET Ordenes-trabajo/[:id]",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesion}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/ordenes-trabajo/cmuvqsl3d0001lh046ylh04hy",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "ordenes-trabajo",
+            "cmuvqsl3d0001lh046ylh04hy"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST Ordenes-trabajo/[:id]/finalizacion",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesion}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{url}}/api/ordenes-trabajo/cmuvqsl3d0001lh046ylh04hy/finalizacion",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "ordenes-trabajo",
+            "cmuvqsl3d0001lh046ylh04hy",
+            "finalizacion"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "url",
+      "value": ""
+    },
+    {
+      "key": "CookieSesion",
+      "value": ""
+    },
+    {
+      "key": "idUsuario",
+      "value": ""
+    },
+    {
+      "key": "CookieSesionCliente",
+      "value": ""
+    }
+  ]
+}
