@@ -585,16 +585,6 @@ Dado que la orden pertenece al vehículo de otro cliente, cuando intenta consult
 
 ---
 
-### Reglas complementarias (2026-10-05)
-**RN34.** Cada orden tiene como máximo un presupuesto. Crear un segundo responde 409.
-**RN35.** Mecánico y Administrador editan el único presupuesto mediante PATCH. El body contiene la lista completa de servicios; omitir uno lo elimina, agregar uno lo incorpora.
-**RN36.** Los servicios conservados mantienen sus precios históricos; los agregados toman el precio actual del catálogo.
-**RN37.** Toda edición vuelve el presupuesto a PENDIENTE y la orden a ABIERTA, de forma atómica. El cliente debe aprobar nuevamente, aunque el importe disminuya.
-**RN38.** Una orden FINALIZADA no permite editar, aprobar ni rechazar su presupuesto.
-**RN39.** El total se calcula con Decimal y se devuelve como cadena con dos decimales, sin almacenarlo.
-**RN40.** Todos los listados admiten pagina y limite, por defecto 1 y 20, con máximo 100 por página. Devuelven un array; una página vacía indica el fin de resultados.
-**RN41.** Existe como máximo un Administrador, protegido por un índice único parcial de la base. El seed configura el inicial.
-
 ## 6. Flujo principal del sistema
 
 El recorrido principal del MVP es:
@@ -713,6 +703,24 @@ Este flujo constituye el proceso de negocio principal del sistema y no un simple
 
 **RN36.** Un administrador no puede modificar su propio rol.
 
+### Presupuesto único, edición y consultas
+
+**RN37.** Cada orden tiene como máximo un presupuesto. Crear un segundo responde 409.
+
+**RN38.** Mecánico y Administrador editan el único presupuesto mediante PATCH. El body contiene la lista completa de servicios; omitir uno lo elimina, agregar uno lo incorpora.
+
+**RN39.** Los servicios conservados mantienen sus precios históricos; los agregados toman el precio actual del catálogo.
+
+**RN40.** Toda edición vuelve el presupuesto a PENDIENTE y la orden a ABIERTA, de forma atómica. El cliente debe aprobar nuevamente, aunque el importe disminuya.
+
+**RN41.** Una orden FINALIZADA no permite editar, aprobar ni rechazar su presupuesto.
+
+**RN42.** El total se calcula con Decimal y se devuelve como cadena con dos decimales, sin almacenarlo.
+
+**RN43.** Todos los listados admiten pagina y limite, por defecto 1 y 20, con máximo 100 por página. Devuelven un array; una página vacía indica el fin de resultados.
+
+**RN44.** Existe como máximo un Administrador, protegido por un índice único parcial de la base. El seed configura el inicial.
+
 ---
 
 ## 8. Requisitos no funcionales
@@ -777,18 +785,20 @@ Por eso el aviso se envía siempre **después** de que la operación quedó guar
 
 ### 9.3. Qué pasa si Resend no responde
 
-El comportamiento es el mismo en las tres operaciones, tanto si Resend falla o rechaza el envío como si tarda más de 5 segundos, que es el tiempo máximo de espera:
+El comportamiento es el mismo en las cuatro operaciones, tanto si Resend falla o rechaza el envío como si tarda más de 5 segundos, que es el tiempo máximo de espera:
 
 | Quién | Qué pasa |
 | --- | --- |
-| La operación | Se completa igual: el turno queda `CONFIRMADO`, el presupuesto queda creado en `PENDIENTE` o la orden queda `FINALIZADA` |
-| El mecánico | Recibe la misma respuesta exitosa que cuando el correo se envía. A lo sumo espera hasta 5 segundos más |
+| La operación | Se completa igual: el turno queda `CONFIRMADO`, el presupuesto queda creado o editado en `PENDIENTE`, o la orden queda `FINALIZADA` |
+| El mecánico | Recibe la misma respuesta exitosa, con la indicación de que el aviso no pudo enviarse (9.4). A lo sumo espera hasta 5 segundos más |
 | El cliente | No recibe el correo. Conoce el estado al consultar sus turnos, presupuestos u órdenes en el sistema |
 | El taller | La falla queda registrada en el log del servidor. El envío no se reintenta |
 
-### 9.4. Mejora prevista
+### 9.4. Cómo se entera el mecánico
 
-Hoy el mecánico no se entera de que el aviso no pudo enviarse. Queda previsto informarlo en la respuesta de la operación, para que pueda avisarle al cliente por otro medio.
+La respuesta de las cuatro operaciones informa si el aviso pudo enviarse. Cuando no pudo, el sistema debe mostrárselo al mecánico junto con el resultado de la operación, para que pueda avisarle al cliente por otro medio.
+
+Que el aviso no salga no es un error de la operación: el turno, el presupuesto o la orden quedan guardados igual.
 
 ---
 

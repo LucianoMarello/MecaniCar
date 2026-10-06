@@ -69,14 +69,14 @@ export async function POST(request: Request) {
     );
 
     // 4. AVISAR AL CLIENTE. Resend es accesorio (docs/spec.md, sección 9):
-    // de acá para abajo nada puede lanzar. Si el correo falla,
-    // enviarNotificacion devuelve false y se responde igual.
-    await enviarNotificacion({
+    // de acá para abajo nada puede lanzar. Si el correo falla, la operación
+    // queda hecha igual y avisoEnviado le informa al mecánico que no salió.
+    const avisoEnviado = await enviarNotificacion({
       destinatario: orden.turno.usuario.email,
       asunto: "Nuevo presupuesto disponible - MecaniCar",
       mensaje: `Ya está disponible el presupuesto ${presupuesto.id} para tu vehículo.`,
     });
-    return NextResponse.json(presupuesto, { status: 201 });
+    return NextResponse.json({ ...presupuesto, avisoEnviado }, { status: 201 });
   } catch (error) {
     return responderError("POST /api/presupuestos", error);
   }

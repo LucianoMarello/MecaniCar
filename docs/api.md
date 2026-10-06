@@ -143,7 +143,7 @@ El cambio de rol se aplica en el siguiente request del usuario afectado, sin que
 
 ## Avisos por correo
 
-Tres operaciones le envían un correo al cliente mediante Resend, **después** de completarse. La decisión y el detalle están en la sección 9 de `docs/spec.md`.
+Cuatro operaciones le envían un correo al cliente mediante Resend, **después** de completarse. La decisión y el detalle están en la sección 9 de `docs/spec.md`.
 
 | Operación | Aviso al cliente |
 |---|---|
@@ -152,7 +152,26 @@ Tres operaciones le envían un correo al cliente mediante Resend, **después** d
 | `PATCH /api/presupuestos/:id` | El presupuesto cambió y requiere nueva aprobación |
 | `POST /api/ordenes-trabajo/:id/finalizacion` | El vehículo está listo para retirar |
 
-El servicio es accesorio, así que **no agrega ningún código de error al contrato**: si Resend falla, rechaza el envío o tarda más de 5 segundos, la operación responde igual (`200` o `201`) y la falla queda en el log del servidor. La prueba está al final de `docs/api.http`.
+El servicio es accesorio, así que **no agrega ningún código de error al contrato**: si Resend falla, rechaza el envío o tarda más de 5 segundos, la operación responde igual (`200` o `201`) y la falla queda en el log del servidor.
+
+La respuesta de estas cuatro operaciones suma el campo `avisoEnviado`, para que quien la ejecuta sepa si el correo salió:
+
+```json
+{
+  "id": "turno-demo",
+  "estado": "CONFIRMADO",
+  "avisoEnviado": false
+}
+```
+
+| Valor | Significado |
+|---|---|
+| `true` | Resend aceptó el correo. No garantiza que el cliente lo haya leído ni recibido |
+| `false` | El correo no se envió. La operación quedó guardada; conviene avisarle al cliente por otro medio |
+
+Mientras la variable `RESEND_TEST_RECIPIENT` tenga valor, todos los avisos se envían a esa casilla de prueba y no al cliente, y `avisoEnviado` igual responde `true`.
+
+Las pruebas están en `app/api/avisoEnviado.test.ts` y al final de `docs/api.http`.
 
 ---
 
