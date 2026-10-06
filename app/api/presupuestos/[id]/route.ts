@@ -63,6 +63,10 @@ export async function PATCH(
           asunto: "Presupuesto actualizado - MecaniCar",
           mensaje: `El presupuesto ${id} fue actualizado. El total es $${presupuesto.total}. Revisalo y aprobalo nuevamente antes de continuar la reparación.`,
         });
+      else
+        console.error(
+          "notificaciones: el presupuesto editado no tiene destinatario",
+        );
     } catch {
       console.error(
         "notificaciones: no se pudo consultar el destinatario del presupuesto editado",
