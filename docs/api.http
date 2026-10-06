@@ -297,3 +297,22 @@ Content-Type: application/json
 # Verificar: queda PENDIENTE, la orden ABIERTA y el total es una cadena decimal.
 # Aprobar de nuevo como CLIENTE antes de finalizar; edición tras finalizar: 409.
 # Crear otro presupuesto para la misma orden: 409. limite=0: 400.
+
+### FALLA RESEND — las otras tres operaciones que avisan (como MECANICO)
+# Con la misma preparación A o B, las tres responden su status habitual
+# y "avisoEnviado": false. Reemplazar los ID.
+
+### FALLA RESEND — crear un presupuesto: 201
+POST {{base}}/api/presupuestos
+Content-Type: application/json
+
+{"ordenTrabajoId":"ORDEN_ID","serviciosIds":["servicio-demo"]}
+
+### FALLA RESEND — editar un presupuesto: 200
+PATCH {{base}}/api/presupuestos/PRESUPUESTO_ID
+Content-Type: application/json
+
+{"serviciosIds":["servicio-demo"]}
+
+### FALLA RESEND — finalizar una orden en reparación: 200
+POST {{base}}/api/ordenes-trabajo/ORDEN_ID/finalizacion

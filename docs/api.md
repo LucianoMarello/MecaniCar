@@ -166,8 +166,10 @@ La respuesta de estas cuatro operaciones suma el campo `avisoEnviado`, para que 
 
 | Valor | Significado |
 |---|---|
-| `true` | Resend aceptó el correo |
+| `true` | Resend aceptó el correo. No garantiza que el cliente lo haya leído ni recibido |
 | `false` | El correo no se envió. La operación quedó guardada; conviene avisarle al cliente por otro medio |
+
+Mientras la variable `RESEND_TEST_RECIPIENT` tenga valor, todos los avisos se envían a esa casilla de prueba y no al cliente, y `avisoEnviado` igual responde `true`.
 
 Las pruebas están en `app/api/avisoEnviado.test.ts` y al final de `docs/api.http`.
 
