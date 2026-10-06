@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { POST as finalizarOrden } from "./ordenes-trabajo/[id]/finalizacion/route";
+import { PATCH as editarPresupuesto } from "./presupuestos/[id]/route";
 import { POST as crearPresupuesto } from "./presupuestos/route";
 import { POST as confirmarTurno } from "./turnos/[id]/confirmacion/route";
 import { enviarNotificacion } from "@/lib/servicios/notificaciones";
 
-// Las tres operaciones que avisan por correo (docs/spec.md, sección 9) tienen
+// Las cuatro operaciones que avisan por correo (docs/spec.md, sección 9) tienen
 // que completarse aunque Resend falle, e informarlo en avisoEnviado.
 // Se simulan la sesión, la base y Resend; las reglas de negocio son las reales.
 
@@ -47,6 +48,13 @@ vi.mock("@/lib/db/presupuestos", () => ({
     id: "presupuesto-1",
     estado: "PENDIENTE",
   })),
+  buscarPresupuesto: vi.fn(),
+  editarPresupuesto: vi.fn(async (id: string) => ({
+    id,
+    estado: "PENDIENTE",
+    total: "50000.00",
+  })),
+  buscarDestinatarioPresupuesto: vi.fn(async () => cliente.usuario.email),
 }));
 
 vi.mock("@/lib/db/ordenes-trabajo", () => ({
@@ -89,6 +97,19 @@ const operaciones = [
             serviciosIds: ["servicio-1"],
           }),
         }),
+      ),
+  },
+  {
+    nombre: "editar un presupuesto",
+    status: 200,
+    estado: "PENDIENTE",
+    ejecutar: () =>
+      editarPresupuesto(
+        new Request("http://test/api/presupuestos/presupuesto-1", {
+          method: "PATCH",
+          body: JSON.stringify({ serviciosIds: ["servicio-1"] }),
+        }),
+        contexto("presupuesto-1"),
       ),
   },
   {

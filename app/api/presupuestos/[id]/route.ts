@@ -52,11 +52,13 @@ export async function PATCH(
         { error: "El presupuesto no existe" },
         { status: 404 },
       );
-    // El correo es accesorio: una falla no revierte la edición ya confirmada.
+    // El correo es accesorio: una falla no revierte la edición ya confirmada,
+    // y avisoEnviado le informa al mecánico que el aviso no salió.
+    let avisoEnviado = false;
     try {
       const destinatario = await buscarDestinatarioPresupuesto(id);
       if (destinatario)
-        await enviarNotificacion({
+        avisoEnviado = await enviarNotificacion({
           destinatario,
           asunto: "Presupuesto actualizado - MecaniCar",
           mensaje: `El presupuesto ${id} fue actualizado. El total es $${presupuesto.total}. Revisalo y aprobalo nuevamente antes de continuar la reparación.`,
@@ -66,7 +68,7 @@ export async function PATCH(
         "notificaciones: no se pudo consultar el destinatario del presupuesto editado",
       );
     }
-    return NextResponse.json(presupuesto);
+    return NextResponse.json({ ...presupuesto, avisoEnviado });
   } catch (error) {
     return responderError("PATCH /api/presupuestos/:id", error);
   }
