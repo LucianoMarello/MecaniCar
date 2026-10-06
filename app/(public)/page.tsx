@@ -6,6 +6,7 @@ import {
 } from "@/lib/auth";
 
 // La página cambia según haya o no sesión, así que se arma en cada request.
+// Next ya lo deduce porque leer la sesión usa las cookies; acá queda explícito.
 export const dynamic = "force-dynamic";
 
 const NOMBRE_ROL: Record<UsuarioSesion["rol"], string> = {
@@ -23,7 +24,7 @@ const PASOS = [
 ];
 
 const ESTILO_BOTON =
-  "mt-4 cursor-pointer rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background focus-visible:outline-2 focus-visible:outline-offset-2";
+  "cursor-pointer rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background focus-visible:outline-2 focus-visible:outline-offset-2";
 
 // Server Actions: corren en el servidor al enviar cada formulario.
 async function iniciarSesion() {
@@ -36,18 +37,10 @@ async function cerrarSesion() {
   await signOut({ redirectTo: "/" });
 }
 
-async function leerSesion() {
-  // Si la base no responde, la portada se muestra igual, sin sesión.
-  try {
-    return await obtenerUsuario();
-  } catch (error) {
-    console.error("portada: no se pudo leer la sesión", error);
-    return null;
-  }
-}
-
 export default async function Home() {
-  const usuario = await leerSesion();
+  // Si la base no responde, Auth.js registra el error y devuelve "sin sesión":
+  // la portada se muestra igual, con el botón de ingreso.
+  const usuario = await obtenerUsuario();
 
   return (
     <main className="mx-auto max-w-2xl p-8">
@@ -67,7 +60,7 @@ export default async function Home() {
             <p className="mt-1">
               Rol: <strong>{NOMBRE_ROL[usuario.rol]}</strong>
             </p>
-            <form action={cerrarSesion}>
+            <form action={cerrarSesion} className="mt-4">
               <button type="submit" className={ESTILO_BOTON}>
                 Cerrar sesión
               </button>
@@ -76,7 +69,7 @@ export default async function Home() {
         ) : (
           <>
             <p>Para usar el sistema, ingresá con tu cuenta de Google.</p>
-            <form action={iniciarSesion}>
+            <form action={iniciarSesion} className="mt-4">
               <button type="submit" className={ESTILO_BOTON}>
                 Iniciar sesión con Google
               </button>
