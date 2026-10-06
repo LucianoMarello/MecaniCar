@@ -119,7 +119,8 @@ El catálogo de servicios constituye el CRUD completo requerido para el MVP.
 
 | Método y ruta | Qué hace | Rol | Respuesta exitosa | Errores |
 |---|---|---|---|---|
-| `POST /api/presupuestos` | Crea un presupuesto para una orden utilizando uno o más servicios | Mecánico | `201` con el presupuesto en estado `PENDIENTE`, sus detalles y el total | `400` datos inválidos o sin servicios; `401` sin sesión; `403` rol incorrecto; `404` orden o servicio inexistente; `409` orden finalizada |
+| `POST /api/presupuestos` | Crea un presupuesto para una orden utilizando uno o más servicios | Mecánico | `201` con el presupuesto en estado `PENDIENTE`, sus detalles y el total | `400` datos inválidos o sin servicios; `401` sin sesión; `403` rol incorrecto; `404` orden o servicio inexistente; `409` orden finalizada, presupuesto existente o conflicto concurrente |
+| `PATCH /api/presupuestos/:id` | Reemplaza los servicios del presupuesto único y solicita nueva aprobación; body: `{ "serviciosIds": ["servicio-demo"] }` | Mecánico | `200` presupuesto `PENDIENTE`, orden `ABIERTA` y total como texto decimal | `400` datos inválidos; `401` sin sesión; `403` rol incorrecto; `404` presupuesto inexistente; `409` orden finalizada, servicio inexistente o conflicto concurrente |
 | `GET /api/presupuestos` | Lista los presupuestos permitidos para el usuario. El cliente recibe los correspondientes a sus vehículos y el mecánico recibe los presupuestos del taller | Cliente o Mecánico | `200` con la lista | `401` sin sesión |
 | `GET /api/presupuestos/:id` | Consulta los servicios, precios aplicados, total y estado de un presupuesto | Cliente o Mecánico | `200` con el presupuesto | `401` sin sesión; `404` inexistente o de otro cliente |
 | `POST /api/presupuestos/:id/aprobacion` | Aprueba un presupuesto pendiente y pasa la orden asociada a `EN_REPARACION` | Cliente | `200` con el presupuesto aprobado y la orden actualizada | `401` sin sesión; `403` rol incorrecto; `404` inexistente o de otro cliente; `409` presupuesto ya aprobado o rechazado |
@@ -148,6 +149,7 @@ Tres operaciones le envían un correo al cliente mediante Resend, **después** d
 |---|---|
 | `POST /api/turnos/:id/confirmacion` | El turno fue confirmado |
 | `POST /api/presupuestos` | Hay un presupuesto disponible |
+| `PATCH /api/presupuestos/:id` | El presupuesto cambió y requiere nueva aprobación |
 | `POST /api/ordenes-trabajo/:id/finalizacion` | El vehículo está listo para retirar |
 
 El servicio es accesorio, así que **no agrega ningún código de error al contrato**: si Resend falla, rechaza el envío o tarda más de 5 segundos, la operación responde igual (`200` o `201`) y la falla queda en el log del servidor.
@@ -207,7 +209,5 @@ La sesión viaja en una cookie que el navegador envía sola. Para probar la API 
 
 MecaniCar no expone ningún recurso mediante un `GET` público.
 
-### Edición del presupuesto único
-`PATCH /api/presupuestos/:id`, Mecánico o Administrador. Body: `{ "serviciosIds": ["servicio-demo"] }`.
-200 devuelve el presupuesto PENDIENTE, total decimal como cadena y orden ABIERTA; 400 datos inválidos; 401 sin sesión; 403 rol incorrecto; 404 presupuesto inexistente; 409 orden finalizada, servicio inexistente o conflicto concurrente.
-POST sobre una orden que ya tiene presupuesto responde 409. Los totales se devuelven en creación, edición, listado, consulta, aprobación y rechazo.
+
+Los totales de presupuestos se devuelven como texto decimal con dos decimales en creación, edición, consulta, listado, aprobación y rechazo.

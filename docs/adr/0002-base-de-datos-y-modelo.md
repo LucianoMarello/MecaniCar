@@ -49,8 +49,10 @@ Sobre esa base, el modelo (`prisma/schema.prisma`) toma estas decisiones:
 ### Puntos conocidos, pendientes de mejora
 
 - **Año del vehículo.** `Vehiculo.anio` es obligatorio en la base y opcional en el formulario. Si no se informa, se guarda el año actual (`crearVehiculo` en `lib/db/vehiculos.ts`), que es un dato inventado. Lo correcto sería permitir que quede vacío.
-- **Índices faltantes.** `Presupuesto.ordenTrabajoId` y `DetallePresupuesto.servicioId` no tienen índice. Con el volumen actual no se nota; habría que agregarlos si crecen los datos.
+- **Índices faltantes.** `DetallePresupuesto.servicioId` no tiene índice. `Presupuesto.ordenTrabajoId` tiene un índice único. Con el volumen actual no se nota; habría que agregarlos si crecen los datos.
 - **`onDelete` sin declarar.** Ninguna relación indica qué pasa al borrar. Vale el comportamiento por defecto de Prisma para relaciones obligatorias, que impide borrar un registro con datos asociados. Es lo que el sistema necesita (RN03 y RN33), pero está implícito y debería quedar escrito en el schema.
 - **Datos repetidos.** `OrdenTrabajo.vehiculoId` puede obtenerse a través del turno, y `Turno.usuarioId` a través del vehículo. Simplifican las consultas, pero nada impide que queden desincronizados si algún día un vehículo cambia de dueño.
 
 Actualización 2026-10-05: ordenTrabajoId es único en Presupuesto. El índice parcial Usuario_admin_unico limita a un Administrador. Las mutaciones de presupuesto y la finalización usan transacciones Serializable; los conflictos se devuelven como 409.
+
+El índice parcial `Usuario_admin_unico` se administra mediante SQL porque Prisma 6 no lo representa en el schema. Antes de aplicar una futura migración, generarla con `prisma migrate dev --create-only` y revisar que no incluya `DROP INDEX "Usuario_admin_unico"`. No modificar migraciones ya aplicadas.
