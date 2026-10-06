@@ -585,16 +585,6 @@ Dado que la orden pertenece al vehículo de otro cliente, cuando intenta consult
 
 ---
 
-### Reglas complementarias (2026-10-05)
-**RN34.** Cada orden tiene como máximo un presupuesto. Crear un segundo responde 409.
-**RN35.** Mecánico y Administrador editan el único presupuesto mediante PATCH. El body contiene la lista completa de servicios; omitir uno lo elimina, agregar uno lo incorpora.
-**RN36.** Los servicios conservados mantienen sus precios históricos; los agregados toman el precio actual del catálogo.
-**RN37.** Toda edición vuelve el presupuesto a PENDIENTE y la orden a ABIERTA, de forma atómica. El cliente debe aprobar nuevamente, aunque el importe disminuya.
-**RN38.** Una orden FINALIZADA no permite editar, aprobar ni rechazar su presupuesto.
-**RN39.** El total se calcula con Decimal y se devuelve como cadena con dos decimales, sin almacenarlo.
-**RN40.** Todos los listados admiten pagina y limite, por defecto 1 y 20, con máximo 100 por página. Devuelven un array; una página vacía indica el fin de resultados.
-**RN41.** Existe como máximo un Administrador, protegido por un índice único parcial de la base. El seed configura el inicial.
-
 ## 6. Flujo principal del sistema
 
 El recorrido principal del MVP es:
@@ -712,6 +702,24 @@ Este flujo constituye el proceso de negocio principal del sistema y no un simple
 **RN35.** Solamente un administrador puede asignar roles, y únicamente los roles Cliente o Mecánico.
 
 **RN36.** Un administrador no puede modificar su propio rol.
+
+### Presupuesto único, edición y consultas
+
+**RN37.** Cada orden tiene como máximo un presupuesto. Crear un segundo responde 409.
+
+**RN38.** Mecánico y Administrador editan el único presupuesto mediante PATCH. El body contiene la lista completa de servicios; omitir uno lo elimina, agregar uno lo incorpora.
+
+**RN39.** Los servicios conservados mantienen sus precios históricos; los agregados toman el precio actual del catálogo.
+
+**RN40.** Toda edición vuelve el presupuesto a PENDIENTE y la orden a ABIERTA, de forma atómica. El cliente debe aprobar nuevamente, aunque el importe disminuya.
+
+**RN41.** Una orden FINALIZADA no permite editar, aprobar ni rechazar su presupuesto.
+
+**RN42.** El total se calcula con Decimal y se devuelve como cadena con dos decimales, sin almacenarlo.
+
+**RN43.** Todos los listados admiten pagina y limite, por defecto 1 y 20, con máximo 100 por página. Devuelven un array; una página vacía indica el fin de resultados.
+
+**RN44.** Existe como máximo un Administrador, protegido por un índice único parcial de la base. El seed configura el inicial.
 
 ---
 
