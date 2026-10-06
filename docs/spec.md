@@ -785,18 +785,18 @@ Por eso el aviso se envía siempre **después** de que la operación quedó guar
 
 ### 9.3. Qué pasa si Resend no responde
 
-El comportamiento es el mismo en las tres operaciones, tanto si Resend falla o rechaza el envío como si tarda más de 5 segundos, que es el tiempo máximo de espera:
+El comportamiento es el mismo en las cuatro operaciones, tanto si Resend falla o rechaza el envío como si tarda más de 5 segundos, que es el tiempo máximo de espera:
 
 | Quién | Qué pasa |
 | --- | --- |
-| La operación | Se completa igual: el turno queda `CONFIRMADO`, el presupuesto queda creado en `PENDIENTE` o la orden queda `FINALIZADA` |
+| La operación | Se completa igual: el turno queda `CONFIRMADO`, el presupuesto queda creado o editado en `PENDIENTE`, o la orden queda `FINALIZADA` |
 | El mecánico | Recibe la misma respuesta exitosa, con la indicación de que el aviso no pudo enviarse (9.4). A lo sumo espera hasta 5 segundos más |
 | El cliente | No recibe el correo. Conoce el estado al consultar sus turnos, presupuestos u órdenes en el sistema |
 | El taller | La falla queda registrada en el log del servidor. El envío no se reintenta |
 
 ### 9.4. Cómo se entera el mecánico
 
-La respuesta de las tres operaciones informa si el aviso pudo enviarse. Cuando no pudo, el sistema debe mostrárselo al mecánico junto con el resultado de la operación, para que pueda avisarle al cliente por otro medio.
+La respuesta de las cuatro operaciones informa si el aviso pudo enviarse. Cuando no pudo, el sistema debe mostrárselo al mecánico junto con el resultado de la operación, para que pueda avisarle al cliente por otro medio.
 
 Que el aviso no salga no es un error de la operación: el turno, el presupuesto o la orden quedan guardados igual.
 

@@ -143,7 +143,7 @@ El cambio de rol se aplica en el siguiente request del usuario afectado, sin que
 
 ## Avisos por correo
 
-Tres operaciones le envían un correo al cliente mediante Resend, **después** de completarse. La decisión y el detalle están en la sección 9 de `docs/spec.md`.
+Cuatro operaciones le envían un correo al cliente mediante Resend, **después** de completarse. La decisión y el detalle están en la sección 9 de `docs/spec.md`.
 
 | Operación | Aviso al cliente |
 |---|---|
@@ -154,7 +154,7 @@ Tres operaciones le envían un correo al cliente mediante Resend, **después** d
 
 El servicio es accesorio, así que **no agrega ningún código de error al contrato**: si Resend falla, rechaza el envío o tarda más de 5 segundos, la operación responde igual (`200` o `201`) y la falla queda en el log del servidor.
 
-La respuesta de estas tres operaciones suma el campo `avisoEnviado`, para que quien la ejecuta sepa si el correo salió:
+La respuesta de estas cuatro operaciones suma el campo `avisoEnviado`, para que quien la ejecuta sepa si el correo salió:
 
 ```json
 {
