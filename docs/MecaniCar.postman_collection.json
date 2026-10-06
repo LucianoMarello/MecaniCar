@@ -370,7 +370,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n  \"vehiculoId\": \"cmuvpjvm80001jt046dq9ev4u\",\r\n  \"servicioId\": \"cmuvpv68t0002jt04wzllgz3a\",\r\n  \"fechaHora\": \"2026-10-10T09:00:00.000Z\",\r\n  \"motivo\": \"El auto hace un ruido al frenar.\"\r\n}",
+          "raw": "{\r\n  \"vehiculoId\": \"cmuvpjvm80001jt046dq9ev4u\",\r\n  \"fechaHora\": \"2026-10-10T09:00:00.000Z\",\r\n  \"motivo\": \"El auto hace un ruido al frenar.\"\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -471,7 +471,7 @@
         "header": [
           {
             "key": "Cookie",
-            "value": "{{CookieSesion}}"
+            "value": "{{CookieSesionCliente}}"
           }
         ],
         "url": {
@@ -524,7 +524,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n  \"ordenTrabajoId\": \"cmuvqsl3d0001lh046ylh04hy\",\r\n  \"serviciosIds\": [\r\n    \"servicio-demo\"\r\n  ],\r\n  \"descuento\": 0,\r\n  \"observaciones\": \"Presupuesto detallado para la orden de trabajo.\"\r\n}",
+          "raw": "{\r\n  \"ordenTrabajoId\": \"cmuvqsl3d0001lh046ylh04hy\",\r\n  \"serviciosIds\": [\r\n    \"servicio-demo\"\r\n  ]\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -554,6 +554,39 @@
             "value": "{{CookieSesion}}"
           }
         ],
+        "url": {
+          "raw": "{{url}}/api/presupuestos/cmuvtw0z30001id0459zao9na",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "presupuestos",
+            "cmuvtw0z30001id0459zao9na"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET Presupuestos/[:id]",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "{{CookieSesion}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"serviciosIds\": [\r\n        \"servicio-demo\",\r\n        \"cmuvpv68t0002jt04wzllgz3a\"\r\n    ]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
         "url": {
           "raw": "{{url}}/api/presupuestos/cmuvtw0z30001id0459zao9na",
           "host": [
@@ -677,7 +710,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n  \"notasFinales\": \"Trabajo realizado con éxito. Se realizaron pruebas de frenado en pista.\"\r\n}",
+          "raw": "",
           "options": {
             "raw": {
               "language": "json"
