@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   obtenerUsuario,
   signIn,
@@ -60,6 +61,14 @@ export default async function Home() {
             <p className="mt-1">
               Rol: <strong>{NOMBRE_ROL[usuario.rol]}</strong>
             </p>
+            <Link
+              href="/vehiculos"
+              className="mt-4 inline-block underline focus-visible:outline-2 focus-visible:outline-offset-4"
+            >
+              {usuario.rol === "CLIENTE"
+                ? "Ver mis vehículos"
+                : "Ver vehículos del taller"}
+            </Link>
             <form action={cerrarSesion} className="mt-4">
               <button type="submit" className={ESTILO_BOTON}>
                 Cerrar sesión
@@ -86,12 +95,6 @@ export default async function Home() {
           ))}
         </ol>
       </section>
-
-      <p className="mt-8 text-sm">
-        Las pantallas del sistema están en desarrollo. Hoy las operaciones se
-        realizan a través de la API.
-      </p>
-
       <footer className="mt-8 border-t border-foreground/20 pt-4 text-sm">
         Proyecto de Metodologías de Desarrollo Web 2026 — UAI. Equipo: Luciano
         Marello, Pedro Cabral y Mauro Gobernatori.
