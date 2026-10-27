@@ -315,6 +315,37 @@ Presupuesto N ───── N Servicio
 
 Las historias asumen que el usuario se encuentra autenticado con el rol correspondiente.
 
+### Mapa de pantallas del flujo principal — clase 10
+
+Las direcciones existentes se conservan. Las propuestas para pasos pendientes son una reserva de navegación, no pantallas implementadas ni enlaces habilitados. Las operaciones de escritura siguen disponibles en la API; los formularios corresponden a la siguiente entrega.
+
+| Paso del flujo | Pantalla | Dirección | Quién puede abrirla | Estado |
+| --- | --- | --- | --- | --- |
+| Conocer el sistema | Portada | `/` | Cualquier visitante | Implementada; con sesión redirige a vehículos |
+| Iniciar sesión | Ingreso con Google | `/ingresar` | Sin sesión | Implementada; Google completa el flujo OAuth |
+| Registrar vehículo (HU01) | Alta de vehículo | `/vehiculos/nuevo` | Cliente | Pendiente, disponible por API |
+| Consultar vehículos (HU02) | Listado | `/vehiculos` | Cliente: propios; Mecánico y Administrador: taller | Implementada |
+| Consultar vehículo | Detalle | `/vehiculos/[id]` | Cliente propietario; Mecánico y Administrador | Implementada |
+| Solicitar turno (HU03) | Solicitud | `/turnos/nuevo` | Cliente | Pendiente, disponible por API |
+| Consultar turnos | Listado de turnos | `/turnos` | Cliente: propios; Mecánico y Administrador: taller | Pendiente |
+| Confirmar turno (HU04) | Detalle del turno | `/turnos/[id]` | Mecánico y Administrador | Pantalla y acción pendientes; API implementada |
+| Cancelar turno (HU05) | Detalle del turno | `/turnos/[id]` | Cliente propietario | Pantalla y acción pendientes; API implementada |
+| Registrar ingreso (HU06) | Detalle del turno | `/turnos/[id]` | Mecánico y Administrador | Pantalla y acción pendientes; API implementada |
+| Generar orden al ingresar | Sin pantalla independiente | — | Mecánico y Administrador mediante el ingreso | La creación es consecuencia del ingreso, no otra pantalla |
+| Administrar catálogo (HU07) | Catálogo de servicios | `/servicios` | Mecánico y Administrador | Pendiente, CRUD por API |
+| Crear presupuesto (HU08) | Detalle de orden | `/ordenes-trabajo/[id]` | Mecánico y Administrador | Pantalla y acción pendientes; API implementada |
+| Consultar presupuesto (HU09) | Detalle de presupuesto | `/presupuestos/[id]` | Cliente propietario; Mecánico y Administrador | Pendiente |
+| Aprobar o rechazar (HU10/HU11) | Detalle de presupuesto | `/presupuestos/[id]` | Cliente propietario | Pantalla y acciones pendientes; API implementada |
+| Editar presupuesto y volver a pendiente | Detalle de presupuesto | `/presupuestos/[id]` | Mecánico y Administrador | Pantalla y acción pendientes; API implementada |
+| Consultar reparación (HU13) | Detalle de orden | `/ordenes-trabajo/[id]` | Cliente propietario; Mecánico y Administrador | Pendiente |
+| Finalizar reparación (HU12) | Detalle de orden | `/ordenes-trabajo/[id]` | Mecánico y Administrador | Pantalla y acción pendientes; API implementada |
+| Notificar al cliente | Sin pantalla independiente | — | Envío del servidor; resultado en la operación | Integración implementada; presentación operativa pendiente |
+| Revisar componentes y sus estados | Galería visual | `/sistema` | Cualquier usuario autenticado | Implementada con ejemplos fijos, sin escribir en la base |
+| Asignar rol | Administración de usuarios | `/usuarios` | Administrador | Pantalla pendiente; API implementada |
+| Cerrar sesión | Barra de navegación | Sin página nueva | Cualquier usuario autenticado | Implementada, regresa a `/ingresar` |
+
+El layout privado mantiene la navegación y redirige al ingreso cuando falta la sesión. Cada pantalla conserva además su comprobación de sesión y sus consultas con usuario y rol: el layout no reemplaza la autorización del modelo. Los casos "no existe" y "no pertenece al cliente" comparten la misma pantalla de no encontrado.
+
 ### HU01 — Registrar vehículo
 
 **Como** cliente

@@ -24,6 +24,10 @@ vi.mock("next/navigation", () => ({
 
 import Vehiculos from "./(app)/vehiculos/page";
 import DetalleVehiculo from "./(app)/vehiculos/[id]/page";
+import LayoutPrivado from "./(app)/layout";
+import Sistema from "./(app)/sistema/page";
+import Home from "./(public)/page";
+import Ingresar from "./(public)/ingresar/page";
 
 const cliente = {
   id: "cliente-a",
@@ -37,6 +41,33 @@ describe("pantallas de vehículos: sesión y acceso al modelo", () => {
     vi.clearAllMocks();
     mocks.obtenerUsuario.mockResolvedValue(cliente);
     mocks.listarVehiculos.mockResolvedValue([]);
+  });
+
+  it("el layout privado redirige a la pantalla propia de ingreso", async () => {
+    mocks.obtenerUsuario.mockResolvedValue(null);
+    await expect(LayoutPrivado({ children: null })).rejects.toThrow(
+      "REDIRECT:/ingresar",
+    );
+  });
+
+  it("la galería también verifica la sesión sin depender del layout", async () => {
+    mocks.obtenerUsuario.mockResolvedValue(null);
+    await expect(Sistema()).rejects.toThrow("REDIRECT:/ingresar");
+    expect(mocks.listarVehiculos).not.toHaveBeenCalled();
+  });
+
+  it("la portada lleva al listado a quien ya tiene sesión", async () => {
+    await expect(Home()).rejects.toThrow("REDIRECT:/vehiculos");
+  });
+
+  it("la pantalla de ingreso no vuelve a pedir Google a un usuario autenticado", async () => {
+    await expect(Ingresar()).rejects.toThrow("REDIRECT:/vehiculos");
+  });
+
+  it("la galería autenticada usa ejemplos, sin consultar vehículos", async () => {
+    expect(await Sistema()).toBeTruthy();
+    expect(mocks.listarVehiculos).not.toHaveBeenCalled();
+    expect(mocks.buscarVehiculo).not.toHaveBeenCalled();
   });
 
   it("sin sesión redirige el listado antes de consultar vehículos", async () => {
