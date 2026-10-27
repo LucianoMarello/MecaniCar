@@ -1,33 +1,34 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { BuscadorVehiculos } from "@/components/BuscadorVehiculos";
+import { EncabezadoPagina } from "@/components/EncabezadoPagina";
+import { SinDatos } from "@/components/SinDatos";
+import { Button } from "@/components/ui/button";
 import { obtenerUsuario } from "@/lib/auth";
 import { listarVehiculos } from "@/lib/db/vehiculos";
-import { paginacionSchema } from "@/lib/schemas/http";
+import { MAX_PAGINAS, paginacionSchema } from "@/lib/schemas/http";
 
 type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-// Server Component: lee la sesión y el modelo directamente, sin llamar a la API.
+// La pantalla conserva su comprobación de sesión aunque también exista un layout.
 export default async function Vehiculos({ searchParams }: Props) {
   const usuario = await obtenerUsuario();
-  if (!usuario) redirect("/api/auth/signin?callbackUrl=%2Fvehiculos");
-
+  if (!usuario) redirect("/ingresar");
   const parametros = await searchParams;
   const validacion = paginacionSchema.safeParse({
     pagina: parametros.pagina,
     limite: 20,
   });
   if (!validacion.success) notFound();
-
   const { pagina, limite } = validacion.data;
   const vehiculos = await listarVehiculos(
     usuario.id,
     usuario.rol,
     validacion.data,
   );
-  // Solo estos campos de presentación cruzan al componente de cliente.
+  // El buscador recibe solo datos de presentación, nunca la sesión.
   const filas = vehiculos.map(({ id, patente, marca, modelo, anio }) => ({
     id,
     patente,
@@ -37,52 +38,59 @@ export default async function Vehiculos({ searchParams }: Props) {
   }));
 
   return (
-    <main className="mx-auto max-w-4xl p-6 sm:p-8">
-      <Link
-        href="/"
-        className="underline focus-visible:outline-2 focus-visible:outline-offset-4"
-      >
-        Volver al inicio
-      </Link>
-      <h1 className="mt-6 text-3xl font-bold">
-        {usuario.rol === "CLIENTE" ? "Mis vehículos" : "Vehículos del taller"}
-      </h1>
-      <p className="mt-2">
-        {usuario.rol === "CLIENTE"
-          ? "Consultá los vehículos registrados a tu nombre."
-          : "Consultá los vehículos registrados en el sistema."}
-      </p>
-
+    <main id="contenido" className="min-w-0">
+      <EncabezadoPagina
+        titulo={
+          usuario.rol === "CLIENTE" ? "Mis vehículos" : "Vehículos del taller"
+        }
+        descripcion={
+          usuario.rol === "CLIENTE"
+            ? "Consultá los vehículos registrados a tu nombre. Elegí una patente para ver sus datos."
+            : "Consultá los vehículos del taller. Elegí una patente para ver sus datos."
+        }
+      />
       {vehiculos.length === 0 ? (
-        <p className="mt-6" role="status">
-          {pagina === 1
-            ? "Todavía no hay vehículos para mostrar."
-            : "No hay vehículos en esta página. Volvé a la página anterior."}
-        </p>
+        <SinDatos
+          titulo={
+            pagina === 1
+              ? "Todavía no hay vehículos"
+              : "Llegaste al final del listado"
+          }
+          descripcion={
+            pagina === 1
+              ? "Cuando haya vehículos registrados, aparecerán en esta sección. Podés volver a consultarla más adelante."
+              : "No hay vehículos en esta página. Usá Página anterior para volver a los resultados."
+          }
+        />
       ) : (
-        <BuscadorVehiculos vehiculos={filas} />
+        <BuscadorVehiculos key={pagina} vehiculos={filas} />
       )}
-
       <nav
         aria-label="Páginas de vehículos"
-        className="mt-8 flex flex-wrap items-center gap-5"
+        className="mt-8 flex flex-wrap items-center gap-3"
       >
         {pagina > 1 && (
-          <Link
-            href={`/vehiculos?pagina=${pagina - 1}`}
-            className="underline focus-visible:outline-2 focus-visible:outline-offset-4"
+          <Button
+            asChild
+            variant="outline"
+            className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
           >
-            Página anterior
-          </Link>
+            <Link href={`/vehiculos?pagina=${pagina - 1}`}>
+              Página anterior
+            </Link>
+          </Button>
         )}
-        <span>Página {pagina}</span>
-        {vehiculos.length === limite && pagina < 100000 && (
-          <Link
-            href={`/vehiculos?pagina=${pagina + 1}`}
-            className="underline focus-visible:outline-2 focus-visible:outline-offset-4"
+        <span aria-current="page">Página {pagina}</span>
+        {vehiculos.length === limite && pagina < MAX_PAGINAS && (
+          <Button
+            asChild
+            variant="outline"
+            className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
           >
-            Página siguiente
-          </Link>
+            <Link href={`/vehiculos?pagina=${pagina + 1}`}>
+              Página siguiente
+            </Link>
+          </Button>
         )}
       </nav>
     </main>

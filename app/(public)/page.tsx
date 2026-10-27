@@ -1,104 +1,46 @@
 import Link from "next/link";
-import {
-  obtenerUsuario,
-  signIn,
-  signOut,
-  type UsuarioSesion,
-} from "@/lib/auth";
-
-// La página cambia según haya o no sesión, así que se arma en cada request.
-// Next ya lo deduce porque leer la sesión usa las cookies; acá queda explícito.
-export const dynamic = "force-dynamic";
-
-const NOMBRE_ROL: Record<UsuarioSesion["rol"], string> = {
-  CLIENTE: "Cliente",
-  MECANICO: "Mecánico",
-  ADMIN: "Administrador",
-};
-
-const PASOS = [
-  "El cliente registra su vehículo y solicita un turno.",
-  "El taller confirma el turno y registra el ingreso del vehículo.",
-  "El mecánico arma un presupuesto con los servicios del catálogo.",
-  "El cliente lo aprueba o lo rechaza.",
-  "El taller realiza el trabajo y finaliza la orden.",
-];
-
-const ESTILO_BOTON =
-  "cursor-pointer rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background focus-visible:outline-2 focus-visible:outline-offset-2";
-
-// Server Actions: corren en el servidor al enviar cada formulario.
-async function iniciarSesion() {
-  "use server";
-  await signIn("google", { redirectTo: "/" });
-}
-
-async function cerrarSesion() {
-  "use server";
-  await signOut({ redirectTo: "/" });
-}
+import { redirect } from "next/navigation";
+import { obtenerUsuario } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function Home() {
-  // Si la base no responde, Auth.js registra el error y devuelve "sin sesión":
-  // la portada se muestra igual, con el botón de ingreso.
-  const usuario = await obtenerUsuario();
-
+  if (await obtenerUsuario()) redirect("/vehiculos");
   return (
-    <main className="mx-auto max-w-2xl p-8">
-      <h1 className="text-3xl font-bold">MecaniCar</h1>
-      <p className="mt-2">
-        Gestión de un taller mecánico: turnos, órdenes de trabajo y
-        presupuestos, en un solo lugar para el cliente y para el taller.
-      </p>
-
-      <section className="mt-8 rounded-md border border-foreground/20 p-4">
-        {usuario ? (
-          <>
-            <p>
-              Sesión iniciada como <strong>{usuario.nombre}</strong> (
-              {usuario.email}).
-            </p>
-            <p className="mt-1">
-              Rol: <strong>{NOMBRE_ROL[usuario.rol]}</strong>
-            </p>
-            <Link
-              href="/vehiculos"
-              className="mt-4 inline-block underline focus-visible:outline-2 focus-visible:outline-offset-4"
-            >
-              {usuario.rol === "CLIENTE"
-                ? "Ver mis vehículos"
-                : "Ver vehículos del taller"}
-            </Link>
-            <form action={cerrarSesion} className="mt-4">
-              <button type="submit" className={ESTILO_BOTON}>
-                Cerrar sesión
-              </button>
-            </form>
-          </>
-        ) : (
-          <>
-            <p>Para usar el sistema, ingresá con tu cuenta de Google.</p>
-            <form action={iniciarSesion} className="mt-4">
-              <button type="submit" className={ESTILO_BOTON}>
-                Iniciar sesión con Google
-              </button>
-            </form>
-          </>
-        )}
-      </section>
-
-      <section className="mt-8">
-        <h2 className="text-xl font-semibold">Cómo funciona</h2>
-        <ol className="mt-2 list-decimal space-y-1 pl-6">
-          {PASOS.map((paso) => (
-            <li key={paso}>{paso}</li>
-          ))}
-        </ol>
-      </section>
-      <footer className="mt-8 border-t border-foreground/20 pt-4 text-sm">
-        Proyecto de Metodologías de Desarrollo Web 2026 — UAI. Equipo: Luciano
-        Marello, Pedro Cabral y Mauro Gobernatori.
-      </footer>
+    <main id="contenido" className="mx-auto max-w-2xl space-y-8">
+      <div className="space-y-4">
+        <h1 className="text-3xl font-bold tracking-tight">
+          Tu vehículo, más cerca del taller
+        </h1>
+        <p className="text-muted-foreground">
+          Consultá tus vehículos y centralizá la información de la atención del
+          taller en MecaniCar.
+        </p>
+        <Button
+          asChild
+          className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
+        >
+          <Link href="/ingresar">Ingresar a MecaniCar</Link>
+        </Button>
+      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <h2>Cómo funciona la atención</h2>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ol className="list-decimal space-y-3 pl-5">
+            <li>El cliente registra su vehículo y solicita un turno.</li>
+            <li>El taller confirma el turno y recibe el vehículo.</li>
+            <li>
+              El mecánico prepara un presupuesto y el cliente decide si lo
+              aprueba.
+            </li>
+            <li>El taller realiza la reparación y avisa cuando termina.</li>
+          </ol>
+        </CardContent>
+      </Card>
     </main>
   );
 }
