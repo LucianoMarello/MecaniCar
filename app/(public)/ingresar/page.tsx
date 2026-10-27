@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { obtenerUsuario, signIn } from "@/lib/auth";
+import { destinoIngreso } from "@/lib/schemas/destinoIngreso";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,13 +10,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-async function iniciarSesion() {
+async function iniciarSesion(destino: string) {
   "use server";
-  await signIn("google", { redirectTo: "/vehiculos" });
+  await signIn("google", { redirectTo: destinoIngreso(destino) });
 }
 
-export default async function Ingresar() {
-  if (await obtenerUsuario()) redirect("/vehiculos");
+export default async function Ingresar({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const parametros = await searchParams;
+  const destino = destinoIngreso(parametros?.callbackUrl);
+  if (await obtenerUsuario()) redirect(destino);
   return (
     <main id="contenido" className="mx-auto max-w-md">
       <Card>
@@ -29,7 +36,7 @@ export default async function Ingresar() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
-          <form action={iniciarSesion}>
+          <form action={iniciarSesion.bind(null, destino)}>
             <Button
               type="submit"
               className="min-h-11 w-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"

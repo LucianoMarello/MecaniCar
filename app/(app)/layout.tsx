@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { redirect } from "next/navigation";
 import { obtenerUsuario } from "@/lib/auth";
 import { Navegacion } from "@/components/Navegacion";
 
@@ -9,7 +8,8 @@ export default async function LayoutPrivado({
   children: ReactNode;
 }) {
   const usuario = await obtenerUsuario();
-  if (!usuario) redirect("/ingresar");
+  // Cada página redirige conservando su destino. El layout no debe reemplazarlo.
+  if (!usuario) return children;
   // El layout no reemplaza las comprobaciones de sesión y acceso de páginas/modelo.
   return (
     <div className="min-h-screen bg-background text-foreground">

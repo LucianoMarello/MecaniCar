@@ -10,8 +10,12 @@ type Props = { params: Promise<{ id: string }> };
 
 export default async function DetalleVehiculo({ params }: Props) {
   const usuario = await obtenerUsuario();
-  if (!usuario) redirect("/ingresar");
-  const validacion = idSchema.safeParse((await params).id);
+  const parametros = await params;
+  if (!usuario) {
+    const destino = `/vehiculos/${encodeURIComponent(parametros.id)}`;
+    redirect(`/ingresar?callbackUrl=${encodeURIComponent(destino)}`);
+  }
+  const validacion = idSchema.safeParse(parametros.id);
   if (!validacion.success) notFound();
   const resultado = await buscarVehiculo(
     validacion.data,

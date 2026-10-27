@@ -43,11 +43,9 @@ describe("pantallas de vehículos: sesión y acceso al modelo", () => {
     mocks.listarVehiculos.mockResolvedValue([]);
   });
 
-  it("el layout privado redirige a la pantalla propia de ingreso", async () => {
+  it("el layout deja a la página decidir el destino de ingreso sin mostrar navegación privada", async () => {
     mocks.obtenerUsuario.mockResolvedValue(null);
-    await expect(LayoutPrivado({ children: null })).rejects.toThrow(
-      "REDIRECT:/ingresar",
-    );
+    expect(await LayoutPrivado({ children: null })).toBeNull();
   });
 
   it("la galería también verifica la sesión sin depender del layout", async () => {
@@ -61,7 +59,15 @@ describe("pantallas de vehículos: sesión y acceso al modelo", () => {
   });
 
   it("la pantalla de ingreso no vuelve a pedir Google a un usuario autenticado", async () => {
-    await expect(Ingresar()).rejects.toThrow("REDIRECT:/vehiculos");
+    await expect(Ingresar({})).rejects.toThrow("REDIRECT:/vehiculos");
+  });
+
+  it("el ingreso conserva el detalle para una sesión ya iniciada", async () => {
+    await expect(
+      Ingresar({
+        searchParams: Promise.resolve({ callbackUrl: "/vehiculos/vehiculo-a" }),
+      }),
+    ).rejects.toThrow("REDIRECT:/vehiculos/vehiculo-a");
   });
 
   it("la galería autenticada usa ejemplos, sin consultar vehículos", async () => {
@@ -82,7 +88,9 @@ describe("pantallas de vehículos: sesión y acceso al modelo", () => {
     mocks.obtenerUsuario.mockResolvedValue(null);
     await expect(
       DetalleVehiculo({ params: Promise.resolve({ id: "vehiculo-a" }) }),
-    ).rejects.toThrow("REDIRECT:");
+    ).rejects.toThrow(
+      "REDIRECT:/ingresar?callbackUrl=%2Fvehiculos%2Fvehiculo-a",
+    );
     expect(mocks.buscarVehiculo).not.toHaveBeenCalled();
   });
 

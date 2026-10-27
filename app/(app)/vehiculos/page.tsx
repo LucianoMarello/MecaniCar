@@ -6,7 +6,7 @@ import { SinDatos } from "@/components/SinDatos";
 import { Button } from "@/components/ui/button";
 import { obtenerUsuario } from "@/lib/auth";
 import { listarVehiculos } from "@/lib/db/vehiculos";
-import { paginacionSchema } from "@/lib/schemas/http";
+import { MAX_PAGINAS, paginacionSchema } from "@/lib/schemas/http";
 
 type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -81,7 +81,7 @@ export default async function Vehiculos({ searchParams }: Props) {
           </Button>
         )}
         <span aria-current="page">Página {pagina}</span>
-        {vehiculos.length === limite && pagina < 100000 && (
+        {vehiculos.length === limite && pagina < MAX_PAGINAS && (
           <Button
             asChild
             variant="outline"
