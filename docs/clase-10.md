@@ -10,7 +10,7 @@ La portada mezclaba ingreso, sesión y presentación del proyecto. El listado y 
 - `docs/spec.md`, sección 5: mapa de pantallas, roles y pasos del flujo, distinguiendo lo implementado, lo pendiente y los eventos sin pantalla independiente.
 - `/`: portada pública; quien ya tiene sesión pasa a `/vehiculos`.
 - `/ingresar`: ingreso con Google. El callback OAuth sigue siendo el de Auth.js; no cambian las credenciales ni los permisos.
-- `app/(app)/layout.tsx`: barra con nombre del sistema, usuario, rol, enlaces y cierre de sesión. El layout redirige al ingreso, pero no sustituye los controles de cada página y de `lib/db/`.
+- `app/(app)/layout.tsx`: barra con nombre del sistema, usuario, rol, enlaces y cierre de sesión. Sin sesión, el layout devuelve `children` sin mostrar la barra privada; cada página redirige al ingreso y conserva el destino cuando corresponde. Los controles de cada página y de `lib/db/` mantienen la autorización.
 - `/vehiculos` y `/vehiculos/[id]`: reutilizan las consultas autorizadas y las rutas de clase 8. El buscador filtra los 20 registros de la página visible sin requests por tecla.
 - Los bordes y radios de las pantallas se delegan a los componentes compartidos de `components/ui/`. No se agregan hojas de estilo ni valores inline.
 - `loading.tsx` del listado y del detalle usa esqueletos distintos, con texto para lectores de pantalla y respeto de movimiento reducido.

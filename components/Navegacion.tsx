@@ -35,7 +35,6 @@ export function Navegacion({ usuario }: { usuario: UsuarioSesion }) {
               <Button
                 type="submit"
                 variant="outline"
-                className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
               >
                 Cerrar sesión
               </Button>
@@ -46,7 +45,6 @@ export function Navegacion({ usuario }: { usuario: UsuarioSesion }) {
           <Button
             asChild
             variant="secondary"
-            className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
           >
             <Link href="/vehiculos">
               {usuario.rol === "CLIENTE"
@@ -57,7 +55,6 @@ export function Navegacion({ usuario }: { usuario: UsuarioSesion }) {
           <Button
             asChild
             variant="ghost"
-            className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
           >
             <Link href="/sistema">Guía visual</Link>
           </Button>

@@ -20,7 +20,7 @@ export function MensajeError({ reintentar }: { reintentar?: () => void }) {
             type="button"
             variant="outline"
             onClick={reintentar}
-            className="mt-3 min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
+            className="mt-3"
           >
             Reintentar
           </Button>

@@ -39,7 +39,7 @@ export default async function Ingresar({
           <form action={iniciarSesion.bind(null, destino)}>
             <Button
               type="submit"
-              className="min-h-11 w-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
+              className="w-full"
             >
               Continuar con Google
             </Button>

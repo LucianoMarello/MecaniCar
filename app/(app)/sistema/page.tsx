@@ -59,7 +59,6 @@ export default async function Sistema() {
                 key={variant}
                 type="button"
                 variant={variant}
-                className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
               >
                 {variant}
               </Button>
@@ -72,7 +71,6 @@ export default async function Sistema() {
             <Button
               asChild
               variant="outline"
-              className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
             >
               <Link href="/vehiculos">Enlace a vehículos</Link>
             </Button>
@@ -136,7 +134,6 @@ export default async function Sistema() {
             <Input
               id="ejemplo-normal"
               placeholder="Patente, marca o modelo"
-              className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
             />
           </div>
           <div className="space-y-2">
@@ -161,7 +158,6 @@ export default async function Sistema() {
               aria-invalid="true"
               aria-describedby="error-ejemplo"
               defaultValue="Ejemplo inválido"
-              className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
             />
             <p id="error-ejemplo" className="text-sm text-destructive">
               Revisá el dato ingresado. Este mensaje es una muestra visual.
@@ -174,7 +170,6 @@ export default async function Sistema() {
             <Input
               id="ejemplo-largo"
               defaultValue="Vehículo de ejemplo con una descripción extensa para comprobar el ancho del campo en dispositivos pequeños"
-              className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
             />
           </div>
         </CardContent>

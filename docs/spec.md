@@ -344,7 +344,7 @@ Las direcciones existentes se conservan. Las propuestas para pasos pendientes so
 | Asignar rol | Administración de usuarios | `/usuarios` | Administrador | Pantalla pendiente; API implementada |
 | Cerrar sesión | Barra de navegación | Sin página nueva | Cualquier usuario autenticado | Implementada, regresa a `/ingresar` |
 
-El layout privado mantiene la navegación y redirige al ingreso cuando falta la sesión. Cada pantalla conserva además su comprobación de sesión y sus consultas con usuario y rol: el layout no reemplaza la autorización del modelo. Los casos "no existe" y "no pertenece al cliente" comparten la misma pantalla de no encontrado.
+El layout privado muestra la navegación cuando hay sesión. Sin sesión devuelve `children` sin mostrar la barra privada, y cada pantalla realiza su propia redirección al ingreso para conservar el destino cuando corresponde. Cada pantalla mantiene su comprobación de sesión y sus consultas con usuario y rol: el layout no reemplaza la autorización del modelo. Los casos "no existe" y "no pertenece al cliente" comparten la misma pantalla de no encontrado.
 
 ### HU01 — Registrar vehículo
 

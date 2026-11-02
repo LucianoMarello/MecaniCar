@@ -12,7 +12,6 @@ export default function ErrorDePagina({ reset }: { reset: () => void }) {
       <Button
         asChild
         variant="outline"
-        className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
       >
         <Link href="/">Volver al inicio</Link>
       </Button>

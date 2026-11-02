@@ -73,7 +73,6 @@ export default async function Vehiculos({ searchParams }: Props) {
           <Button
             asChild
             variant="outline"
-            className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
           >
             <Link href={`/vehiculos?pagina=${pagina - 1}`}>
               Página anterior
@@ -85,7 +84,6 @@ export default async function Vehiculos({ searchParams }: Props) {
           <Button
             asChild
             variant="outline"
-            className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
           >
             <Link href={`/vehiculos?pagina=${pagina + 1}`}>
               Página siguiente

@@ -41,7 +41,6 @@ export function BuscadorVehiculos({
           value={texto}
           onChange={(evento) => setTexto(evento.target.value)}
           aria-describedby="alcance-buscador"
-          className="min-h-11 w-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
         />
         <p id="alcance-buscador" className="text-sm text-muted-foreground">
           La búsqueda filtra solamente los vehículos de esta página.
@@ -59,7 +58,6 @@ export function BuscadorVehiculos({
             type="button"
             variant="outline"
             onClick={() => setTexto("")}
-            className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
           >
             Limpiar búsqueda
           </Button>
@@ -84,7 +82,6 @@ export function BuscadorVehiculos({
                   <Button
                     asChild
                     variant="outline"
-                    className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
                   >
                     <Link
                       href={`/vehiculos/${vehiculo.id}`}

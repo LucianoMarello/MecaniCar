@@ -18,7 +18,6 @@ export default async function Home() {
         </p>
         <Button
           asChild
-          className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
         >
           <Link href="/ingresar">Ingresar a MecaniCar</Link>
         </Button>
