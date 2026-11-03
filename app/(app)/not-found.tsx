@@ -1,0 +1,22 @@
+import Link from "next/link";
+import { SinDatos } from "@/components/SinDatos";
+import { Button } from "@/components/ui/button";
+
+export default function PaginaNoEncontrada() {
+  return (
+    <main id="contenido">
+      <h1 className="mb-6 text-3xl font-bold">No encontramos esta página</h1>
+      <SinDatos
+        titulo="La información solicitada no está disponible"
+        descripcion="Revisá la dirección o volvé al listado de vehículos."
+      >
+        <Button
+          asChild
+          variant="outline"
+        >
+          <Link href="/vehiculos">Volver a vehículos</Link>
+        </Button>
+      </SinDatos>
+    </main>
+  );
+}

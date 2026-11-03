@@ -1,70 +1,78 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { obtenerUsuario } from "@/lib/auth";
 import { buscarVehiculo } from "@/lib/db/vehiculos";
 import { idSchema } from "@/lib/schemas/http";
+import { formatearFecha } from "@/lib/presentacion";
+import { EncabezadoPagina } from "@/components/EncabezadoPagina";
+import { Card, CardContent } from "@/components/ui/card";
 
 type Props = { params: Promise<{ id: string }> };
 
-// Reutiliza la consulta autorizada del endpoint GET /api/vehiculos/:id.
 export default async function DetalleVehiculo({ params }: Props) {
   const usuario = await obtenerUsuario();
-  if (!usuario) redirect("/api/auth/signin?callbackUrl=%2Fvehiculos");
-
-  const validacion = idSchema.safeParse((await params).id);
+  const parametros = await params;
+  if (!usuario) {
+    const destino = `/vehiculos/${encodeURIComponent(parametros.id)}`;
+    redirect(`/ingresar?callbackUrl=${encodeURIComponent(destino)}`);
+  }
+  const validacion = idSchema.safeParse(parametros.id);
   if (!validacion.success) notFound();
-
   const resultado = await buscarVehiculo(
     validacion.data,
     usuario.id,
     usuario.rol,
   );
   if (resultado.resultado !== "OK") notFound();
-
   const { vehiculo } = resultado;
-  // Se formatea en el servidor con zona explícita para evitar diferencias UTC/AR.
-  const fecha = new Intl.DateTimeFormat("es-AR", {
-    dateStyle: "long",
-    timeStyle: "short",
-    timeZone: "America/Argentina/Buenos_Aires",
-  });
 
   return (
-    <main className="mx-auto max-w-2xl p-6 sm:p-8">
-      <Link
-        href="/vehiculos"
-        className="underline focus-visible:outline-2 focus-visible:outline-offset-4"
-      >
-        Volver a vehículos
-      </Link>
-      <h1 className="mt-6 text-3xl font-bold">Vehículo {vehiculo.patente}</h1>
-      <dl className="mt-6 grid grid-cols-1 gap-4 rounded-md border border-foreground/20 p-5 sm:grid-cols-2">
-        <div>
-          <dt className="font-semibold">Patente</dt>
-          <dd>{vehiculo.patente}</dd>
-        </div>
-        <div>
-          <dt className="font-semibold">Marca</dt>
-          <dd>{vehiculo.marca}</dd>
-        </div>
-        <div>
-          <dt className="font-semibold">Modelo</dt>
-          <dd>{vehiculo.modelo}</dd>
-        </div>
-        <div>
-          <dt className="font-semibold">Año</dt>
-          <dd>{vehiculo.anio}</dd>
-        </div>
-        <div>
-          <dt className="font-semibold">Fecha de registro</dt>
-          <dd>{fecha.format(vehiculo.createdAt)}</dd>
-        </div>
-        <div>
-          <dt className="font-semibold">Última actualización</dt>
-          <dd>{fecha.format(vehiculo.updatedAt)}</dd>
-        </div>
-      </dl>
-      <p className="mt-4 text-sm">
+    <main id="contenido" className="min-w-0">
+      <EncabezadoPagina
+        titulo={`Vehículo ${vehiculo.patente}`}
+        descripcion="Datos de registro del vehículo."
+        volver={{ href: "/vehiculos", texto: "Vehículos" }}
+      />
+      <Card>
+        <CardContent>
+          <dl className="grid min-w-0 gap-6 sm:grid-cols-2">
+            <div>
+              <dt className="text-sm text-muted-foreground">Patente</dt>
+              <dd className="break-words font-medium [overflow-wrap:anywhere]">
+                {vehiculo.patente}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm text-muted-foreground">Marca</dt>
+              <dd className="break-words font-medium [overflow-wrap:anywhere]">
+                {vehiculo.marca}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm text-muted-foreground">Modelo</dt>
+              <dd className="break-words font-medium [overflow-wrap:anywhere]">
+                {vehiculo.modelo}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm text-muted-foreground">Año</dt>
+              <dd className="font-medium">{vehiculo.anio}</dd>
+            </div>
+            <div>
+              <dt className="text-sm text-muted-foreground">
+                Fecha de registro
+              </dt>
+              <dd>{formatearFecha(vehiculo.createdAt)}</dd>
+            </div>
+            <div>
+              <dt className="text-sm text-muted-foreground">
+                Última actualización
+              </dt>
+              <dd>{formatearFecha(vehiculo.updatedAt)}</dd>
+            </div>
+          </dl>
+        </CardContent>
+      </Card>
+      <p className="mt-4 text-sm text-muted-foreground">
         Horarios expresados en la zona de Buenos Aires.
       </p>
     </main>
