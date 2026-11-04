@@ -1,11 +1,16 @@
 import { z } from "zod";
 
 export const vehiculoSchema = z.object({
+  // "ab 123 cd" y "AB123CD" son la misma patente (RN02): se guarda normalizada.
   patente: z
     .string()
-    .trim()
-    .min(6, "La patente debe tener al menos 6 caracteres")
-    .max(10, "La patente no puede superar los 10 caracteres"),
+    .transform((valor) => valor.replace(/\s+/g, "").toUpperCase())
+    .pipe(
+      z
+        .string()
+        .min(6, "La patente debe tener al menos 6 caracteres")
+        .max(10, "La patente no puede superar los 10 caracteres"),
+    ),
 
   marca: z
     .string()
@@ -20,7 +25,7 @@ export const vehiculoSchema = z.object({
     .max(50, "El modelo no puede superar los 50 caracteres"),
 
   anio: z
-    .number()
+    .number({ invalid_type_error: "El año debe ser un número" })
     .int("El año debe ser un número entero")
     .min(1900, "El año no puede ser anterior a 1900")
     .refine(
