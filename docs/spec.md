@@ -317,17 +317,17 @@ Las historias asumen que el usuario se encuentra autenticado con el rol correspo
 
 ### Mapa de pantallas del flujo principal — clase 10
 
-Las direcciones existentes se conservan. Las propuestas para pasos pendientes son una reserva de navegación, no pantallas implementadas ni enlaces habilitados. Las operaciones de escritura siguen disponibles en la API; los formularios corresponden a la siguiente entrega.
+Las direcciones existentes se conservan. Las propuestas para pasos pendientes son una reserva de navegación, no pantallas implementadas ni enlaces habilitados. Las operaciones de escritura siguen disponibles en la API; los formularios se agregan desde la clase 12 y cada fila indica su estado.
 
 | Paso del flujo | Pantalla | Dirección | Quién puede abrirla | Estado |
 | --- | --- | --- | --- | --- |
 | Conocer el sistema | Portada | `/` | Cualquier visitante | Implementada; con sesión redirige a vehículos |
 | Iniciar sesión | Ingreso con Google | `/ingresar` | Sin sesión | Implementada; Google completa el flujo OAuth |
-| Registrar vehículo (HU01) | Alta de vehículo | `/vehiculos/nuevo` | Cliente | Pendiente, disponible por API |
-| Consultar vehículos (HU02) | Listado | `/vehiculos` | Cliente: propios; Mecánico y Administrador: taller | Implementada |
+| Registrar vehículo (HU01) | Alta de vehículo | `/vehiculos/nuevo` | Cliente | Implementada (clase 12); al guardar lleva al detalle |
+| Consultar vehículos | Listado | `/vehiculos` | Cliente: propios; Mecánico y Administrador: taller | Implementada |
 | Consultar vehículo | Detalle | `/vehiculos/[id]` | Cliente propietario; Mecánico y Administrador | Implementada |
-| Solicitar turno (HU03) | Solicitud | `/turnos/nuevo` | Cliente | Pendiente, disponible por API |
-| Consultar turnos | Listado de turnos | `/turnos` | Cliente: propios; Mecánico y Administrador: taller | Pendiente |
+| Solicitar turno (HU02) | Solicitud | `/turnos/nuevo` | Cliente | Pendiente, disponible por API |
+| Consultar turnos (HU03) | Listado de turnos | `/turnos` | Cliente: propios; Mecánico y Administrador: taller | Pendiente |
 | Confirmar turno (HU04) | Detalle del turno | `/turnos/[id]` | Mecánico y Administrador | Pantalla y acción pendientes; API implementada |
 | Cancelar turno (HU05) | Detalle del turno | `/turnos/[id]` | Cliente propietario | Pantalla y acción pendientes; API implementada |
 | Registrar ingreso (HU06) | Detalle del turno | `/turnos/[id]` | Mecánico y Administrador | Pantalla y acción pendientes; API implementada |
@@ -652,7 +652,7 @@ Este flujo constituye el proceso de negocio principal del sistema y no un simple
 
 **RN01.** Todo vehículo debe pertenecer a un cliente.
 
-**RN02.** La patente debe ser única dentro del sistema.
+**RN02.** La patente debe ser única dentro del sistema. Se guarda en mayúsculas y sin espacios, así que "ab 123 cd" y "AB123CD" son la misma patente.
 
 **RN03.** Un cliente solamente puede administrar sus propios vehículos. Tanto el cliente propietario como el mecánico pueden dar de baja un vehículo únicamente cuando no posee turnos ni órdenes de trabajo asociados.
 
