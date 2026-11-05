@@ -326,11 +326,11 @@ Las direcciones existentes se conservan. Las propuestas para pasos pendientes so
 | Registrar vehículo (HU01) | Alta de vehículo | `/vehiculos/nuevo` | Cliente | Implementada (clase 12); al guardar lleva al detalle |
 | Consultar vehículos | Listado | `/vehiculos` | Cliente: propios; Mecánico y Administrador: taller | Implementada |
 | Consultar vehículo | Detalle | `/vehiculos/[id]` | Cliente propietario; Mecánico y Administrador | Implementada |
-| Solicitar turno (HU02) | Solicitud | `/turnos/nuevo` | Cliente | Pendiente, disponible por API |
-| Consultar turnos (HU03) | Listado de turnos | `/turnos` | Cliente: propios; Mecánico y Administrador: taller | Pendiente |
-| Confirmar turno (HU04) | Detalle del turno | `/turnos/[id]` | Mecánico y Administrador | Pantalla y acción pendientes; API implementada |
-| Cancelar turno (HU05) | Detalle del turno | `/turnos/[id]` | Cliente propietario | Pantalla y acción pendientes; API implementada |
-| Registrar ingreso (HU06) | Detalle del turno | `/turnos/[id]` | Mecánico y Administrador | Pantalla y acción pendientes; API implementada |
+| Solicitar turno (HU02) | Solicitud | `/turnos/nuevo` | Cliente | Implementada (clase 12); al guardar lleva al detalle del turno |
+| Consultar turnos (HU03) | Listado y detalle de turnos | `/turnos`, `/turnos/[id]` | Cliente: propios; Mecánico y Administrador: taller | Implementada (clase 12) |
+| Confirmar turno (HU04) | Detalle del turno | `/turnos/[id]` | Mecánico y Administrador | Pantalla implementada; acción pendiente; API implementada |
+| Cancelar turno (HU05) | Detalle del turno | `/turnos/[id]` | Cliente propietario | Pantalla implementada; acción pendiente; API implementada |
+| Registrar ingreso (HU06) | Detalle del turno | `/turnos/[id]` | Mecánico y Administrador | Pantalla implementada; acción pendiente; API implementada |
 | Generar orden al ingresar | Sin pantalla independiente | — | Mecánico y Administrador mediante el ingreso | La creación es consecuencia del ingreso, no otra pantalla |
 | Administrar catálogo (HU07) | Catálogo de servicios | `/servicios` | Mecánico y Administrador | Pendiente, CRUD por API |
 | Crear presupuesto (HU08) | Detalle de orden | `/ordenes-trabajo/[id]` | Mecánico y Administrador | Pantalla y acción pendientes; API implementada |
