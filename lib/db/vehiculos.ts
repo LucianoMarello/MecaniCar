@@ -1,5 +1,5 @@
 import type { Paginacion } from "@/lib/schemas/http";
-import type { Rol } from "@prisma/client";
+import { Prisma, type Rol } from "@prisma/client";
 import { prisma } from "@/lib/db/client";
 import type { ActualizarVehiculoInput, VehiculoInput } from "@/lib/schemas/vehiculo";
 
@@ -21,8 +21,14 @@ export async function buscarVehiculo(id: string, usuarioId: string, rol: Rol) {
 export async function crearVehiculo(datos: VehiculoInput, usuarioId: string) {
   const duplicado = await prisma.vehiculo.findUnique({ where: { patente: datos.patente }, select: { id: true } });
   if (duplicado) return { resultado: "PATENTE_DUPLICADA" } as const;
-  const vehiculo = await prisma.vehiculo.create({ data: { ...datos, anio: datos.anio ?? new Date().getFullYear(), usuarioId }, select: vehiculoSelect });
-  return { resultado: "CREADO", vehiculo } as const;
+  try {
+    const vehiculo = await prisma.vehiculo.create({ data: { ...datos, anio: datos.anio ?? new Date().getFullYear(), usuarioId }, select: vehiculoSelect });
+    return { resultado: "CREADO", vehiculo } as const;
+  } catch (error) {
+    // Dos altas simultáneas pasan la consulta de arriba; el índice único decide.
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") return { resultado: "PATENTE_DUPLICADA" } as const;
+    throw error;
+  }
 }
 
 export async function actualizarVehiculo(id: string, datos: ActualizarVehiculoInput, usuarioId: string, rol: Rol) {

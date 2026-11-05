@@ -23,6 +23,7 @@ export default async function Vehiculos({ searchParams }: Props) {
   });
   if (!validacion.success) notFound();
   const { pagina, limite } = validacion.data;
+  const esCliente = usuario.rol === "CLIENTE";
   const vehiculos = await listarVehiculos(
     usuario.id,
     usuario.rol,
@@ -41,14 +42,19 @@ export default async function Vehiculos({ searchParams }: Props) {
     <main id="contenido" className="min-w-0">
       <EncabezadoPagina
         titulo={
-          usuario.rol === "CLIENTE" ? "Mis vehículos" : "Vehículos del taller"
+          esCliente ? "Mis vehículos" : "Vehículos del taller"
         }
         descripcion={
-          usuario.rol === "CLIENTE"
+          esCliente
             ? "Consultá los vehículos registrados a tu nombre. Elegí una patente para ver sus datos."
             : "Consultá los vehículos del taller. Elegí una patente para ver sus datos."
         }
       />
+      {esCliente && vehiculos.length > 0 && (
+        <Button asChild className="mb-6 w-full sm:w-auto">
+          <Link href="/vehiculos/nuevo">Registrar vehículo</Link>
+        </Button>
+      )}
       {vehiculos.length === 0 ? (
         <SinDatos
           titulo={
@@ -57,11 +63,19 @@ export default async function Vehiculos({ searchParams }: Props) {
               : "Llegaste al final del listado"
           }
           descripcion={
-            pagina === 1
-              ? "Cuando haya vehículos registrados, aparecerán en esta sección. Podés volver a consultarla más adelante."
-              : "No hay vehículos en esta página. Usá Página anterior para volver a los resultados."
+            pagina !== 1
+              ? "No hay vehículos en esta página. Usá Página anterior para volver a los resultados."
+              : esCliente
+                ? "Registrá tu primer vehículo para poder pedir un turno en el taller."
+                : "Cuando haya vehículos registrados, aparecerán en esta sección. Podés volver a consultarla más adelante."
           }
-        />
+        >
+          {esCliente && pagina === 1 && (
+            <Button asChild className="w-full sm:w-auto">
+              <Link href="/vehiculos/nuevo">Registrar mi primer vehículo</Link>
+            </Button>
+          )}
+        </SinDatos>
       ) : (
         <BuscadorVehiculos key={pagina} vehiculos={filas} />
       )}
