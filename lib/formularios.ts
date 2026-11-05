@@ -11,6 +11,14 @@ export type EstadoFormulario = {
 
 export const SIN_ENVIAR: EstadoFormulario = {};
 
+// datetime-local manda "2026-11-10T09:30", sin zona horaria, y el servidor corre
+// en UTC. Se interpreta como hora de Buenos Aires (UTC-3, sin horario de verano).
+export function fechaHoraArgentina(valor: string): string {
+  return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(valor)
+    ? `${valor}:00-03:00`
+    : valor;
+}
+
 // Un campo vacío llega como "" y uno ausente como null; los dos quedan en "".
 export function leerTexto(formData: FormData, nombre: string): string {
   const valor = formData.get(nombre);
