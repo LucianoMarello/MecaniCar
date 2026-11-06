@@ -27,7 +27,7 @@ describe("Validación de Vehículos (Zod)", () => {
   });
 
   it("rechaza símbolos en la patente", () => {
-    for (const patente of ["AB#123", "AB/123CD", "ÁB123CD", "AB.123.CD"]) {
+    for (const patente of ["AB#123", "AB/123CD", "ÁB123CD", "AB.123.CD", "abßcd1", "ﬀ1234"]) {
       const result = vehiculoSchema.safeParse({ patente, marca: "Ford", modelo: "Focus" });
 
       expect(result.success).toBe(false);

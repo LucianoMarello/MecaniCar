@@ -29,7 +29,7 @@ export function FormularioVehiculo() {
         etiqueta="Patente"
         nombre="patente"
         required
-        maxLength={12}
+        maxLength={16}
         autoComplete="off"
         autoCapitalize="characters"
         defaultValue={estado.valores?.patente}
