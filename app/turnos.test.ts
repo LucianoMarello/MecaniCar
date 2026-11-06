@@ -1,3 +1,4 @@
+import { isValidElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -29,6 +30,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 import { solicitarTurno } from "./(app)/turnos/nuevo/acciones";
+import { FormularioTurno } from "./(app)/turnos/nuevo/FormularioTurno";
 import NuevoTurno from "./(app)/turnos/nuevo/page";
 import Turnos from "./(app)/turnos/page";
 import DetalleTurno from "./(app)/turnos/[id]/page";
@@ -49,6 +51,20 @@ const valido = {
   motivo: "Ruido en el tren delantero",
 };
 const sinParametros = { searchParams: Promise.resolve({}) };
+
+// Recorre lo que devuelve una página y da las props del componente buscado.
+function propsDe(nodo: unknown, tipo: unknown): Record<string, unknown> | undefined {
+  if (Array.isArray(nodo)) {
+    for (const hijo of nodo) {
+      const props = propsDe(hijo, tipo);
+      if (props) return props;
+    }
+    return undefined;
+  }
+  if (!isValidElement(nodo)) return undefined;
+  const props = nodo.props as Record<string, unknown>;
+  return nodo.type === tipo ? props : propsDe(props.children, tipo);
+}
 
 describe("solicitar turno desde el formulario", () => {
   beforeEach(() => {
@@ -104,6 +120,7 @@ describe("solicitar turno desde el formulario", () => {
       }),
       "cliente-a",
     );
+    expect(mocks.crearTurno.mock.lastCall?.[0]).not.toHaveProperty("usuarioId");
     expect(mocks.revalidatePath).toHaveBeenCalledWith("/turnos");
   });
 });
@@ -124,6 +141,31 @@ describe("pantallas de turnos: sesión y acceso", () => {
     expect(mocks.listarVehiculos).toHaveBeenCalledWith("cliente-a", "CLIENTE", {
       pagina: 1,
       limite: 100,
+    });
+  });
+
+  it("?vehiculo= preselecciona solo un vehículo propio con id válido", async () => {
+    mocks.listarVehiculos.mockResolvedValue([
+      { id: "vehiculo-1", patente: "AB123CD", marca: "Ford", modelo: "Focus" },
+    ]);
+    const casos: [string | string[], string][] = [
+      ["vehiculo-1", "vehiculo-1"],
+      ["vehiculo-ajeno", ""],
+      ["../x", ""],
+      [["vehiculo-1", "vehiculo-2"], ""],
+    ];
+    for (const [vehiculo, esperado] of casos) {
+      const pagina = await NuevoTurno({ searchParams: Promise.resolve({ vehiculo }) });
+      expect(propsDe(pagina, FormularioTurno)?.vehiculoInicial).toBe(esperado);
+    }
+  });
+
+  it("el taller lista los turnos con su propio id y rol", async () => {
+    mocks.obtenerUsuario.mockResolvedValue(mecanico);
+    await Turnos(sinParametros);
+    expect(mocks.listarTurnos).toHaveBeenCalledWith("mecanico-1", "MECANICO", {
+      pagina: 1,
+      limite: 20,
     });
   });
 
