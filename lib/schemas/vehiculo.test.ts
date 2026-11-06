@@ -14,14 +14,37 @@ describe("Validación de Vehículos (Zod)", () => {
     expect(result.success).toBe(true);
   });
 
-  it("guarda la patente en mayúsculas y sin espacios", () => {
-    const result = vehiculoSchema.safeParse({
-      patente: " ab 123 cd ",
-      marca: "Ford",
-      modelo: "Focus",
-    });
+  it("guarda la patente en mayúsculas, sin espacios ni guiones", () => {
+    for (const escrita of [" ab 123 cd ", "AB-123-CD", "ab - 123cd"]) {
+      const result = vehiculoSchema.safeParse({
+        patente: escrita,
+        marca: "Ford",
+        modelo: "Focus",
+      });
 
-    expect(result.success && result.data.patente).toBe("AB123CD");
+      expect(result.success && result.data.patente).toBe("AB123CD");
+    }
+  });
+
+  it("rechaza símbolos en la patente", () => {
+    for (const patente of ["AB#123", "AB/123CD", "ÁB123CD", "AB.123.CD"]) {
+      const result = vehiculoSchema.safeParse({ patente, marca: "Ford", modelo: "Focus" });
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.flatten().fieldErrors.patente).toContain(
+          "La patente solo puede tener letras y números",
+        );
+      }
+    }
+  });
+
+  it("sigue aceptando las patentes que ya están en la base", () => {
+    for (const patente of ["PRB123", "C5A123", "API123", "PR10T1", "AB123CD", "TEST01"]) {
+      const result = vehiculoSchema.safeParse({ patente, marca: "Ford", modelo: "Focus" });
+
+      expect(result.success).toBe(true);
+    }
   });
 
   it("cuenta el largo de la patente sin los espacios", () => {

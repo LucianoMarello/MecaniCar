@@ -1,15 +1,16 @@
 import { z } from "zod";
 
 export const vehiculoSchema = z.object({
-  // "ab 123 cd" y "AB123CD" son la misma patente (RN02): se guarda normalizada.
+  // "ab-123 cd" y "AB123CD" son la misma patente (RN02): se guarda normalizada.
   patente: z
     .string()
-    .transform((valor) => valor.replace(/\s+/g, "").toUpperCase())
+    .transform((valor) => valor.replace(/[\s-]+/g, "").toUpperCase())
     .pipe(
       z
         .string()
         .min(6, "La patente debe tener al menos 6 caracteres")
-        .max(10, "La patente no puede superar los 10 caracteres"),
+        .max(10, "La patente no puede superar los 10 caracteres")
+        .regex(/^[A-Z0-9]+$/, "La patente solo puede tener letras y números"),
     ),
 
   marca: z

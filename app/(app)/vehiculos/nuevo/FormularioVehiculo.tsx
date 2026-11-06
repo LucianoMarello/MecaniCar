@@ -34,7 +34,7 @@ export function FormularioVehiculo() {
         autoCapitalize="characters"
         defaultValue={estado.valores?.patente}
         errores={estado.errores?.patente}
-        ayuda="Por ejemplo AB123CD o ABC123. Se guarda en mayúsculas y sin espacios."
+        ayuda="Solo letras y números, por ejemplo AB123CD o ABC123. Se guarda en mayúsculas, sin espacios ni guiones."
       />
       <Campo
         etiqueta="Marca"
