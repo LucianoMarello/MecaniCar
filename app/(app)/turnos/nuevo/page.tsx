@@ -5,6 +5,7 @@ import { SinDatos } from "@/components/SinDatos";
 import { Button } from "@/components/ui/button";
 import { obtenerUsuario } from "@/lib/auth";
 import { listarVehiculos } from "@/lib/db/vehiculos";
+import { idSchema } from "@/lib/schemas/http";
 import { FormularioTurno } from "./FormularioTurno";
 
 type Props = {
@@ -25,8 +26,11 @@ export default async function NuevoTurno({ searchParams }: Props) {
     id,
     etiqueta: `${patente} · ${marca} ${modelo}`,
   }));
-  // ?vehiculo= solo preselecciona si es uno de los propios.
-  const vehiculoInicial = opciones.find(({ id }) => id === vehiculo)?.id ?? "";
+  // ?vehiculo= solo preselecciona si es un id válido y uno de los propios.
+  const pedido = idSchema.safeParse(vehiculo);
+  const vehiculoInicial = pedido.success
+    ? (opciones.find(({ id }) => id === pedido.data)?.id ?? "")
+    : "";
 
   return (
     <main id="contenido" className="min-w-0 max-w-lg">

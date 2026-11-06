@@ -31,6 +31,11 @@ describe("hora del formulario", () => {
     expect(fecha.toISOString()).toBe("2026-11-10T12:30:00.000Z");
   });
 
+  it("también interpreta como hora de Buenos Aires un valor con segundos", () => {
+    const fecha = new Date(fechaHoraArgentina("2026-11-10T09:30:15"));
+    expect(fecha.toISOString()).toBe("2026-11-10T12:30:15.000Z");
+  });
+
   it("deja pasar sin cambios un valor que no es de datetime-local", () => {
     expect(fechaHoraArgentina("")).toBe("");
   });
