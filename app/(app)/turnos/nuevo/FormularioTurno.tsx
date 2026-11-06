@@ -84,6 +84,7 @@ export function FormularioTurno({
             required
             rows={4}
             maxLength={500}
+            className="min-h-24"
             defaultValue={estado.valores?.motivo}
           />
         )}
