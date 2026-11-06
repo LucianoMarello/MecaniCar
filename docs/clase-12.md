@@ -11,7 +11,7 @@
 - `acciones.ts` (`"use server"`): es un endpoint público, así que repite el orden de los Route Handlers: sesión y rol, validación con `vehiculoSchema` (el mismo de `POST /api/vehiculos`), regla de patente única con `crearVehiculo`, escritura con el id de la sesión, `revalidatePath("/vehiculos")` y redirección al detalle.
 - `FormularioVehiculo.tsx` (cliente): `useActionState` para los errores y `pendiente` para deshabilitar el botón mientras guarda.
 - El listado ofrece "Registrar vehículo" y la lista vacía ofrece "Registrar mi primer vehículo", solo al cliente.
-- La patente se normaliza en el schema (mayúsculas, sin espacios, RN02). Como `PATCH` usa el mismo schema, también aplica al editar.
+- La patente se normaliza en el schema (mayúsculas, sin espacios ni guiones) y solo admite letras y números (RN02). Como `PATCH` usa el mismo schema, también aplica al editar.
 - Si dos altas con la misma patente llegan a la vez, la segunda choca con el índice único: `crearVehiculo` lo informa como patente duplicada en vez de un error 500.
 
 ## Pruebas manuales
