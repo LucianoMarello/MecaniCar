@@ -326,7 +326,7 @@ Las direcciones existentes se conservan. Las propuestas para pasos pendientes so
 | Registrar vehículo (HU01) | Alta de vehículo | `/vehiculos/nuevo` | Cliente | Implementada (clase 12); al guardar lleva al detalle |
 | Consultar vehículos | Listado | `/vehiculos` | Cliente: propios; Mecánico y Administrador: taller | Implementada |
 | Consultar vehículo | Detalle | `/vehiculos/[id]` | Cliente propietario; Mecánico y Administrador | Implementada |
-| Solicitar turno (HU02) | Solicitud | `/turnos/nuevo` | Cliente | Implementada (clase 12); al guardar lleva al detalle del turno |
+| Solicitar turno (HU02) | Solicitud | `/turnos/nuevo` | Cliente | Implementada (clase 12); se abre con un clic desde Mis vehículos (8.1) y al guardar lleva al detalle del turno |
 | Consultar turnos (HU03) | Listado y detalle de turnos | `/turnos`, `/turnos/[id]` | Cliente: propios; Mecánico y Administrador: taller | Implementada (clase 12) |
 | Confirmar turno (HU04) | Detalle del turno | `/turnos/[id]` | Mecánico y Administrador | Pantalla implementada; acción pendiente; API implementada |
 | Cancelar turno (HU05) | Detalle del turno | `/turnos/[id]` | Cliente propietario | Pantalla implementada; acción pendiente; API implementada |

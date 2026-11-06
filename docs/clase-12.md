@@ -22,6 +22,8 @@
 - `turnoSchema` pasó a explicar en castellano la falta de vehículo y de fecha, también para la API.
 - `/turnos` y `/turnos/[id]` reutilizan `listarTurnos` y `buscarTurno`, las mismas consultas que la API: el cliente ve los suyos y el taller todos. Un turno ajeno o inexistente da el mismo 404. Por ahora el detalle es solo de lectura: confirmar, cancelar y registrar ingreso llegan en el PR siguiente.
 - La barra suma "Mis turnos" / "Turnos del taller", y el detalle del vehículo ofrece "Solicitar turno para este vehículo" al cliente.
+- "Mis vehículos", la pantalla principal del cliente, ofrece "Solicitar turno" como acción principal y "Registrar vehículo" al lado: así el turno se pide con un solo clic (spec 8.1).
+- `/turnos` y `/turnos/[id]` tienen su `loading.tsx`, con esqueletos propios (`CargandoTurnos`, `CargandoDetalleTurno`) como los de vehículos.
 - `components/ui/native-select.tsx` y `textarea.tsx` salen de shadcn y se ajustaron como `Input`: 44 px de alto, letra de 16 px en el teléfono y contorno de foco visible.
 
 ## Pruebas manuales
@@ -33,5 +35,5 @@
 5. Apretar "Registrar vehículo" dos veces rápido: el botón pasa a "Guardando…" deshabilitado y se crea un solo vehículo.
 6. Recorrer el formulario con Tab y Enter, sin mouse, y a 375 px.
 7. En un teléfono real, contra producción y con datos móviles: anotar en el PR qué se vio que DevTools no mostró.
-8. Turnos, como Cliente: desde el detalle de un vehículo, "Solicitar turno para este vehículo" llega con el vehículo elegido. Enviar sin fecha y con un motivo corto: errores debajo de cada campo. Cambiar de vehículo, corregir el motivo y volver a enviar con una fecha pasada: el select sigue con el vehículo nuevo y el motivo no se borra. Pedir un turno a las 09:30: el detalle muestra 09:30, no 06:30 ni 12:30.
+8. Turnos, como Cliente: en "Mis vehículos", "Solicitar turno" abre el formulario de un solo clic. Desde el detalle de un vehículo, "Solicitar turno para este vehículo" llega con el vehículo elegido. Enviar sin fecha y con un motivo corto: errores debajo de cada campo. Cambiar de vehículo, corregir el motivo y volver a enviar con una fecha pasada: el select sigue con el vehículo nuevo y el motivo no se borra. Pedir un turno a las 09:30: el detalle muestra 09:30, no 06:30 ni 12:30.
 9. El nuevo turno aparece en "Mis turnos" sin recargar. Otro cliente que abre su URL recibe el 404 de turnos. El taller lo ve en "Turnos del taller".
