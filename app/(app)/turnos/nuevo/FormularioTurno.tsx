@@ -24,6 +24,7 @@ export function FormularioTurno({
     solicitarTurno,
     SIN_ENVIAR,
   );
+  const vehiculoElegido = estado.valores?.vehiculoId ?? vehiculoInicial;
 
   return (
     <form action={enviar} noValidate className="space-y-5">
@@ -42,10 +43,13 @@ export function FormularioTurno({
         errores={estado.errores?.vehiculoId}
         control={(props) => (
           // Select nativo: en el teléfono abre el selector del sistema.
+          // Un select solo lee defaultValue al montarse; si la key cambia, se
+          // vuelve a montar y el reinicio del formulario no pierde el vehículo.
           <NativeSelect
+            key={vehiculoElegido}
             {...props}
             required
-            defaultValue={estado.valores?.vehiculoId ?? vehiculoInicial}
+            defaultValue={vehiculoElegido}
             className="w-full"
           >
             <NativeSelectOption value="" disabled>
