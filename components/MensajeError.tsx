@@ -1,9 +1,22 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { startTransition } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
 export function MensajeError({ reintentar }: { reintentar?: () => void }) {
+  const router = useRouter();
+
+  // reset() solo redibuja con lo que ya tiene el navegador, que incluye el
+  // error del servidor. refresh() pide la pantalla de nuevo antes de redibujar.
+  function volverAIntentar() {
+    startTransition(() => {
+      router.refresh();
+      reintentar?.();
+    });
+  }
+
   return (
     <Alert
       variant="destructive"
@@ -19,7 +32,7 @@ export function MensajeError({ reintentar }: { reintentar?: () => void }) {
           <Button
             type="button"
             variant="outline"
-            onClick={reintentar}
+            onClick={volverAIntentar}
             className="mt-3"
           >
             Reintentar
