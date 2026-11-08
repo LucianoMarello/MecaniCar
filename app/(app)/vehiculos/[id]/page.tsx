@@ -1,9 +1,11 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { obtenerUsuario } from "@/lib/auth";
 import { buscarVehiculo } from "@/lib/db/vehiculos";
 import { idSchema } from "@/lib/schemas/http";
 import { formatearFecha } from "@/lib/presentacion";
 import { EncabezadoPagina } from "@/components/EncabezadoPagina";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 type Props = { params: Promise<{ id: string }> };
@@ -75,6 +77,13 @@ export default async function DetalleVehiculo({ params }: Props) {
       <p className="mt-4 text-sm text-muted-foreground">
         Horarios expresados en la zona de Buenos Aires.
       </p>
+      {usuario.rol === "CLIENTE" && (
+        <Button asChild className="mt-6 w-full sm:w-auto">
+          <Link href={`/turnos/nuevo?vehiculo=${vehiculo.id}`}>
+            Solicitar turno para este vehículo
+          </Link>
+        </Button>
+      )}
     </main>
   );
 }

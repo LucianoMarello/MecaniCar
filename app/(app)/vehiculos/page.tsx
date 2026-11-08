@@ -50,10 +50,16 @@ export default async function Vehiculos({ searchParams }: Props) {
             : "Consultá los vehículos del taller. Elegí una patente para ver sus datos."
         }
       />
+      {/* Spec 8.1: desde la pantalla principal, el turno se pide con un solo clic. */}
       {esCliente && vehiculos.length > 0 && (
-        <Button asChild className="mb-6 w-full sm:w-auto">
-          <Link href="/vehiculos/nuevo">Registrar vehículo</Link>
-        </Button>
+        <div className="mb-6 flex flex-col gap-2 sm:flex-row">
+          <Button asChild className="w-full sm:w-auto">
+            <Link href="/turnos/nuevo">Solicitar turno</Link>
+          </Button>
+          <Button asChild variant="outline" className="w-full sm:w-auto">
+            <Link href="/vehiculos/nuevo">Registrar vehículo</Link>
+          </Button>
+        </div>
       )}
       {vehiculos.length === 0 ? (
         <SinDatos

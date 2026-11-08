@@ -10,10 +10,10 @@ export const estadoTurnoSchema = z.enum([
 export type EstadoTurno = z.infer<typeof estadoTurnoSchema>;
 
 export const turnoSchema = z.object({
-  vehiculoId: idSchema,
+  vehiculoId: z.string().min(1, "Elegí un vehículo").pipe(idSchema),
 
   fechaHora: z.coerce
-    .date()
+    .date({ errorMap: () => ({ message: "Ingresá una fecha y hora válidas" }) })
     .refine(
       (fecha) => fecha > new Date(),
       "La fecha del turno debe ser posterior a la fecha actual",
