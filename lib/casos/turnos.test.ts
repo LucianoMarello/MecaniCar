@@ -119,6 +119,14 @@ describe("confirmarTurno", () => {
     });
     expect(marcarTurnoConfirmado).toHaveBeenCalledTimes(1);
   });
+
+  it("si guardar falla, no avisa", async () => {
+    conTurnoEn("PENDIENTE");
+    vi.mocked(marcarTurnoConfirmado).mockRejectedValue(new Error("base caída"));
+
+    await expect(confirmarTurno(turno.id)).rejects.toThrow("base caída");
+    expect(enviarNotificacion).not.toHaveBeenCalled();
+  });
 });
 
 describe("cancelarTurno", () => {
