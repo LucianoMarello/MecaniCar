@@ -77,7 +77,7 @@ Después de tocar `prisma/schema.prisma`, siempre generar una migración. Nunca 
 
 - Los endpoints REST deben utilizar sustantivos para representar recursos (`POST /api/turnos`). Prohibidos los verbos en la URL (`/api/crearTurno`).
 - Los Route Handlers deben mantener este orden estricto de ejecución: 1. Verificar sesión y rol, 2. Validar entrada, 3. Verificar acceso al recurso y reglas de negocio, 4. Ejecutar operación, 5. Responder.
-- Un caso de uso de `lib/casos/` hace solo los pasos 3 y 4. No lee la sesión ni valida la entrada: recibe el id ya validado y el `usuarioId` de la sesión, y devuelve una unión discriminada `{ resultado: … }`. Quien llama traduce el resultado: el Route Handler a HTTP, la Server Action a `EstadoFormulario`.
+- Un caso de uso de `lib/casos/` hace solo los pasos 3 y 4: no importa `@/lib/auth` ni valida con Zod. Recibe el id ya validado y, cuando el acceso depende de quién lo pide, el `usuarioId` de la sesión. Devuelve una unión discriminada `{ resultado: … }` y no captura los errores de la base. Quien llama traduce el resultado y los errores: el Route Handler a HTTP, la Server Action a `EstadoFormulario`.
 
 ### Seguridad
 
