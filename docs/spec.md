@@ -337,8 +337,8 @@ Las direcciones existentes se conservan. Las propuestas para pasos pendientes so
 | Consultar presupuesto (HU09) | Detalle de presupuesto | `/presupuestos/[id]` | Cliente propietario; Mecánico y Administrador | Pendiente |
 | Aprobar o rechazar (HU10/HU11) | Detalle de presupuesto | `/presupuestos/[id]` | Cliente propietario | Pantalla y acciones pendientes; API implementada |
 | Editar presupuesto y volver a pendiente | Detalle de presupuesto | `/presupuestos/[id]` | Mecánico y Administrador | Pantalla y acción pendientes; API implementada |
-| Consultar reparación (HU13) | Detalle de orden | `/ordenes-trabajo/[id]` | Cliente propietario; Mecánico y Administrador | Pendiente |
-| Finalizar reparación (HU12) | Detalle de orden | `/ordenes-trabajo/[id]` | Mecánico y Administrador | Pantalla y acción pendientes; API implementada |
+| Consultar reparación (HU13) | Detalle de orden | `/ordenes-trabajo/[id]` | Cliente propietario; Mecánico y Administrador | Implementada |
+| Finalizar reparación (HU12) | Detalle de orden | `/ordenes-trabajo/[id]` | Mecánico y Administrador | Pantalla implementada; acción disponible |
 | Notificar al cliente | Sin pantalla independiente | — | Envío del servidor; resultado en la operación | Integración implementada; presentación operativa pendiente |
 | Revisar componentes y sus estados | Galería visual | `/sistema` | Cualquier usuario autenticado | Implementada con ejemplos fijos, sin escribir en la base |
 | Asignar rol | Administración de usuarios | `/usuarios` | Administrador | Pantalla pendiente; API implementada |
