@@ -158,6 +158,14 @@ describe("API de turnos: confirmar, cancelar y registrar el ingreso", () => {
       expect(buscar).not.toHaveBeenCalled();
     });
 
+    it("sin sesión responde 401 aunque el id sea inválido", async () => {
+      vi.mocked(requerirUsuario).mockRejectedValue(new NoAutenticado());
+
+      const respuesta = await pedir(handler, "no es un id");
+
+      expect(respuesta.status).toBe(401);
+    });
+
     it("si el turno no existe responde 404", async () => {
       vi.mocked(buscar).mockResolvedValue(null);
 
