@@ -652,7 +652,7 @@ Este flujo constituye el proceso de negocio principal del sistema y no un simple
 
 **RN01.** Todo vehículo debe pertenecer a un cliente.
 
-**RN02.** La patente debe ser única dentro del sistema. Se guarda en mayúsculas y sin espacios, así que "ab 123 cd" y "AB123CD" son la misma patente.
+**RN02.** La patente debe ser única dentro del sistema. Solo admite letras y números; se guarda en mayúsculas, sin espacios ni guiones, así que "ab-123 cd" y "AB123CD" son la misma patente.
 
 **RN03.** Un cliente solamente puede administrar sus propios vehículos. Tanto el cliente propietario como el mecánico pueden dar de baja un vehículo únicamente cuando no posee turnos ni órdenes de trabajo asociados.
 
