@@ -49,6 +49,7 @@ Después de tocar `prisma/schema.prisma`, siempre generar una migración. Nunca 
 | Un endpoint                | `app/api/<recurso>/route.ts`                                      |
 | Un componente reutilizable | `components/`                                                     |
 | Una consulta a la base     | `lib/db/<entidad>.ts`                                             |
+| Un caso de uso que comparten un Route Handler y una Server Action | `lib/casos/<entidad>.ts` |
 | Un schema de validación    | `lib/schemas/<entidad>.ts`                                        |
 | Un helper sin dependencias | `lib/utils.ts`                                                    |
 
@@ -76,6 +77,7 @@ Después de tocar `prisma/schema.prisma`, siempre generar una migración. Nunca 
 
 - Los endpoints REST deben utilizar sustantivos para representar recursos (`POST /api/turnos`). Prohibidos los verbos en la URL (`/api/crearTurno`).
 - Los Route Handlers deben mantener este orden estricto de ejecución: 1. Verificar sesión y rol, 2. Validar entrada, 3. Verificar acceso al recurso y reglas de negocio, 4. Ejecutar operación, 5. Responder.
+- Un caso de uso de `lib/casos/` hace solo los pasos 3 y 4. No lee la sesión ni valida la entrada: recibe el id ya validado y el `usuarioId` de la sesión, y devuelve una unión discriminada `{ resultado: … }`. Quien llama traduce el resultado: el Route Handler a HTTP, la Server Action a `EstadoFormulario`.
 
 ### Seguridad
 
