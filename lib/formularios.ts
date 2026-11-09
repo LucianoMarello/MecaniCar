@@ -3,10 +3,13 @@
 //   errores  validación de Zod, por campo: van debajo del campo (400 en la API)
 //   mensaje  rechazo de una regla de negocio: va arriba del formulario (409)
 //   valores  lo que la persona escribió, para no vaciarle el formulario
+//   aviso    la operación se guardó, pero el correo al cliente no salió: va
+//            arriba, para que el taller le avise por otro medio (spec 9.4)
 export type EstadoFormulario = {
   errores?: Record<string, string[] | undefined>;
   mensaje?: string;
   valores?: Record<string, string>;
+  aviso?: string;
 };
 
 export const SIN_ENVIAR: EstadoFormulario = {};
