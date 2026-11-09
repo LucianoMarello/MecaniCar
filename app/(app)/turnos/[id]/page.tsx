@@ -7,6 +7,7 @@ import { obtenerUsuario } from "@/lib/auth";
 import { buscarTurno } from "@/lib/db/turnos";
 import { formatearFecha } from "@/lib/presentacion";
 import { idSchema } from "@/lib/schemas/http";
+import { AccionesTurno } from "./AccionesTurno";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -20,6 +21,9 @@ export default async function DetalleTurno({ params }: Props) {
   if (resultado.resultado !== "OK") notFound();
   const { turno } = resultado;
   const esCliente = usuario.rol === "CLIENTE";
+  const esTaller = usuario.rol === "MECANICO" || usuario.rol === "ADMIN";
+  const pendienteOConfirmado =
+    turno.estado === "PENDIENTE" || turno.estado === "CONFIRMADO";
 
   return (
     <main id="contenido" className="min-w-0">
@@ -66,9 +70,19 @@ export default async function DetalleTurno({ params }: Props) {
             <div className="sm:col-span-2">
               <dt className="text-sm text-muted-foreground">Ingreso al taller</dt>
               <dd>
-                {turno.ordenTrabajo
-                  ? "Registrado: el vehículo ya tiene una orden de trabajo."
-                  : "Todavía no ingresó al taller."}
+                {turno.ordenTrabajo ? (
+                  <>
+                    Registrado: el vehículo ya tiene una orden de trabajo.{" "}
+                    <Link
+                      href={`/ordenes-trabajo/${turno.ordenTrabajo.id}`}
+                      className="underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-foreground"
+                    >
+                      Ver orden de trabajo
+                    </Link>
+                  </>
+                ) : (
+                  "Todavía no ingresó al taller."
+                )}
               </dd>
             </div>
           </dl>
@@ -77,6 +91,16 @@ export default async function DetalleTurno({ params }: Props) {
       <p className="mt-4 text-sm text-muted-foreground">
         Horarios expresados en la zona de Buenos Aires.
       </p>
+      {/* Esconder un botón es solo cortesía: cada acción vuelve a verificar
+          la sesión, el rol, el acceso al turno y la regla. */}
+      <AccionesTurno
+        turnoId={turno.id}
+        mostrarConfirmar={esTaller && turno.estado === "PENDIENTE"}
+        mostrarIngreso={
+          esTaller && turno.estado === "CONFIRMADO" && !turno.ordenTrabajo
+        }
+        mostrarCancelar={esCliente && pendienteOConfirmado && !turno.ordenTrabajo}
+      />
     </main>
   );
 }

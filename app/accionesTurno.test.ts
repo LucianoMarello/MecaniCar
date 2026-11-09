@@ -1,4 +1,6 @@
 import { Prisma } from "@prisma/client";
+import Link from "next/link";
+import { isValidElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -6,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   confirmarTurno: vi.fn(),
   cancelarTurno: vi.fn(),
   registrarIngreso: vi.fn(),
+  buscarTurno: vi.fn(),
   revalidatePath: vi.fn(),
   redirect: vi.fn((url: string) => {
     throw new Error(`REDIRECT:${url}`);
@@ -21,6 +24,7 @@ vi.mock("@/lib/casos/turnos", () => ({
   cancelarTurno: mocks.cancelarTurno,
   registrarIngreso: mocks.registrarIngreso,
 }));
+vi.mock("@/lib/db/turnos", () => ({ buscarTurno: mocks.buscarTurno }));
 vi.mock("next/cache", () => ({ revalidatePath: mocks.revalidatePath }));
 vi.mock("next/navigation", () => ({
   redirect: mocks.redirect,
@@ -32,6 +36,8 @@ import {
   confirmarTurnoAction,
   registrarIngresoAction,
 } from "./(app)/turnos/[id]/acciones";
+import { AccionesTurno } from "./(app)/turnos/[id]/AccionesTurno";
+import DetalleTurno from "./(app)/turnos/[id]/page";
 import { ConflictoNegocio } from "@/lib/errores";
 import { SIN_ENVIAR, type EstadoFormulario } from "@/lib/formularios";
 
@@ -211,5 +217,74 @@ describe("lo propio de cada acción", () => {
       ["/turnos/turno-1"],
       ["/ordenes-trabajo"],
     ]);
+  });
+});
+
+// Recorre lo que devuelve la página y junta las props de cada elemento del tipo buscado.
+function propsDe(nodo: unknown, tipo: unknown): Record<string, unknown>[] {
+  if (Array.isArray(nodo)) return nodo.flatMap((hijo) => propsDe(hijo, tipo));
+  if (!isValidElement(nodo)) return [];
+  const props = nodo.props as Record<string, unknown>;
+  return [...(nodo.type === tipo ? [props] : []), ...propsDe(props.children, tipo)];
+}
+
+function turnoCon(estado: string, ordenTrabajo: { id: string } | null) {
+  return {
+    id: "turno-1",
+    usuarioId: "cliente-a",
+    fechaHora: new Date("2026-11-19T12:30:00.000Z"),
+    motivo: "Ruido en el tren delantero",
+    estado,
+    fechaCreacion: new Date("2026-11-09T12:00:00.000Z"),
+    vehiculo: { id: "vehiculo-1", patente: "TEST01", marca: "Fiat", modelo: "Cronos" },
+    ordenTrabajo,
+  };
+}
+
+async function abrirDetalle(usuario: unknown, turno: ReturnType<typeof turnoCon>) {
+  mocks.obtenerUsuario.mockResolvedValue(usuario);
+  mocks.buscarTurno.mockResolvedValue({ resultado: "OK", turno });
+  return DetalleTurno({ params: Promise.resolve({ id: "turno-1" }) });
+}
+
+describe("qué botones muestra el detalle del turno", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const usuarios = { Mecánico: mecanico, Administrador: admin, Cliente: cliente };
+  it.each([
+    ["Mecánico", "PENDIENTE", "sin orden", "Confirmar"],
+    ["Administrador", "PENDIENTE", "sin orden", "Confirmar"],
+    ["Mecánico", "CONFIRMADO", "sin orden", "Registrar ingreso"],
+    ["Administrador", "CONFIRMADO", "sin orden", "Registrar ingreso"],
+    ["Mecánico", "CONFIRMADO", "con orden", "ninguno"],
+    ["Mecánico", "CANCELADO", "sin orden", "ninguno"],
+    ["Cliente", "PENDIENTE", "sin orden", "Cancelar"],
+    ["Cliente", "CONFIRMADO", "sin orden", "Cancelar"],
+    ["Cliente", "CONFIRMADO", "con orden", "ninguno"],
+    ["Cliente", "CANCELADO", "sin orden", "ninguno"],
+  ] as const)("%s, turno %s %s: %s", async (rol, estado, orden, boton) => {
+    const ordenTrabajo = orden === "con orden" ? { id: "orden-1" } : null;
+    const pagina = await abrirDetalle(usuarios[rol], turnoCon(estado, ordenTrabajo));
+    const [props] = propsDe(pagina, AccionesTurno);
+    expect(props).toEqual({
+      turnoId: "turno-1",
+      mostrarConfirmar: boton === "Confirmar",
+      mostrarIngreso: boton === "Registrar ingreso",
+      mostrarCancelar: boton === "Cancelar",
+    });
+  });
+
+  it("con orden de trabajo, enlaza a la orden, también para el cliente", async () => {
+    for (const usuario of [cliente, mecanico]) {
+      const pagina = await abrirDetalle(usuario, turnoCon("CONFIRMADO", { id: "orden-1" }));
+      const enlaces = propsDe(pagina, Link).map((props) => props.href);
+      expect(enlaces).toContain("/ordenes-trabajo/orden-1");
+    }
+    const sinOrden = await abrirDetalle(mecanico, turnoCon("CONFIRMADO", null));
+    expect(propsDe(sinOrden, Link).map((props) => props.href)).not.toContain(
+      "/ordenes-trabajo/orden-1",
+    );
   });
 });
