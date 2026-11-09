@@ -14,6 +14,7 @@ import {
   marcarTurnoCancelado,
   marcarTurnoConfirmado,
 } from "@/lib/db/turnos";
+import { ConflictoNegocio } from "@/lib/errores";
 import { enviarNotificacion } from "@/lib/servicios/notificaciones";
 
 // Fija los status y los cuerpos de confirmar, cancelar y registrar el ingreso
@@ -194,6 +195,24 @@ describe("API de turnos: confirmar, cancelar y registrar el ingreso", () => {
         error: "Solo puede confirmarse un turno pendiente",
       });
       expect(marcarTurnoConfirmado).not.toHaveBeenCalled();
+      expect(enviarNotificacion).not.toHaveBeenCalled();
+    });
+
+    it("si otro pedido lo canceló entre la lectura y la escritura, responde 409 sin avisar", async () => {
+      vi.mocked(buscarTurnoParaValidarConfirmacion).mockResolvedValue({
+        estado: "PENDIENTE",
+        usuario: { email: cliente.email },
+      });
+      vi.mocked(marcarTurnoConfirmado).mockRejectedValue(
+        new ConflictoNegocio("Solo puede confirmarse un turno pendiente"),
+      );
+
+      const respuesta = await pedir(confirmar);
+
+      expect(respuesta.status).toBe(409);
+      expect(await respuesta.json()).toEqual({
+        error: "Solo puede confirmarse un turno pendiente",
+      });
       expect(enviarNotificacion).not.toHaveBeenCalled();
     });
 

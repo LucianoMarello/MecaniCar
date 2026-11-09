@@ -3,6 +3,7 @@ import { ConflictoNegocio } from "@/lib/errores";
 import type { Paginacion } from "@/lib/schemas/http";
 import type { Rol } from "@prisma/client";
 import { prisma } from "@/lib/db/client";
+import { validarIngresoTaller } from "@/lib/turnos";
 const ordenSelect = {
   id: true,
   turnoId: true,
@@ -53,11 +54,23 @@ export async function insertarOrdenDesdeTurno(
   turnoId: string,
   vehiculoId: string,
 ) {
-  // Mutación pura
-  return prisma.ordenTrabajo.create({
-    data: { turnoId, vehiculoId, fechaIngreso: new Date(), estado: "ABIERTA" },
-    select: ordenSelect,
-  });
+  // Vuelve a aplicar la regla en una transacción serializable: una
+  // cancelación simultánea no puede dejar un turno CANCELADO con orden.
+  return prisma.$transaction(
+    async (tx) => {
+      const turno = await tx.turno.findUniqueOrThrow({
+        where: { id: turnoId },
+        select: { estado: true, ordenTrabajo: { select: { id: true } } },
+      });
+      const motivos = validarIngresoTaller(turno);
+      if (motivos.length > 0) throw new ConflictoNegocio(motivos.join(". "));
+      return tx.ordenTrabajo.create({
+        data: { turnoId, vehiculoId, fechaIngreso: new Date(), estado: "ABIERTA" },
+        select: ordenSelect,
+      });
+    },
+    { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+  );
 }
 export async function buscarOrdenParaValidar(id: string) {
   // Solo lee. Extrae lo que necesita la función pura y el email del cliente,

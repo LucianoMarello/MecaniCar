@@ -1,7 +1,9 @@
 import type { Paginacion } from "@/lib/schemas/http";
-import type { Rol } from "@prisma/client";
+import { Prisma, type Rol } from "@prisma/client";
 import { prisma } from "@/lib/db/client";
+import { ConflictoNegocio } from "@/lib/errores";
 import type { TurnoInput } from "@/lib/schemas/turno";
+import { validarCancelacionTurno, validarConfirmacionTurno } from "@/lib/turnos";
 
 const turnoSelect = {
   id: true,
@@ -68,20 +70,43 @@ export async function buscarTurnoParaValidarCancelacion(
   });
 }
 
+// Las dos escrituras vuelven a aplicar la regla en una transacción
+// serializable: si otro pedido cambió el turno después de leerlo, no lo pisan
+// y responden 409 con el mismo texto que la regla.
 export async function marcarTurnoConfirmado(id: string) {
-  // Solo escribe confirmación
-  return prisma.turno.update({
-    where: { id },
-    data: { estado: "CONFIRMADO" },
-    select: turnoSelect,
-  });
+  return prisma.$transaction(
+    async (tx) => {
+      const actual = await tx.turno.findUniqueOrThrow({
+        where: { id },
+        select: { estado: true },
+      });
+      const motivos = validarConfirmacionTurno(actual);
+      if (motivos.length > 0) throw new ConflictoNegocio(motivos.join(". "));
+      return tx.turno.update({
+        where: { id },
+        data: { estado: "CONFIRMADO" },
+        select: turnoSelect,
+      });
+    },
+    { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+  );
 }
 
 export async function marcarTurnoCancelado(id: string) {
-  // Solo escribe cancelación
-  return prisma.turno.update({
-    where: { id },
-    data: { estado: "CANCELADO" },
-    select: turnoSelect,
-  });
+  return prisma.$transaction(
+    async (tx) => {
+      const actual = await tx.turno.findUniqueOrThrow({
+        where: { id },
+        select: { estado: true, ordenTrabajo: { select: { id: true } } },
+      });
+      const motivos = validarCancelacionTurno(actual);
+      if (motivos.length > 0) throw new ConflictoNegocio(motivos.join(". "));
+      return tx.turno.update({
+        where: { id },
+        data: { estado: "CANCELADO" },
+        select: turnoSelect,
+      });
+    },
+    { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+  );
 }
