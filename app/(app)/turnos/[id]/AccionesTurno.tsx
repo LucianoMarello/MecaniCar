@@ -120,7 +120,7 @@ export function AccionesTurno({
                 <form action={cancelar}>
                   <AlertDialogFooter>
                     <AlertDialogCancel disabled={cancelando}>Volver</AlertDialogCancel>
-                    <Button type="submit" variant="destructive" disabled={cancelando}>
+                    <Button type="submit" disabled={cancelando}>
                       {cancelando ? "Cancelando…" : "Sí, cancelar turno"}
                     </Button>
                   </AlertDialogFooter>
