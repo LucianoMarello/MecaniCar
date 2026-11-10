@@ -13,3 +13,11 @@ export function formatearFecha(fecha: Date) {
     timeZone: "America/Argentina/Buenos_Aires",
   }).format(fecha);
 }
+
+export function formatearImporte(importe: string | number) {
+  return new Intl.NumberFormat("es-AR", {
+    style: "currency",
+    currency: "ARS",
+    minimumFractionDigits: 2,
+  }).format(Number(importe));
+}

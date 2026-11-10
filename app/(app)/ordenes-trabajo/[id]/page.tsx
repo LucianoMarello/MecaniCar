@@ -1,4 +1,5 @@
 import type { EstadoOrdenTrabajo } from "@prisma/client";
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { EncabezadoPagina } from "@/components/EncabezadoPagina";
@@ -52,7 +53,10 @@ export default async function DetalleOrden({ params, searchParams }: Props) {
         </div>
       </dl>
       {usuario.rol !== "CLIENTE" && (
-        <AccionesOrden id={orden.id} estado={orden.estado} />
+        <>
+          <div className="mt-6"><Link className="underline underline-offset-4" href={`/presupuestos/nuevo?orden=${orden.id}`}>Crear presupuesto</Link></div>
+          <AccionesOrden id={orden.id} estado={orden.estado} />
+        </>
       )}
     </main>
   );
