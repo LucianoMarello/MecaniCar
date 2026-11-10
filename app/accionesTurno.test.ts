@@ -45,8 +45,7 @@ const cliente = { id: "cliente-a", email: "a@example.com", nombre: "A", rol: "CL
 const mecanico = { id: "mecanico-1", email: "m@example.com", nombre: "M", rol: "MECANICO" };
 const admin = { id: "admin-1", email: "ad@example.com", nombre: "Ad", rol: "ADMIN" };
 
-const CONFLICTO =
-  "El turno cambió mientras se procesaba. Actualizá la página e intentá de nuevo.";
+const CONFLICTO = "El turno cambió mientras se procesaba. Revisá su estado actual.";
 
 function errorDePrisma(code: string) {
   return new Prisma.PrismaClientKnownRequestError("Falla simulada", {
@@ -144,20 +143,20 @@ describe.each(acciones)(
       expect(mocks.revalidatePath).not.toHaveBeenCalled();
     });
 
-    it("RECHAZADO muestra los motivos de la regla y no revalida", async () => {
+    it("RECHAZADO muestra los motivos y revalida, porque la pantalla estaba vieja", async () => {
       caso.mockResolvedValue({ resultado: "RECHAZADO", motivos: ["Motivo uno", "Motivo dos"] });
       expect(await enviar(accion, "turno-1")).toEqual({ mensaje: "Motivo uno. Motivo dos" });
-      expect(mocks.revalidatePath).not.toHaveBeenCalled();
+      expect(mocks.revalidatePath.mock.calls).toEqual([["/turnos"], ["/turnos/turno-1"]]);
     });
 
     it.each([
       ["ConflictoNegocio", new ConflictoNegocio("Solo puede confirmarse un turno pendiente")],
       ["P2034", errorDePrisma("P2034")],
       ["P2002", errorDePrisma("P2002")],
-    ])("un %s se informa como conflicto", async (_nombre, error) => {
+    ])("un %s se informa como conflicto y revalida", async (_nombre, error) => {
       caso.mockRejectedValue(error);
       expect(await enviar(accion, "turno-1")).toEqual({ mensaje: CONFLICTO });
-      expect(mocks.revalidatePath).not.toHaveBeenCalled();
+      expect(mocks.revalidatePath.mock.calls).toEqual([["/turnos"], ["/turnos/turno-1"]]);
     });
 
     it("cualquier otro error se relanza", async () => {

@@ -18,8 +18,7 @@ import { idSchema } from "@/lib/schemas/http";
 // formData, pero estas acciones no los declaran porque no leen nada de ahí.
 
 const NO_EXISTE = "El turno no existe.";
-const CONFLICTO =
-  "El turno cambió mientras se procesaba. Actualizá la página e intentá de nuevo.";
+const CONFLICTO = "El turno cambió mientras se procesaba. Revisá su estado actual.";
 
 // Si otro pedido cambió el turno entre la lectura y la escritura, el caso
 // lanza en vez de devolver. Ese error pasa a ser un resultado más; cualquier
@@ -37,6 +36,15 @@ async function capturarConflicto<T>(caso: Promise<T>) {
     }
     throw error;
   }
+}
+
+// Se revalida ante todo resultado menos NO_EXISTE, que daría 404 y se
+// perdería el mensaje. Los botones solo aparecen si la regla lo permite: un
+// rechazo o un conflicto quiere decir que la pantalla estaba vieja, y así
+// pasa a mostrar el estado real al lado del mensaje.
+function revalidarTurno(id: string) {
+  revalidatePath("/turnos");
+  revalidatePath(`/turnos/${id}`);
 }
 
 export async function confirmarTurnoAction(
@@ -57,13 +65,12 @@ export async function confirmarTurnoAction(
   const resultado = await capturarConflicto(confirmarTurno(id.data));
 
   // 5. Respuesta
-  if (resultado.resultado === "CONFLICTO") return { mensaje: CONFLICTO };
   if (resultado.resultado === "NO_EXISTE") return { mensaje: NO_EXISTE };
+  revalidarTurno(id.data);
+  if (resultado.resultado === "CONFLICTO") return { mensaje: CONFLICTO };
   if (resultado.resultado === "RECHAZADO") {
     return { mensaje: resultado.motivos.join(". ") };
   }
-  revalidatePath("/turnos");
-  revalidatePath(`/turnos/${id.data}`);
   if (!resultado.avisoEnviado) {
     return {
       aviso: "Avisale al cliente por otro medio que su turno quedó confirmado.",
@@ -90,13 +97,12 @@ export async function cancelarTurnoAction(
   const resultado = await capturarConflicto(cancelarTurno(id.data, usuario.id));
 
   // 5. Respuesta
-  if (resultado.resultado === "CONFLICTO") return { mensaje: CONFLICTO };
   if (resultado.resultado === "NO_EXISTE") return { mensaje: NO_EXISTE };
+  revalidarTurno(id.data);
+  if (resultado.resultado === "CONFLICTO") return { mensaje: CONFLICTO };
   if (resultado.resultado === "RECHAZADO") {
     return { mensaje: resultado.motivos.join(". ") };
   }
-  revalidatePath("/turnos");
-  revalidatePath(`/turnos/${id.data}`);
   return SIN_ENVIAR;
 }
 
@@ -118,13 +124,12 @@ export async function registrarIngresoAction(
   const resultado = await capturarConflicto(registrarIngreso(id.data));
 
   // 5. Respuesta. redirect lanza una excepción: va al final y fuera del try.
-  if (resultado.resultado === "CONFLICTO") return { mensaje: CONFLICTO };
   if (resultado.resultado === "NO_EXISTE") return { mensaje: NO_EXISTE };
+  revalidarTurno(id.data);
+  if (resultado.resultado === "CONFLICTO") return { mensaje: CONFLICTO };
   if (resultado.resultado === "RECHAZADO") {
     return { mensaje: resultado.motivos.join(". ") };
   }
-  revalidatePath("/turnos");
-  revalidatePath(`/turnos/${id.data}`);
   revalidatePath("/ordenes-trabajo");
   redirect(`/ordenes-trabajo/${resultado.orden.id}`);
 }
