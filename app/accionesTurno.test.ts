@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import Link from "next/link";
-import { isValidElement } from "react";
+import { createElement, isValidElement } from "react";
+import { renderToString } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -285,5 +286,17 @@ describe("qué botones muestra el detalle del turno", () => {
     expect(propsDe(sinOrden, Link).map((props) => props.href)).not.toContain(
       "/ordenes-trabajo/orden-1",
     );
+  });
+});
+
+describe("anuncio de un éxito", () => {
+  // Un lector de pantalla anuncia los cambios de una región role="status" que
+  // ya estaba en la página; por eso tiene que existir, vacía, desde el principio.
+  it.each([
+    ["confirmar", { mostrarConfirmar: true, mostrarCancelar: false, mostrarIngreso: false }],
+    ["cancelar", { mostrarConfirmar: false, mostrarCancelar: true, mostrarIngreso: false }],
+  ])("con el botón de %s, la región de estado está antes de apretarlo", (_boton, botones) => {
+    const html = renderToString(createElement(AccionesTurno, { turnoId: "turno-1", ...botones }));
+    expect(html).toMatch(/<p role="status" class="sr-only"><\/p>/);
   });
 });

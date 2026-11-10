@@ -1,5 +1,6 @@
 "use client";
 
+import { CircleCheckIcon } from "lucide-react";
 import { useActionState, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
@@ -33,10 +34,16 @@ export function AccionesTurno({
 }) {
   // Un estado por acción, todos acá: el mensaje o el aviso siguen a la vista
   // aunque, después de revalidar, el botón que se apretó ya no se muestre.
-  const [confirmacion, confirmar, confirmando] = useActionState(
-    confirmarTurnoAction.bind(null, turnoId),
-    SIN_ENVIAR,
-  );
+  // Por eso mismo, un éxito se anuncia en `exito`: el botón desaparece, el
+  // foco queda en la página y, sin el mensaje, un lector de pantalla no dice nada.
+  const [exito, setExito] = useState("");
+  const confirmarEsteTurno = confirmarTurnoAction.bind(null, turnoId);
+  const [confirmacion, confirmar, confirmando] = useActionState(async () => {
+    const estado = await confirmarEsteTurno();
+    // Con aviso no hace falta: su Alert ya dice que el turno se confirmó.
+    setExito(estado.mensaje || estado.aviso ? "" : "Turno confirmado.");
+    return estado;
+  }, SIN_ENVIAR);
   const [ingreso, registrar, registrando] = useActionState(
     registrarIngresoAction.bind(null, turnoId),
     SIN_ENVIAR,
@@ -48,6 +55,7 @@ export function AccionesTurno({
     // El diálogo se cierra con la respuesta: si hubo rechazo, el mensaje
     // queda arriba de los botones y el foco vuelve a "Cancelar turno".
     setDialogoAbierto(false);
+    setExito(estado.mensaje ? "" : "Turno cancelado.");
     return estado;
   }, SIN_ENVIAR);
 
@@ -57,10 +65,22 @@ export function AccionesTurno({
     { titulo: "No se pudo registrar el ingreso", mensaje: ingreso.mensaje },
   ].filter((rechazo) => rechazo.mensaje);
   const hayBotones = mostrarConfirmar || mostrarCancelar || mostrarIngreso;
-  if (!hayBotones && !confirmacion.aviso && rechazos.length === 0) return null;
+  if (!hayBotones && !exito && !confirmacion.aviso && rechazos.length === 0) {
+    return null;
+  }
 
   return (
     <section aria-label="Acciones del turno" className="mt-6 space-y-4">
+      {/* La región role="status" existe desde el principio, vacía y fuera de
+          la vista: si apareciera junto con el texto, algunos lectores de
+          pantalla no lo anunciarían. */}
+      <p
+        role="status"
+        className={exito ? "flex items-center gap-2 text-sm font-medium" : "sr-only"}
+      >
+        {exito && <CircleCheckIcon aria-hidden="true" className="size-4 shrink-0" />}
+        {exito}
+      </p>
       {confirmacion.aviso && (
         <Alert variant="destructive">
           <AlertTitle>El turno se confirmó, pero el aviso no pudo enviarse</AlertTitle>
