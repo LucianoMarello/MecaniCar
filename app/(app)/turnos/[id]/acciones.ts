@@ -1,6 +1,5 @@
 "use server";
 
-import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { obtenerUsuario } from "@/lib/auth";
@@ -9,7 +8,7 @@ import {
   confirmarTurno,
   registrarIngreso,
 } from "@/lib/casos/turnos";
-import { ConflictoNegocio } from "@/lib/errores";
+import { esConflicto } from "@/lib/errores";
 import { SIN_ENVIAR, type EstadoFormulario } from "@/lib/formularios";
 import { idSchema } from "@/lib/schemas/http";
 
@@ -27,13 +26,7 @@ async function capturarConflicto<T>(caso: Promise<T>) {
   try {
     return await caso;
   } catch (error) {
-    if (
-      error instanceof ConflictoNegocio ||
-      (error instanceof Prisma.PrismaClientKnownRequestError &&
-        ["P2002", "P2034"].includes(error.code))
-    ) {
-      return { resultado: "CONFLICTO" } as const;
-    }
+    if (esConflicto(error)) return { resultado: "CONFLICTO" } as const;
     throw error;
   }
 }
