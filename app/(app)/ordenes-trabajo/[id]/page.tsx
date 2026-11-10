@@ -5,7 +5,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { EncabezadoPagina } from "@/components/EncabezadoPagina";
 import { EstadoTrabajo } from "@/components/EstadoTrabajo";
 import { obtenerUsuario } from "@/lib/auth";
-import { buscarOrden } from "@/lib/db/ordenes-trabajo";
+import { buscarOrden, buscarPresupuestoDeOrden } from "@/lib/db/ordenes-trabajo";
 import { formatearFecha } from "@/lib/presentacion";
 import { idSchema } from "@/lib/schemas/http";
 import { AccionesOrden } from "./AccionesOrden";
@@ -24,6 +24,7 @@ export default async function DetalleOrden({ params, searchParams }: Props) {
   if (resultado.resultado !== "OK") notFound();
 
   const { orden } = resultado;
+  const presupuestoExistente = usuario.rol === "CLIENTE" ? null : await buscarPresupuestoDeOrden(orden.id);
   const parametros = await searchParams;
   const avisoPendiente = parametros.aviso === "pendiente";
 
@@ -54,7 +55,9 @@ export default async function DetalleOrden({ params, searchParams }: Props) {
       </dl>
       {usuario.rol !== "CLIENTE" && (
         <>
-          <div className="mt-6"><Link className="underline underline-offset-4" href={`/presupuestos/nuevo?orden=${orden.id}`}>Crear presupuesto</Link></div>
+          {orden.estado !== "FINALIZADA" && !presupuestoExistente && (
+            <div className="mt-6"><Link className="underline underline-offset-4" href={`/presupuestos/nuevo?orden=${orden.id}`}>Crear presupuesto</Link></div>
+          )}
           <AccionesOrden id={orden.id} estado={orden.estado} />
         </>
       )}

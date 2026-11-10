@@ -32,6 +32,29 @@ vi.mock("next/navigation", () => ({
   redirect: mocks.redirect,
   notFound: mocks.notFound,
 }));
+vi.mock("@/components/EstadoTrabajo", () => ({ EstadoTrabajo: () => null }));
+vi.mock("@/components/ui/card", () => ({
+  Card: (props: Record<string, unknown>) => props.children ?? null,
+  CardContent: (props: Record<string, unknown>) => props.children ?? null,
+  CardHeader: (props: Record<string, unknown>) => props.children ?? null,
+  CardTitle: (props: Record<string, unknown>) => props.children ?? null,
+}));
+vi.mock("@/components/ui/button", () => ({ Button: (props: Record<string, unknown>) => props.children ?? null }));
+vi.mock("@/components/ui/alert", () => ({
+  Alert: (props: Record<string, unknown>) => props.children ?? null,
+  AlertTitle: (props: Record<string, unknown>) => props.children ?? null,
+  AlertDescription: (props: Record<string, unknown>) => props.children ?? null,
+}));
+vi.mock("@/components/ui/alert-dialog", () => ({
+  AlertDialog: (props: Record<string, unknown>) => props.children ?? null,
+  AlertDialogCancel: () => null,
+  AlertDialogContent: (props: Record<string, unknown>) => props.children ?? null,
+  AlertDialogDescription: (props: Record<string, unknown>) => props.children ?? null,
+  AlertDialogFooter: (props: Record<string, unknown>) => props.children ?? null,
+  AlertDialogHeader: (props: Record<string, unknown>) => props.children ?? null,
+  AlertDialogTitle: (props: Record<string, unknown>) => props.children ?? null,
+  AlertDialogTrigger: (props: Record<string, unknown>) => props.children ?? null,
+}));
 
 import Presupuestos from "./(app)/presupuestos/page";
 import DetallePresupuesto from "./(app)/presupuestos/[id]/page";

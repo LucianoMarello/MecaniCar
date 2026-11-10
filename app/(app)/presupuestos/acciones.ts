@@ -8,9 +8,21 @@ import { esConflicto } from "@/lib/errores";
 import { type EstadoFormulario } from "@/lib/formularios";
 import { editarPresupuestoSchema, presupuestoSchema } from "@/lib/schemas/presupuesto";
 import { idSchema } from "@/lib/schemas/http";
+import { listarServicios } from "@/lib/db/servicios";
+import { paginacionSchema } from "@/lib/schemas/http";
 
 function idsDesde(formData: FormData) {
   return formData.getAll("serviciosIds").filter((v): v is string => typeof v === "string");
+}
+
+export async function cargarServiciosAction(paginaSolicitada: number) {
+  const usuario = await obtenerUsuario();
+  if (!usuario || usuario.rol === "CLIENTE") return { resultado: "NO_AUTORIZADO" } as const;
+  const validacion = paginacionSchema.safeParse({ pagina: paginaSolicitada, limite: 100 });
+  if (!validacion.success) return { resultado: "PAGINA_INVALIDA" } as const;
+  const servicios = await listarServicios(validacion.data);
+  const total = await (await import("@/lib/db/servicios")).contarServicios();
+  return { resultado: "OK", servicios: servicios.map((s) => ({ id: s.id, nombre: s.nombre, precio: s.precioActual.toString() })), pagina: validacion.data.pagina, totalPaginas: Math.max(1, Math.ceil(total / 100)) } as const;
 }
 
 export async function crearPresupuestoAction(ordenTrabajoId: string, _previo: EstadoFormulario, formData: FormData): Promise<EstadoFormulario> {
@@ -19,17 +31,18 @@ export async function crearPresupuestoAction(ordenTrabajoId: string, _previo: Es
   if (usuario.rol === "CLIENTE") return { mensaje: "Solo el taller puede crear presupuestos." };
   const entrada = presupuestoSchema.safeParse({ ordenTrabajoId, serviciosIds: idsDesde(formData) });
   if (!entrada.success) return { errores: entrada.error.flatten().fieldErrors };
+  let resultado: Awaited<ReturnType<typeof crearPresupuesto>>;
   try {
-    const resultado = await crearPresupuesto(entrada.data.ordenTrabajoId, entrada.data.serviciosIds);
+    resultado = await crearPresupuesto(entrada.data.ordenTrabajoId, entrada.data.serviciosIds);
     if (resultado.resultado === "NO_EXISTE") return { mensaje: "La orden o algún servicio no existe." };
     if (resultado.resultado === "RECHAZADO") return { mensaje: resultado.motivos.join(". ") };
-    revalidatePath("/presupuestos");
-    revalidatePath("/ordenes-trabajo");
-    redirect(`/presupuestos/${resultado.presupuesto.id}${resultado.avisoEnviado ? "" : "?aviso=pendiente"}`);
   } catch (error) {
     if (esConflicto(error)) return { mensaje: "La orden ya tiene un presupuesto o cambió de estado. Actualizá e intentá de nuevo." };
     throw error;
   }
+  revalidatePath("/presupuestos");
+  revalidatePath("/ordenes-trabajo");
+  redirect(`/presupuestos/${resultado.presupuesto.id}${resultado.avisoEnviado ? "" : "?aviso=pendiente"}`);
 }
 
 export async function editarPresupuestoAction(id: string, _previo: EstadoFormulario, formData: FormData): Promise<EstadoFormulario> {
