@@ -3,6 +3,16 @@ import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { NoAutenticado, NoAutorizado } from "@/lib/auth";
 export class ConflictoNegocio extends Error {}
+// Otro pedido cambió los datos entre la lectura y la escritura. Lo detecta la
+// regla dentro de la transacción (ConflictoNegocio) o la base: P2002 (índice
+// único) o P2034 (transacción serializable abortada).
+export function esConflicto(error: unknown) {
+  return (
+    error instanceof ConflictoNegocio ||
+    (error instanceof Prisma.PrismaClientKnownRequestError &&
+      ["P2002", "P2034"].includes(error.code))
+  );
+}
 export function responderError(endpoint: string, error: unknown) {
   if (error instanceof NoAutenticado) {
     return NextResponse.json({ error: error.message }, { status: 401 });
@@ -15,11 +25,7 @@ export function responderError(endpoint: string, error: unknown) {
       { error: "Datos inválidos", detalles: error.flatten() },
       { status: 400 },
     );
-  if (
-    error instanceof ConflictoNegocio ||
-    (error instanceof Prisma.PrismaClientKnownRequestError &&
-      ["P2002", "P2034"].includes(error.code))
-  )
+  if (esConflicto(error))
     return NextResponse.json(
       {
         error:

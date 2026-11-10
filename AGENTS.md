@@ -90,6 +90,9 @@ Después de tocar `prisma/schema.prisma`, siempre generar una migración. Nunca 
 - Los componentes son Server Components por defecto. `"use client"` solo si hay estado, efectos o eventos del navegador.
 - Un componente por archivo, en PascalCase. Los archivos de utilidades, en camelCase.
 - Los estados de carga y de error se resuelven siempre; no dejar la pantalla en blanco.
+- El id del recurso de la pantalla (el `[id]` de la ruta) llega a la Server Action con `.bind()`; nunca en un input oculto ni en el `formData`.
+- Una Server Action no redirige a la misma URL de la que vino: hace `revalidatePath` y devuelve el estado. Solo redirige a otra pantalla (por ejemplo, a lo que se acaba de crear), y siempre al final.
+- Si falla el aviso por correo, el taller lo ve en la pantalla con un `Alert` (spec 9.4). Si la acción se queda en la pantalla, devuelve `aviso` en `EstadoFormulario`; si redirige a otra, le suma `?aviso=pendiente` a esa URL y la página de destino lo muestra solo al taller.
 
 ### Estilos
 

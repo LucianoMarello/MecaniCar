@@ -328,9 +328,9 @@ Las direcciones existentes se conservan. Las propuestas para pasos pendientes so
 | Consultar vehículo | Detalle | `/vehiculos/[id]` | Cliente propietario; Mecánico y Administrador | Implementada |
 | Solicitar turno (HU02) | Solicitud | `/turnos/nuevo` | Cliente | Implementada (clase 12); se abre con un clic desde Mis vehículos (8.1) y al guardar lleva al detalle del turno |
 | Consultar turnos (HU03) | Listado y detalle de turnos | `/turnos`, `/turnos/[id]` | Cliente: propios; Mecánico y Administrador: taller | Implementada (clase 12) |
-| Confirmar turno (HU04) | Detalle del turno | `/turnos/[id]` | Mecánico y Administrador | Pantalla implementada; acción pendiente; API implementada |
-| Cancelar turno (HU05) | Detalle del turno | `/turnos/[id]` | Cliente propietario | Pantalla implementada; acción pendiente; API implementada |
-| Registrar ingreso (HU06) | Detalle del turno | `/turnos/[id]` | Mecánico y Administrador | Pantalla implementada; acción pendiente; API implementada |
+| Confirmar turno (HU04) | Detalle del turno | `/turnos/[id]` | Mecánico y Administrador | Implementada (clase 12); el turno queda confirmado y la pantalla sigue en el detalle, que pasa a ofrecer Registrar ingreso |
+| Cancelar turno (HU05) | Detalle del turno | `/turnos/[id]` | Cliente propietario | Implementada (clase 12); pide confirmación en un diálogo y el turno queda cancelado en el mismo detalle |
+| Registrar ingreso (HU06) | Detalle del turno | `/turnos/[id]` | Mecánico y Administrador | Implementada (clase 12); crea la orden y lleva a su detalle. Después, el turno enlaza a esa orden |
 | Generar orden al ingresar | Sin pantalla independiente | — | Mecánico y Administrador mediante el ingreso | La creación es consecuencia del ingreso, no otra pantalla |
 | Administrar catálogo (HU07) | Catálogo de servicios | `/servicios` | Mecánico y Administrador | Pendiente, CRUD por API |
 | Crear presupuesto (HU08) | Detalle de orden | `/ordenes-trabajo/[id]` | Mecánico y Administrador | Pantalla y acción pendientes; API implementada |
@@ -339,7 +339,7 @@ Las direcciones existentes se conservan. Las propuestas para pasos pendientes so
 | Editar presupuesto y volver a pendiente | Detalle de presupuesto | `/presupuestos/[id]` | Mecánico y Administrador | Pantalla y acción pendientes; API implementada |
 | Consultar reparación (HU13) | Detalle de orden | `/ordenes-trabajo/[id]` | Cliente propietario; Mecánico y Administrador | Implementada |
 | Finalizar reparación (HU12) | Detalle de orden | `/ordenes-trabajo/[id]` | Mecánico y Administrador | Pantalla implementada; acción disponible |
-| Notificar al cliente | Sin pantalla independiente | — | Envío del servidor; resultado en la operación | Integración implementada; presentación operativa pendiente |
+| Notificar al cliente | Sin pantalla independiente | — | Envío del servidor; resultado en la operación | Integración implementada. Si el correo no sale, confirmar un turno y finalizar una reparación se lo muestran al taller en la misma pantalla (9.4); en presupuestos, pendiente con sus pantallas |
 | Revisar componentes y sus estados | Galería visual | `/sistema` | Cualquier usuario autenticado | Implementada con ejemplos fijos, sin escribir en la base |
 | Asignar rol | Administración de usuarios | `/usuarios` | Administrador | Pantalla pendiente; API implementada |
 | Cerrar sesión | Barra de navegación | Sin página nueva | Cualquier usuario autenticado | Implementada, regresa a `/ingresar` |
