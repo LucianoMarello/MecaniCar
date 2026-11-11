@@ -64,11 +64,11 @@ export async function editarPresupuestoAction(id: string, _previo: EstadoFormula
   }
 }
 
-export async function aprobarPresupuestoAction(id: string, _previo: EstadoFormulario): Promise<EstadoFormulario> {
+export async function aprobarPresupuestoAction(id: string): Promise<EstadoFormulario> {
   return decidirPresupuestoActionInterna(id, "APROBAR");
 }
 
-export async function rechazarPresupuestoAction(id: string, _previo: EstadoFormulario): Promise<EstadoFormulario> {
+export async function rechazarPresupuestoAction(id: string): Promise<EstadoFormulario> {
   return decidirPresupuestoActionInterna(id, "RECHAZAR");
 }
 

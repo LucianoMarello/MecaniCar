@@ -24,7 +24,7 @@ export default async function DetalleOrden({ params, searchParams }: Props) {
   if (resultado.resultado !== "OK") notFound();
 
   const { orden } = resultado;
-  const presupuestoExistente = usuario.rol === "CLIENTE" ? null : await buscarPresupuestoDeOrden(orden.id);
+  const presupuestoExistente = await buscarPresupuestoDeOrden(orden.id);
   const parametros = await searchParams;
   const avisoPendiente = parametros.aviso === "pendiente";
 
@@ -60,6 +60,16 @@ export default async function DetalleOrden({ params, searchParams }: Props) {
           )}
           <AccionesOrden id={orden.id} estado={orden.estado} />
         </>
+      )}
+      {presupuestoExistente && (
+        <div className="mt-6">
+          <Link
+            className="underline underline-offset-4"
+            href={`/presupuestos/${presupuestoExistente.id}`}
+          >
+            Ver presupuesto
+          </Link>
+        </div>
       )}
     </main>
   );

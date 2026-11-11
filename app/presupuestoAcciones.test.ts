@@ -60,20 +60,20 @@ describe("acciones de presupuestos", () => {
     mocks.editar.mockRejectedValue(new Error("conflict"));
     expect((await editarPresupuestoAction("id-1", SIN_ENVIAR, form(["s-1"]))).mensaje).toContain("finalizada");
   });
-  it.each([[aprobarPresupuestoAction, "APROBAR"], [rechazarPresupuestoAction, "RECHAZAR"]] as const)("decisión %s exige cliente y propaga rechazo de regla", async (action, decision) => {
+  it.each([aprobarPresupuestoAction, rechazarPresupuestoAction])("la acción %s rechaza al personal del taller y propaga una regla de negocio", async (action) => {
     mocks.obtenerUsuario.mockResolvedValue(mecanico);
-    expect((await action("p-1", SIN_ENVIAR)).mensaje).toContain("cliente propietario");
+    expect((await action("p-1")).mensaje).toContain("cliente propietario");
     mocks.obtenerUsuario.mockResolvedValue(cliente);
     mocks.decidir.mockResolvedValue({ resultado: "RECHAZADO", motivos: ["No pendiente"] });
-    expect((await action("p-1", SIN_ENVIAR)).mensaje).toBe("No pendiente");
+    expect((await action("p-1")).mensaje).toBe("No pendiente");
   });
   it.each([[aprobarPresupuestoAction, "APROBAR"], [rechazarPresupuestoAction, "RECHAZAR"]] as const)("decisión %s actualiza rutas ante éxito y devuelve conflicto", async (action, decision) => {
     mocks.obtenerUsuario.mockResolvedValue(cliente);
     mocks.decidir.mockResolvedValue({ resultado: "DECIDIDO" });
-    expect(await action("p-1", SIN_ENVIAR)).toEqual({});
+    expect(await action("p-1")).toEqual({});
     expect(mocks.decidir).toHaveBeenCalledWith("p-1", "cliente-1", decision);
     expect(mocks.revalidate).toHaveBeenCalledWith("/ordenes-trabajo");
     mocks.decidir.mockRejectedValue(new Error("conflict"));
-    expect((await action("p-1", SIN_ENVIAR)).mensaje).toContain("cambió");
+    expect((await action("p-1")).mensaje).toContain("cambió");
   });
 });

@@ -123,9 +123,9 @@ describe("pantallas de presupuestos", () => {
     expect(mocks.buscarPresupuesto).toHaveBeenCalledWith("presupuesto-ajeno", "cliente-1", "CLIENTE");
   });
 
-  it("el cliente no puede usar la acción para decidir un presupuesto", async () => {
+  it("el mecánico no puede usar la acción para decidir un presupuesto", async () => {
     mocks.obtenerUsuario.mockResolvedValue(mecanico);
-    await expect(aprobarPresupuestoAction("id-1", {})).resolves.toMatchObject({ mensaje: expect.any(String) });
+    await expect(aprobarPresupuestoAction("id-1")).resolves.toMatchObject({ mensaje: expect.any(String) });
     expect(mocks.decidirPresupuesto).not.toHaveBeenCalled();
   });
 });
