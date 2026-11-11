@@ -333,13 +333,13 @@ Las direcciones existentes se conservan. Las propuestas para pasos pendientes so
 | Registrar ingreso (HU06) | Detalle del turno | `/turnos/[id]` | Mecánico y Administrador | Implementada (clase 12); crea la orden y lleva a su detalle. Después, el turno enlaza a esa orden |
 | Generar orden al ingresar | Sin pantalla independiente | — | Mecánico y Administrador mediante el ingreso | La creación es consecuencia del ingreso, no otra pantalla |
 | Administrar catálogo (HU07) | Catálogo de servicios | `/servicios` | Mecánico y Administrador | Pendiente, CRUD por API |
-| Crear presupuesto (HU08) | Detalle de orden | `/ordenes-trabajo/[id]` | Mecánico y Administrador | Pantalla y acción pendientes; API implementada |
-| Consultar presupuesto (HU09) | Detalle de presupuesto | `/presupuestos/[id]` | Cliente propietario; Mecánico y Administrador | Pendiente |
-| Aprobar o rechazar (HU10/HU11) | Detalle de presupuesto | `/presupuestos/[id]` | Cliente propietario | Pantalla y acciones pendientes; API implementada |
-| Editar presupuesto y volver a pendiente | Detalle de presupuesto | `/presupuestos/[id]` | Mecánico y Administrador | Pantalla y acción pendientes; API implementada |
+| Crear presupuesto (HU08) | Formulario de presupuesto | `/presupuestos/nuevo?orden=[id]` | Mecánico y Administrador | Implementada; se inicia desde el detalle de la orden |
+| Consultar presupuesto (HU09) | Listado y detalle de presupuesto | `/presupuestos`, `/presupuestos/[id]` | Cliente propietario; Mecánico y Administrador | Implementada |
+| Aprobar o rechazar (HU10/HU11) | Detalle de presupuesto | `/presupuestos/[id]` | Cliente propietario | Implementadas; el rechazo pide confirmación |
+| Editar presupuesto y volver a pendiente | Detalle de presupuesto | `/presupuestos/[id]` | Mecánico y Administrador | Implementada; cualquier edición vuelve a PENDIENTE |
 | Consultar reparación (HU13) | Detalle de orden | `/ordenes-trabajo/[id]` | Cliente propietario; Mecánico y Administrador | Implementada |
 | Finalizar reparación (HU12) | Detalle de orden | `/ordenes-trabajo/[id]` | Mecánico y Administrador | Pantalla implementada; acción disponible |
-| Notificar al cliente | Sin pantalla independiente | — | Envío del servidor; resultado en la operación | Integración implementada. Si el correo no sale, confirmar un turno y finalizar una reparación se lo muestran al taller en la misma pantalla (9.4); en presupuestos, pendiente con sus pantallas |
+| Notificar al cliente | Sin pantalla independiente | — | Envío del servidor; resultado en la operación | Integración implementada. Si el correo no sale, confirmar un turno, crear o editar un presupuesto y finalizar una reparación se lo muestran al taller (9.4) |
 | Revisar componentes y sus estados | Galería visual | `/sistema` | Cualquier usuario autenticado | Implementada con ejemplos fijos, sin escribir en la base |
 | Asignar rol | Administración de usuarios | `/usuarios` | Administrador | Pantalla pendiente; API implementada |
 | Cerrar sesión | Barra de navegación | Sin página nueva | Cualquier usuario autenticado | Implementada, regresa a `/ingresar` |

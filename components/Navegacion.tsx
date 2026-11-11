@@ -72,6 +72,14 @@ export function Navegacion({ usuario }: { usuario: UsuarioSesion }) {
             asChild
             variant="ghost"
           >
+            <Link href="/presupuestos">
+              {usuario.rol === "CLIENTE" ? "Mis presupuestos" : "Presupuestos"}
+            </Link>
+          </Button>
+          <Button
+            asChild
+            variant="ghost"
+          >
             <Link href="/sistema">Guía visual</Link>
           </Button>
         </nav>

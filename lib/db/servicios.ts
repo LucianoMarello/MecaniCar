@@ -22,6 +22,10 @@ export function listarServicios(paginacion: Paginacion = { pagina: 1, limite: 20
   });
 }
 
+export function contarServicios() {
+  return prisma.servicio.count();
+}
+
 export function buscarServicioPorId(id: string) {
   return prisma.servicio.findUnique({
     where: { id },

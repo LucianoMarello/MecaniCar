@@ -40,6 +40,14 @@ export async function listarPresupuestos(
   });
   return presupuestos.map(conTotal);
 }
+export function contarPresupuestos(usuarioId: string, rol: Rol) {
+  return prisma.presupuesto.count({
+    where: rol === "CLIENTE" ? { ordenTrabajo: { vehiculo: { usuarioId } } } : undefined,
+  });
+}
+export function buscarPresupuestoDeOrden(ordenTrabajoId: string) {
+  return prisma.presupuesto.findUnique({ where: { ordenTrabajoId }, select: { id: true } });
+}
 export async function buscarPresupuesto(
   id: string,
   usuarioId: string,

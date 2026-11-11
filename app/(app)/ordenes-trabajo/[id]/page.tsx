@@ -1,10 +1,11 @@
-import type { EstadoOrdenTrabajo } from "@prisma/client";
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { EncabezadoPagina } from "@/components/EncabezadoPagina";
 import { EstadoTrabajo } from "@/components/EstadoTrabajo";
 import { obtenerUsuario } from "@/lib/auth";
 import { buscarOrden } from "@/lib/db/ordenes-trabajo";
+import { buscarPresupuestoDeOrden } from "@/lib/db/presupuestos";
 import { formatearFecha } from "@/lib/presentacion";
 import { idSchema } from "@/lib/schemas/http";
 import { AccionesOrden } from "./AccionesOrden";
@@ -23,6 +24,7 @@ export default async function DetalleOrden({ params, searchParams }: Props) {
   if (resultado.resultado !== "OK") notFound();
 
   const { orden } = resultado;
+  const presupuestoExistente = await buscarPresupuestoDeOrden(orden.id);
   const parametros = await searchParams;
   const avisoPendiente = parametros.aviso === "pendiente";
 
@@ -52,7 +54,22 @@ export default async function DetalleOrden({ params, searchParams }: Props) {
         </div>
       </dl>
       {usuario.rol !== "CLIENTE" && (
-        <AccionesOrden id={orden.id} estado={orden.estado} />
+        <>
+          {orden.estado !== "FINALIZADA" && !presupuestoExistente && (
+            <div className="mt-6"><Link className="underline underline-offset-4" href={`/presupuestos/nuevo?orden=${orden.id}`}>Crear presupuesto</Link></div>
+          )}
+          <AccionesOrden id={orden.id} estado={orden.estado} />
+        </>
+      )}
+      {presupuestoExistente && (
+        <div className="mt-6">
+          <Link
+            className="underline underline-offset-4"
+            href={`/presupuestos/${presupuestoExistente.id}`}
+          >
+            Ver presupuesto
+          </Link>
+        </div>
       )}
     </main>
   );
