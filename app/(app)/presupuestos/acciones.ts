@@ -8,7 +8,7 @@ import { esConflicto } from "@/lib/errores";
 import { type EstadoFormulario } from "@/lib/formularios";
 import { editarPresupuestoSchema, presupuestoSchema } from "@/lib/schemas/presupuesto";
 import { idSchema } from "@/lib/schemas/http";
-import { listarServicios } from "@/lib/db/servicios";
+import { contarServicios, listarServicios } from "@/lib/db/servicios";
 import { paginacionSchema } from "@/lib/schemas/http";
 
 function idsDesde(formData: FormData) {
@@ -21,7 +21,7 @@ export async function cargarServiciosAction(paginaSolicitada: number) {
   const validacion = paginacionSchema.safeParse({ pagina: paginaSolicitada, limite: 100 });
   if (!validacion.success) return { resultado: "PAGINA_INVALIDA" } as const;
   const servicios = await listarServicios(validacion.data);
-  const total = await (await import("@/lib/db/servicios")).contarServicios();
+  const total = await contarServicios();
   return { resultado: "OK", servicios: servicios.map((s) => ({ id: s.id, nombre: s.nombre, precio: s.precioActual.toString() })), pagina: validacion.data.pagina, totalPaginas: Math.max(1, Math.ceil(total / 100)) } as const;
 }
 
@@ -64,7 +64,15 @@ export async function editarPresupuestoAction(id: string, _previo: EstadoFormula
   }
 }
 
-export async function decidirPresupuestoAction(id: string, decision: "APROBAR" | "RECHAZAR"): Promise<EstadoFormulario> {
+export async function aprobarPresupuestoAction(id: string, _previo: EstadoFormulario): Promise<EstadoFormulario> {
+  return decidirPresupuesto(id, "APROBAR");
+}
+
+export async function rechazarPresupuestoAction(id: string, _previo: EstadoFormulario): Promise<EstadoFormulario> {
+  return decidirPresupuesto(id, "RECHAZAR");
+}
+
+async function decidirPresupuesto(id: string, decision: "APROBAR" | "RECHAZAR"): Promise<EstadoFormulario> {
   const usuario = await obtenerUsuario();
   if (!usuario) redirect("/ingresar");
   if (usuario.rol !== "CLIENTE") return { mensaje: "Solo el cliente propietario puede responder el presupuesto." };

@@ -13,7 +13,7 @@ vi.mock("next/cache", () => ({ revalidatePath: mocks.revalidate }));
 vi.mock("next/navigation", () => ({ redirect: mocks.redirect }));
 vi.mock("@/lib/errores", () => ({ esConflicto: (error: unknown) => error instanceof Error && error.message === "conflict" }));
 
-import { crearPresupuestoAction, editarPresupuestoAction, decidirPresupuestoAction } from "./(app)/presupuestos/acciones";
+import { crearPresupuestoAction, editarPresupuestoAction, aprobarPresupuestoAction, rechazarPresupuestoAction } from "./(app)/presupuestos/acciones";
 import { SIN_ENVIAR } from "@/lib/formularios";
 
 const cliente = { id: "cliente-1", email: "c@example.com", nombre: "C", rol: "CLIENTE" };
@@ -60,20 +60,20 @@ describe("acciones de presupuestos", () => {
     mocks.editar.mockRejectedValue(new Error("conflict"));
     expect((await editarPresupuestoAction("id-1", SIN_ENVIAR, form(["s-1"]))).mensaje).toContain("finalizada");
   });
-  it.each(["APROBAR", "RECHAZAR"] as const)("decisión %s exige cliente y propaga rechazo de regla", async (decision) => {
+  it.each([[aprobarPresupuestoAction, "APROBAR"], [rechazarPresupuestoAction, "RECHAZAR"]] as const)("decisión %s exige cliente y propaga rechazo de regla", async (action, decision) => {
     mocks.obtenerUsuario.mockResolvedValue(mecanico);
-    expect((await decidirPresupuestoAction("p-1", decision)).mensaje).toContain("cliente propietario");
+    expect((await action("p-1", SIN_ENVIAR)).mensaje).toContain("cliente propietario");
     mocks.obtenerUsuario.mockResolvedValue(cliente);
     mocks.decidir.mockResolvedValue({ resultado: "RECHAZADO", motivos: ["No pendiente"] });
-    expect((await decidirPresupuestoAction("p-1", decision)).mensaje).toBe("No pendiente");
+    expect((await action("p-1", SIN_ENVIAR)).mensaje).toBe("No pendiente");
   });
-  it.each(["APROBAR", "RECHAZAR"] as const)("decisión %s actualiza rutas ante éxito y devuelve conflicto", async (decision) => {
+  it.each([[aprobarPresupuestoAction, "APROBAR"], [rechazarPresupuestoAction, "RECHAZAR"]] as const)("decisión %s actualiza rutas ante éxito y devuelve conflicto", async (action, decision) => {
     mocks.obtenerUsuario.mockResolvedValue(cliente);
     mocks.decidir.mockResolvedValue({ resultado: "DECIDIDO" });
-    expect(await decidirPresupuestoAction("p-1", decision)).toEqual({});
+    expect(await action("p-1", SIN_ENVIAR)).toEqual({});
     expect(mocks.decidir).toHaveBeenCalledWith("p-1", "cliente-1", decision);
     expect(mocks.revalidate).toHaveBeenCalledWith("/ordenes-trabajo");
     mocks.decidir.mockRejectedValue(new Error("conflict"));
-    expect((await decidirPresupuestoAction("p-1", decision)).mensaje).toContain("cambió");
+    expect((await action("p-1", SIN_ENVIAR)).mensaje).toContain("cambió");
   });
 });

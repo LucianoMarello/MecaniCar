@@ -23,8 +23,21 @@ export async function crearPresupuesto(ordenId: string, servicioIds: string[]) {
 export async function actualizarPresupuesto(id: string, servicioIds: string[]) {
   const presupuesto = await editarPresupuesto(id, servicioIds);
   if (!presupuesto) return { resultado: "NO_EXISTE" } as const;
-  const destinatario = await buscarDestinatarioPresupuesto(id);
-  const avisoEnviado = destinatario ? await enviarNotificacion({ destinatario, asunto: "Presupuesto actualizado - MecaniCar", mensaje: `El presupuesto ${id} fue actualizado. El total es ${presupuesto.total}. Revisalo y aprobalo nuevamente antes de continuar la reparación.` }) : false;
+  let avisoEnviado = false;
+  try {
+    const destinatario = await buscarDestinatarioPresupuesto(id);
+    if (destinatario) {
+      avisoEnviado = await enviarNotificacion({
+        destinatario,
+        asunto: "Presupuesto actualizado - MecaniCar",
+        mensaje: `El presupuesto ${id} fue actualizado. El total es $${presupuesto.total}. Revisalo y aprobalo nuevamente antes de continuar la reparación.`,
+      });
+    } else {
+      console.error("notificaciones: el presupuesto editado no tiene destinatario");
+    }
+  } catch {
+    console.error("notificaciones: no se pudo consultar el destinatario del presupuesto editado");
+  }
   return { resultado: "ACTUALIZADO", presupuesto, avisoEnviado } as const;
 }
 

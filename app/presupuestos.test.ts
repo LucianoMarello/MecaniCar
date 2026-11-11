@@ -58,7 +58,7 @@ vi.mock("@/components/ui/alert-dialog", () => ({
 
 import Presupuestos from "./(app)/presupuestos/page";
 import DetallePresupuesto from "./(app)/presupuestos/[id]/page";
-import { decidirPresupuestoAction } from "./(app)/presupuestos/acciones";
+import { aprobarPresupuestoAction } from "./(app)/presupuestos/acciones";
 
 const cliente = { id: "cliente-1", email: "c@example.com", nombre: "C", rol: "CLIENTE" };
 const mecanico = { id: "mecanico-1", email: "m@example.com", nombre: "M", rol: "MECANICO" };
@@ -125,7 +125,7 @@ describe("pantallas de presupuestos", () => {
 
   it("el cliente no puede usar la acción para decidir un presupuesto", async () => {
     mocks.obtenerUsuario.mockResolvedValue(mecanico);
-    await expect(decidirPresupuestoAction("id-1", "APROBAR")).resolves.toMatchObject({ mensaje: expect.any(String) });
+    await expect(aprobarPresupuestoAction("id-1", {})).resolves.toMatchObject({ mensaje: expect.any(String) });
     expect(mocks.decidirPresupuesto).not.toHaveBeenCalled();
   });
 });

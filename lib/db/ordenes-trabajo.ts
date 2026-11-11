@@ -15,9 +15,6 @@ const ordenSelect = {
     select: { patente: true, marca: true, modelo: true, usuarioId: true },
   },
 } as const;
-export function buscarPresupuestoDeOrden(ordenTrabajoId: string) {
-  return prisma.presupuesto.findUnique({ where: { ordenTrabajoId }, select: { id: true } });
-}
 export function listarOrdenes(
   usuarioId: string,
   rol: Rol,

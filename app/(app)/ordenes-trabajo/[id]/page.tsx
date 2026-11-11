@@ -1,11 +1,11 @@
-import type { EstadoOrdenTrabajo } from "@prisma/client";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { EncabezadoPagina } from "@/components/EncabezadoPagina";
 import { EstadoTrabajo } from "@/components/EstadoTrabajo";
 import { obtenerUsuario } from "@/lib/auth";
-import { buscarOrden, buscarPresupuestoDeOrden } from "@/lib/db/ordenes-trabajo";
+import { buscarOrden } from "@/lib/db/ordenes-trabajo";
+import { buscarPresupuestoDeOrden } from "@/lib/db/presupuestos";
 import { formatearFecha } from "@/lib/presentacion";
 import { idSchema } from "@/lib/schemas/http";
 import { AccionesOrden } from "./AccionesOrden";
