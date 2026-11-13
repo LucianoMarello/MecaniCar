@@ -11,9 +11,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # 22, la versión con la que corre Vercel.
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Instalar dependencias
@@ -30,3 +31,55 @@ jobs:
 
       - name: Tests
         run: npm test
+
+  # El sistema entero en cada Pull Request: la app compilada, una base de
+  # verdad y un navegador. Corre en paralelo con `verificar`: si los tipos
+  # fallan, se sabe en un minuto, sin esperar a que compile y levante todo.
+  e2e:
+    runs-on: ubuntu-latest
+
+    # Una base que nace con el trabajo y muere con él. Nunca la de producción.
+    # Usuario, contraseña y base son los de `.env.e2e`, así que no hace falta
+    # pisar ninguna variable.
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: e2e
+          POSTGRES_PASSWORD: e2e
+          POSTGRES_DB: mecanicar_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U e2e -d mecanicar_e2e"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Instalar el navegador
+        run: npx playwright install --with-deps chromium
+
+      # Migraciones, seed, build y servidor: lo hace todo `npm run test:e2e`.
+      - name: Pruebas de punta a punta
+        run: npm run test:e2e
+
+      # El recorrido grabado de una prueba que falló (o que pasó al
+      # reintentar) queda para descargar desde la pestaña del trabajo.
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: recorrido-de-la-falla
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 7
