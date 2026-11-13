@@ -35,7 +35,8 @@ Lo que el sistema tiene que hacer está en [`docs/spec.md`](./docs/spec.md).
 npm run dev          # desarrollo
 npm run build        # build de producción
 npm run typecheck    # chequeo de tipos
-npm test         # tests
+npm test             # reglas y Route Handlers con vitest, sin levantar nada
+npm run test:e2e     # el sistema entero: base local, app compilada y navegador (Playwright)
 npx prisma migrate dev --name <nombre>
 ```
 
@@ -52,6 +53,8 @@ Después de tocar `prisma/schema.prisma`, siempre generar una migración. Nunca 
 | Un caso de uso que comparten un Route Handler y una Server Action | `lib/casos/<entidad>.ts` |
 | Un schema de validación    | `lib/schemas/<entidad>.ts`                                        |
 | Un helper sin dependencias | `lib/utils.ts`                                                    |
+| Una prueba de una regla o un Route Handler | `<archivo>.test.ts`, al lado del archivo que prueba |
+| Una prueba de punta a punta, de permisos o de concurrencia | `e2e/<tema>.spec.ts` |
 
 ## Reglas
 
@@ -93,6 +96,20 @@ Después de tocar `prisma/schema.prisma`, siempre generar una migración. Nunca 
 - El id del recurso de la pantalla (el `[id]` de la ruta) llega a la Server Action con `.bind()`; nunca en un input oculto ni en el `formData`.
 - Una Server Action no redirige a la misma URL de la que vino: hace `revalidatePath` y devuelve el estado. Solo redirige a otra pantalla (por ejemplo, a lo que se acaba de crear), y siempre al final.
 - Si falla el aviso por correo, el taller lo ve en la pantalla con un `Alert` (spec 9.4). Si la acción se queda en la pantalla, devuelve `aviso` en `EstadoFormulario`; si redirige a otra, le suma `?aviso=pendiente` a esa URL y la página de destino lo muestra solo al taller.
+
+### Pruebas
+
+- **Las pruebas cambian cuando cambia la spec o el contrato, no cuando cambia el código.** Un refactor no toca las pruebas; si las rompe, cambió un comportamiento que no tenía que cambiar. Nunca se "arregla" una prueba roja cambiando el valor esperado.
+- **Las reglas de negocio se prueban como funciones**, con vitest, en un `*.test.ts` al lado del archivo (`lib/turnos.test.ts`). Una regla nueva o modificada (sección 7 de la spec) entra con su prueba en el mismo PR.
+- **El flujo principal tiene su prueba de punta a punta** en `e2e/flujo-principal.spec.ts`, con un `test.step` por paso de la sección 11 de la spec. Si el flujo cambia en la spec, cambia la prueba en el mismo PR.
+- **Cada fila de la columna "Rol" de `docs/api.md` tiene su caso en `e2e/permisos.spec.ts`.** Un endpoint nuevo entra con su fila. Las pruebas de permisos se escriben mirando el contrato, no el código: el código dice lo que hace, no lo que debería hacer.
+- **Una regla que dice "uno solo" o "una sola vez" tiene su prueba de pedidos simultáneos** en `e2e/concurrencia.spec.ts`: N pedidos con `Promise.all`, y se cuenta lo que quedó en la base.
+- Una prueba nueva se ve fallar al menos una vez: se saca lo que prueba, se confirma el rojo y se vuelve a poner. Se cuenta en el PR.
+- Las pruebas e2e buscan como una persona: `getByLabel`, `getByRole`, `getByText`. Nunca por clase de CSS ni por un id generado.
+- **Las pruebas e2e nunca corren contra la base de producción.** Usan la de `.env.e2e`, y `playwright.config.ts` se niega a arrancar si `DATABASE_URL` o `DIRECT_URL` no son locales, o si `RESEND_API_KEY` no está vacía.
+- `.env.e2e` se commitea porque no tiene secretos reales, y define **todas** las variables de `.env.example`, aunque sea vacías: `prisma.config.ts` y `next start` completan con `.env.local` (producción) las que falten. Una variable nueva en `.env.example` va también en `.env.e2e`.
+- No se agrega un "modo prueba" a la app (usuarios mágicos, `if (process.env.E2E)`): las sesiones de las pruebas se fabrican afuera, en `e2e/preparar.ts`, con el secreto de prueba.
+- Cada prueba e2e crea sus propios datos (una patente nueva por corrida, por ejemplo): la base local no se borra entre corridas.
 
 ### Estilos
 
