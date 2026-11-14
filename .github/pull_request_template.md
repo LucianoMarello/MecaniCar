@@ -10,3 +10,11 @@
 - [ ] Estados de carga y error resueltos en la UI
 - [ ] `npm run build` y `npm run typecheck` pasan
 - [ ] Si se tocó el modelo de datos, hay migración y (si la decisión fue discutida) un ADR
+
+### Pruebas
+
+- [ ] Si cambió una regla de negocio (sección 7 de la spec), cambió su prueba en `*.test.ts`
+- [ ] Si cambió quién puede hacer qué, o hay un endpoint nuevo, tiene su fila en `docs/api.md` y su caso en `e2e/permisos.spec.ts`
+- [ ] Si cambió el flujo principal (secciones 6 y 11 de la spec), cambió `e2e/flujo-principal.spec.ts`
+- [ ] Toda prueba nueva se vio fallar al menos una vez, y está contado en este PR
+- [ ] Ninguna prueba se arregló cambiando el valor esperado

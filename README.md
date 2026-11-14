@@ -53,10 +53,48 @@ npx auth secret
 | `npm run build`          | Build de producción (lo mismo que corre Vercel) |
 | `npm run lint`           | Lint                                            |
 | `npm run typecheck`      | Chequeo de tipos sin emitir                     |
-| `npm test`               | Tests                                           |
+| `npm test`               | Pruebas de reglas y Route Handlers (vitest)     |
+| `npm run test:e2e`       | Pruebas del sistema entero (Playwright)         |
 | `npx prisma migrate dev` | Crear y aplicar una migración                   |
 | `npx prisma studio`      | Ver y editar los datos a mano                   |
 | `npm run db:seed`        | Cargar datos de ejemplo                         |
+
+## Pruebas
+
+Dos capas, con dos comandos:
+
+- `npm test`: las reglas de negocio y los Route Handlers, con vitest. Sin base ni red.
+- `npm run test:e2e`: el sistema entero, con Playwright. Aplica las migraciones y el seed en la base de `.env.e2e`, compila la app y la levanta en el puerto 3100, así que no choca con `npm run dev`.
+
+El CI corre las dos en cada Pull Request, con una base propia que se borra al terminar. Para correr las e2e en tu máquina hace falta una base local. Las e2e **nunca corren contra la base de producción**: `playwright.config.ts` se niega a arrancar si la base no es local.
+
+La primera vez, creá la base con el mismo usuario que usa el CI. Con PostgreSQL instalado, abrí "SQL Shell (psql)", entrá como `postgres` y pegá:
+
+```sql
+CREATE ROLE e2e LOGIN PASSWORD 'e2e';
+CREATE DATABASE mecanicar_e2e OWNER e2e;
+```
+
+O, con Docker (si no tenés otro PostgreSQL usando el puerto 5432):
+
+```bash
+docker run -d --name mecanicar-e2e -e POSTGRES_USER=e2e -e POSTGRES_PASSWORD=e2e -e POSTGRES_DB=mecanicar_e2e -p 5432:5432 postgres:18-alpine
+```
+
+Y el navegador de las pruebas, una sola vez:
+
+```bash
+npx playwright install chromium
+```
+
+Después, cada vez:
+
+```bash
+npm run test:e2e                  # las corre todas en la terminal
+npm run test:e2e -- --ui          # interfaz visual: paso a paso, con la pantalla de cada uno
+npm run test:e2e -- --headed      # muestra el navegador mientras corre
+npx playwright show-trace test-results/<prueba>/trace.zip   # el recorrido de una que falló
+```
 
 ## Estructura
 
@@ -66,6 +104,7 @@ app/                    rutas (App Router)
   (app)/                páginas con sesión
   api/                  Route Handlers
 components/             componentes de UI
+e2e/                    pruebas del sistema entero (Playwright)
 lib/
   db/                   acceso a datos — ÚNICO lugar que habla con Prisma
   schemas/              schemas de Zod (validación + tipos)
