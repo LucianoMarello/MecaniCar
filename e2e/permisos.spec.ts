@@ -25,6 +25,13 @@ import { SESION } from "./sesiones";
 
 type Persona = keyof typeof SESION;
 
+const NOMBRE: Record<Persona, string> = {
+  cliente: "el cliente",
+  otroCliente: "otro cliente",
+  mecanico: "el mecánico",
+  admin: "el administrador",
+};
+
 // Una patente nueva por pedido: es única (RN02) y la base local no se borra.
 let patentes = 0;
 const nuevaPatente = () =>
@@ -100,6 +107,24 @@ const FILAS: Fila[] = [
   { fila: "PATCH /api/usuarios/:id/rol", noPueden: SOLO_ADMIN, pedir: (api) => api.patch(`/api/usuarios/${NADA}/rol`, { data: { rol: "MECANICO" } }) },
 ];
 
+// Una "terminal" por persona: cada una con su cookie, sin navegador.
+let como: Record<Persona, APIRequestContext>;
+
+test.beforeAll(async ({ playwright }, { project }) => {
+  const abrir = (sesion: string) =>
+    playwright.request.newContext({ baseURL: project.use.baseURL, storageState: sesion });
+  como = {
+    cliente: await abrir(SESION.cliente),
+    otroCliente: await abrir(SESION.otroCliente),
+    mecanico: await abrir(SESION.mecanico),
+    admin: await abrir(SESION.admin),
+  };
+});
+
+test.afterAll(async () => {
+  await Promise.all(Object.values(como ?? {}).map((api) => api.dispose()));
+});
+
 test.describe("sin sesión: 401", () => {
   // `request` no lleva cookie: la configuración no pone una sesión por defecto.
   for (const { fila, pedir } of FILAS) {
@@ -110,4 +135,34 @@ test.describe("sin sesión: 401", () => {
       expect(await respuesta.json()).toEqual({ error: "No autenticado" });
     });
   }
+});
+
+test.describe("el rol equivocado: 403", () => {
+  for (const { fila, noPueden, pedir } of FILAS) {
+    for (const persona of noPueden) {
+      test(`${fila}, como ${NOMBRE[persona]}`, async () => {
+        const respuesta = await pedir(como[persona]);
+
+        expect(respuesta.status()).toBe(403);
+        expect(await respuesta.json()).toEqual({ error: "No autorizado" });
+      });
+    }
+  }
+
+  // La otra mitad de la regla: "Mecánico" no deja afuera al administrador.
+  // Con un id que no existe, pasar el control del rol se ve como un 404: no
+  // lo frenaron por el rol y no se tocó ningún dato. `POST /api/servicios`
+  // queda afuera porque dejaría un servicio nuevo en el catálogo por corrida.
+  test("donde dice Mecánico, el administrador también entra", async () => {
+    expect((await como.admin.get("/api/servicios")).status()).toBe(200);
+
+    const delTaller = FILAS.filter(
+      ({ fila, noPueden }) =>
+        noPueden === SOLO_TALLER && !["POST /api/servicios", "GET /api/servicios"].includes(fila),
+    );
+    expect(delTaller).toHaveLength(8);
+    for (const { fila, pedir } of delTaller) {
+      expect((await pedir(como.admin)).status(), fila).toBe(404);
+    }
+  });
 });
