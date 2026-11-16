@@ -23,7 +23,8 @@ export function listarOrdenes(
   return prisma.ordenTrabajo.findMany({
     where: rol === "CLIENTE" ? { vehiculo: { usuarioId } } : undefined,
     select: ordenSelect,
-    orderBy: { fechaCreacion: "desc" },
+    // El id desempata: si no, paginar puede repetir o saltear filas que empatan.
+    orderBy: [{ fechaCreacion: "desc" }, { id: "asc" }],
     skip: (paginacion.pagina - 1) * paginacion.limite,
     take: paginacion.limite,
   });

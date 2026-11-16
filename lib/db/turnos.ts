@@ -20,7 +20,8 @@ export function listarTurnos(usuarioId: string, rol: Rol, paginacion: Paginacion
   return prisma.turno.findMany({
     where: rol === "CLIENTE" ? { usuarioId } : undefined,
     select: turnoSelect,
-    orderBy: { fechaHora: "asc" },
+    // El id desempata: si no, paginar puede repetir o saltear filas que empatan.
+    orderBy: [{ fechaHora: "asc" }, { id: "asc" }],
     skip: (paginacion.pagina - 1) * paginacion.limite, take: paginacion.limite,
   });
 }

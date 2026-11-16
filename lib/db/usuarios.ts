@@ -48,7 +48,8 @@ export function listarUsuarios(
   return prisma.usuario.findMany({
     skip: (paginacion.pagina - 1) * paginacion.limite,
     take: paginacion.limite,
-    orderBy: [{ rol: "asc" }, { nombre: "asc" }],
+    // El id desempata: si no, paginar puede repetir o saltear filas que empatan.
+    orderBy: [{ rol: "asc" }, { nombre: "asc" }, { id: "asc" }],
     select: usuarioAuthSelect,
   });
 }

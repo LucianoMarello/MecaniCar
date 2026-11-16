@@ -17,7 +17,8 @@ const servicioSelect = {
 export function listarServicios(paginacion: Paginacion = { pagina: 1, limite: 20 }) {
   return prisma.servicio.findMany({
     select: servicioSelect,
-    orderBy: { nombre: "asc" },
+    // El id desempata: si no, paginar puede repetir o saltear filas que empatan.
+    orderBy: [{ nombre: "asc" }, { id: "asc" }],
     skip: (paginacion.pagina - 1) * paginacion.limite, take: paginacion.limite,
   });
 }
