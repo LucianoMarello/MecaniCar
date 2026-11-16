@@ -21,7 +21,7 @@ Lo que el sistema tiene que hacer está en [`docs/spec.md`](./docs/spec.md).
 
 ## Stack
 
-- Next.js (App Router) + TypeScript
+- Next.js 16 (App Router) + TypeScript. La plantilla de la materia usa Next 15: por qué se cambió, en `docs/adr/0005-next-16.md`
 - Postgres (Supabase) + Prisma
 - Zod para validación
 - Auth.js para sesión y roles, con Google como proveedor
