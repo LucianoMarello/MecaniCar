@@ -34,7 +34,8 @@ export async function listarPresupuestos(
         ? { ordenTrabajo: { vehiculo: { usuarioId } } }
         : undefined,
     select: presupuestoSelect,
-    orderBy: { fechaCreacion: "desc" },
+    // El id desempata: si no, paginar puede repetir o saltear filas que empatan.
+    orderBy: [{ fechaCreacion: "desc" }, { id: "asc" }],
     skip: (paginacion.pagina - 1) * paginacion.limite,
     take: paginacion.limite,
   });
