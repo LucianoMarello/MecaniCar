@@ -5,9 +5,11 @@
  * como alguien con `curl`: la pregunta no es si el botón está escondido, sino
  * si el servidor dice que no cuando alguien se saltea la pantalla.
  *
- * La tabla FILAS es la columna "Rol" de `docs/api.md`, fila por fila, dada
- * vuelta: quién NO puede y qué tiene que contestar el servidor. Los valores
- * esperados salen del contrato, no de correr el código y copiar lo que dio.
+ * La tabla FILAS es la columna "Rol" de `docs/api.md`, fila por fila: quién NO
+ * puede y qué tiene que contestar el servidor. La tabla ENTRA es la otra
+ * mitad: que quien SÍ puede consigue hacerlo. Sin ella, un permiso roto por
+ * negarle a todos pasaría en verde. Los valores esperados salen del contrato,
+ * no de correr el código y copiar lo que dio.
  *
  * Los tres números, que no son intercambiables:
  *   401  no sé quién sos                      (sin sesión)
@@ -131,14 +133,19 @@ async function cuerpo<T = { id: string; estado: string }>(respuesta: APIResponse
   return (await respuesta.json()) as T;
 }
 
-/** Todos los ids de un listado, página por página. */
-async function idsDe(api: APIRequestContext, ruta: string) {
-  const ids: string[] = [];
+/** Todas las filas de un listado, página por página. */
+async function filasDe<T extends { id: string }>(api: APIRequestContext, ruta: string) {
+  const todas: T[] = [];
   for (let pagina = 1; ; pagina++) {
-    const filas = await cuerpo<{ id: string }[]>(await api.get(`${ruta}?pagina=${pagina}&limite=100`));
-    ids.push(...filas.map((fila) => fila.id));
-    if (filas.length < 100) return ids;
+    const filas = await cuerpo<T[]>(await api.get(`${ruta}?pagina=${pagina}&limite=100`));
+    todas.push(...filas);
+    if (filas.length < 100) return todas;
   }
+}
+
+/** Todos los ids de un listado. */
+async function idsDe(api: APIRequestContext, ruta: string) {
+  return (await filasDe(api, ruta)).map((fila) => fila.id);
 }
 
 test.describe("sin sesión: 401", () => {
@@ -164,23 +171,213 @@ test.describe("el rol equivocado: 403", () => {
       });
     }
   }
+});
 
-  // La otra mitad de la regla: "Mecánico" no deja afuera al administrador.
-  // Con un id que no existe, pasar el control del rol se ve como un 404: no
-  // lo frenaron por el rol y no se tocó ningún dato. `POST /api/servicios`
-  // queda afuera porque dejaría un servicio nuevo en el catálogo por corrida.
-  test("donde dice Mecánico, el administrador también entra", async () => {
-    expect((await como.admin.get("/api/servicios")).status()).toBe(200);
+// Lo que necesitan los casos de ENTRA, armado por la API y siempre a nombre
+// del cliente: para el cliente es lo suyo, y para el taller es "cualquier
+// vehículo" del contrato, no uno propio.
+async function nuevoVehiculo() {
+  return (await cuerpo(await como.cliente.post("/api/vehiculos", { data: vehiculo() }), 201)).id;
+}
 
-    const delTaller = FILAS.filter(
-      ({ fila, noPueden }) =>
-        noPueden === SOLO_TALLER && !["POST /api/servicios", "GET /api/servicios"].includes(fila),
+async function nuevoTurno() {
+  const vehiculoId = await nuevoVehiculo();
+  return (await cuerpo(await como.cliente.post("/api/turnos", { data: turnoPara(vehiculoId) }), 201)).id;
+}
+
+async function nuevoTurnoConfirmado() {
+  const turno = await nuevoTurno();
+  await cuerpo(await como.mecanico.post(`/api/turnos/${turno}/confirmacion`));
+  return turno;
+}
+
+async function nuevaOrden() {
+  const turno = await nuevoTurnoConfirmado();
+  return (await cuerpo(await como.mecanico.post(`/api/turnos/${turno}/ingreso`), 201)).id;
+}
+
+async function nuevoPresupuesto() {
+  const orden = await nuevaOrden();
+  const datos = { ordenTrabajoId: orden, ...SERVICIOS_DEL_PRESUPUESTO };
+  const { id } = await cuerpo(await como.mecanico.post("/api/presupuestos", { data: datos }), 201);
+  return { orden, presupuesto: id };
+}
+
+async function nuevaOrdenEnReparacion() {
+  const { orden, presupuesto } = await nuevoPresupuesto();
+  await cuerpo(await como.cliente.post(`/api/presupuestos/${presupuesto}/aprobacion`));
+  return orden;
+}
+
+// El catálogo es de todos y la base no se borra entre corridas: un servicio
+// que crea una prueba se borra al terminar, pase lo que pase.
+const servicioNuevo = () => ({ nombre: `Prueba ${nuevaPatente()}`, precio: 30000 });
+
+async function conServicioNuevo(usar: (id: string) => Promise<void>) {
+  const { id } = await cuerpo(await como.mecanico.post("/api/servicios", { data: servicioNuevo() }), 201);
+  try {
+    await usar(id);
+  } finally {
+    await como.mecanico.delete(`/api/servicios/${id}`);
+  }
+}
+
+type Caso = (api: APIRequestContext) => Promise<void>;
+
+/** Por fila de FILAS: qué consigue hacer quien sí puede, con el código de éxito del contrato. */
+const ENTRA: Record<string, Caso> = {
+  // Vehículos
+  "POST /api/vehiculos": async (api) => {
+    const datos = vehiculo();
+    const creado = await cuerpo<{ patente: string }>(await api.post("/api/vehiculos", { data: datos }), 201);
+    expect(creado.patente).toBe(datos.patente);
+  },
+  "GET /api/vehiculos": async (api) => {
+    const id = await nuevoVehiculo();
+    expect(await idsDe(api, "/api/vehiculos")).toContain(id);
+  },
+  "GET /api/vehiculos/:id": async (api) => {
+    const id = await nuevoVehiculo();
+    expect((await cuerpo(await api.get(`/api/vehiculos/${id}`))).id).toBe(id);
+  },
+  "PATCH /api/vehiculos/:id": async (api) => {
+    const id = await nuevoVehiculo();
+    const respuesta = await api.patch(`/api/vehiculos/${id}`, { data: { marca: "Fiat" } });
+    expect((await cuerpo<{ marca: string }>(respuesta)).marca).toBe("Fiat");
+  },
+  "DELETE /api/vehiculos/:id": async (api) => {
+    const id = await nuevoVehiculo();
+    expect((await api.delete(`/api/vehiculos/${id}`)).status()).toBe(204);
+    expect((await como.cliente.get(`/api/vehiculos/${id}`)).status()).toBe(404);
+  },
+
+  // Turnos
+  "POST /api/turnos": async (api) => {
+    const vehiculoId = await nuevoVehiculo();
+    const turno = await cuerpo(await api.post("/api/turnos", { data: turnoPara(vehiculoId) }), 201);
+    expect(turno.estado).toBe("PENDIENTE");
+  },
+  "GET /api/turnos": async (api) => {
+    const id = await nuevoTurno();
+    expect(await idsDe(api, "/api/turnos")).toContain(id);
+  },
+  "GET /api/turnos/:id": async (api) => {
+    const id = await nuevoTurno();
+    expect((await cuerpo(await api.get(`/api/turnos/${id}`))).id).toBe(id);
+  },
+  "POST /api/turnos/:id/confirmacion": async (api) => {
+    const id = await nuevoTurno();
+    expect((await cuerpo(await api.post(`/api/turnos/${id}/confirmacion`))).estado).toBe("CONFIRMADO");
+  },
+  "POST /api/turnos/:id/cancelacion": async (api) => {
+    const id = await nuevoTurno();
+    expect((await cuerpo(await api.post(`/api/turnos/${id}/cancelacion`))).estado).toBe("CANCELADO");
+  },
+
+  // Órdenes de trabajo
+  "POST /api/turnos/:id/ingreso": async (api) => {
+    const turno = await nuevoTurnoConfirmado();
+    expect((await cuerpo(await api.post(`/api/turnos/${turno}/ingreso`), 201)).estado).toBe("ABIERTA");
+  },
+  "GET /api/ordenes-trabajo": async (api) => {
+    const id = await nuevaOrden();
+    expect(await idsDe(api, "/api/ordenes-trabajo")).toContain(id);
+  },
+  "GET /api/ordenes-trabajo/:id": async (api) => {
+    const id = await nuevaOrden();
+    expect((await cuerpo(await api.get(`/api/ordenes-trabajo/${id}`))).id).toBe(id);
+  },
+  "POST /api/ordenes-trabajo/:id/finalizacion": async (api) => {
+    const id = await nuevaOrdenEnReparacion();
+    expect((await cuerpo(await api.post(`/api/ordenes-trabajo/${id}/finalizacion`))).estado).toBe("FINALIZADA");
+  },
+
+  // Servicios
+  "POST /api/servicios": async (api) => {
+    const datos = servicioNuevo();
+    const creado = await cuerpo<{ id: string; nombre: string }>(
+      await api.post("/api/servicios", { data: datos }),
+      201,
     );
-    expect(delTaller).toHaveLength(8);
-    for (const { fila, pedir } of delTaller) {
-      expect((await pedir(como.admin)).status(), fila).toBe(404);
+    await como.mecanico.delete(`/api/servicios/${creado.id}`);
+    expect(creado.nombre).toBe(datos.nombre);
+  },
+  "GET /api/servicios": async (api) => {
+    expect(await idsDe(api, "/api/servicios")).toContain("servicio-demo");
+  },
+  "GET /api/servicios/:id": async (api) => {
+    expect((await cuerpo(await api.get("/api/servicios/servicio-demo"))).id).toBe("servicio-demo");
+  },
+  "PATCH /api/servicios/:id": (api) =>
+    conServicioNuevo(async (id) => {
+      const respuesta = await api.patch(`/api/servicios/${id}`, { data: { precio: 45000 } });
+      expect(Number((await cuerpo<{ precioActual: string }>(respuesta)).precioActual)).toBe(45000);
+    }),
+  "DELETE /api/servicios/:id": (api) =>
+    conServicioNuevo(async (id) => {
+      expect((await api.delete(`/api/servicios/${id}`)).status()).toBe(204);
+      expect((await como.mecanico.get(`/api/servicios/${id}`)).status()).toBe(404);
+    }),
+
+  // Presupuestos
+  "POST /api/presupuestos": async (api) => {
+    const datos = { ordenTrabajoId: await nuevaOrden(), ...SERVICIOS_DEL_PRESUPUESTO };
+    expect((await cuerpo(await api.post("/api/presupuestos", { data: datos }), 201)).estado).toBe("PENDIENTE");
+  },
+  "PATCH /api/presupuestos/:id": async (api) => {
+    const { presupuesto } = await nuevoPresupuesto();
+    const respuesta = await api.patch(`/api/presupuestos/${presupuesto}`, { data: SERVICIOS_DEL_PRESUPUESTO });
+    expect((await cuerpo(respuesta)).estado).toBe("PENDIENTE");
+  },
+  "GET /api/presupuestos": async (api) => {
+    const { presupuesto } = await nuevoPresupuesto();
+    expect(await idsDe(api, "/api/presupuestos")).toContain(presupuesto);
+  },
+  "GET /api/presupuestos/:id": async (api) => {
+    const { presupuesto } = await nuevoPresupuesto();
+    expect((await cuerpo(await api.get(`/api/presupuestos/${presupuesto}`))).id).toBe(presupuesto);
+  },
+  "POST /api/presupuestos/:id/aprobacion": async (api) => {
+    const { orden, presupuesto } = await nuevoPresupuesto();
+    expect((await cuerpo(await api.post(`/api/presupuestos/${presupuesto}/aprobacion`))).estado).toBe("APROBADO");
+    // RN30: aprobarlo pone la orden en reparación.
+    expect((await cuerpo(await api.get(`/api/ordenes-trabajo/${orden}`))).estado).toBe("EN_REPARACION");
+  },
+  "POST /api/presupuestos/:id/rechazo": async (api) => {
+    const { presupuesto } = await nuevoPresupuesto();
+    expect((await cuerpo(await api.post(`/api/presupuestos/${presupuesto}/rechazo`))).estado).toBe("RECHAZADO");
+  },
+
+  // Usuarios
+  "GET /api/usuarios": async (api) => {
+    const usuarios = await filasDe<{ id: string; email: string }>(api, "/api/usuarios");
+    expect(usuarios.map((usuario) => usuario.email)).toContain("otro-cliente@ejemplo.com");
+  },
+  "PATCH /api/usuarios/:id/rol": async (api) => {
+    // El id sale de la sesión del otro cliente y no del listado, para no
+    // depender del caso de arriba.
+    const { user } = await cuerpo<{ user: { id: string } }>(await como.otroCliente.get("/api/auth/session"));
+    // Le asigna el rol que ya tiene: el permiso se prueba igual, y si la
+    // prueba se corta no queda un usuario con otro rol para las siguientes.
+    const respuesta = await api.patch(`/api/usuarios/${user.id}/rol`, { data: { rol: "CLIENTE" } });
+    expect((await cuerpo<{ rol: string }>(respuesta)).rol).toBe("CLIENTE");
+  },
+};
+
+test.describe("el rol correcto: entra", () => {
+  // Cada fila, con cada rol que la columna "Rol" deja entrar. Donde dice
+  // "Mecánico", también el administrador.
+  const CON_ROL: Persona[] = ["cliente", "mecanico", "admin"];
+
+  for (const { fila, noPueden } of FILAS) {
+    for (const persona of CON_ROL.filter((rol) => !noPueden.includes(rol))) {
+      test(`${fila}, como ${NOMBRE[persona]}`, async () => {
+        const caso = ENTRA[fila];
+        if (!caso) throw new Error(`"${fila}" no tiene su caso en ENTRA`);
+        await caso(como[persona]);
+      });
     }
-  });
+  }
 });
 
 test.describe("lo ajeno no existe: 404", () => {
