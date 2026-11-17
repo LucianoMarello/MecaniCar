@@ -32,7 +32,7 @@ export default async function DetallePresupuesto({ params, searchParams }: { par
   );
   return (
     <main id="contenido">
-      <EncabezadoPagina titulo={`Presupuesto · ${presupuesto.ordenTrabajo.vehiculo.patente}`} descripcion={`Reparación ${presupuesto.ordenTrabajo.id}`} volver={{ href: "/presupuestos", texto: "Presupuestos" }} />
+      <EncabezadoPagina titulo={`Presupuesto · ${presupuesto.ordenTrabajo.vehiculo.patente}`} descripcion="Revisá los servicios, los precios aplicados, el total y el estado." volver={{ href: "/presupuestos", texto: "Presupuestos" }} />
       {query.aviso === "pendiente" && esTaller && <Alert variant="destructive"><AlertTitle>El presupuesto se guardó, pero el aviso no pudo enviarse</AlertTitle><AlertDescription>Avisale al cliente por otro medio que tiene un presupuesto pendiente de revisión.</AlertDescription></Alert>}
       {!esTaller && presupuesto.estado === "APROBADO" && (
         <p role="status" className="mb-4 rounded-md border p-4">
