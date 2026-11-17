@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { signOut, type UsuarioSesion } from "@/lib/auth";
 import { nombreRol } from "@/lib/presentacion";
+import { EnlaceNavegacion } from "@/components/EnlaceNavegacion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -42,46 +43,19 @@ export function Navegacion({ usuario }: { usuario: UsuarioSesion }) {
           </div>
         </div>
         <nav aria-label="Navegación principal" className="flex flex-wrap gap-3">
-          <Button
-            asChild
-            variant="secondary"
-          >
-            <Link href="/vehiculos">
-              {usuario.rol === "CLIENTE"
-                ? "Mis vehículos"
-                : "Vehículos del taller"}
-            </Link>
-          </Button>
-          <Button
-            asChild
-            variant="secondary"
-          >
-            <Link href="/turnos">
-              {usuario.rol === "CLIENTE" ? "Mis turnos" : "Turnos del taller"}
-            </Link>
-          </Button>
-          <Button
-            asChild
-            variant="ghost"
-          >
-            <Link href="/ordenes-trabajo">
-              {usuario.rol === "CLIENTE" ? "Mis reparaciones" : "Órdenes de trabajo"}
-            </Link>
-          </Button>
-          <Button
-            asChild
-            variant="ghost"
-          >
-            <Link href="/presupuestos">
-              {usuario.rol === "CLIENTE" ? "Mis presupuestos" : "Presupuestos"}
-            </Link>
-          </Button>
-          <Button
-            asChild
-            variant="ghost"
-          >
-            <Link href="/sistema">Guía visual</Link>
-          </Button>
+          <EnlaceNavegacion href="/vehiculos">
+            {usuario.rol === "CLIENTE" ? "Mis vehículos" : "Vehículos del taller"}
+          </EnlaceNavegacion>
+          <EnlaceNavegacion href="/turnos">
+            {usuario.rol === "CLIENTE" ? "Mis turnos" : "Turnos del taller"}
+          </EnlaceNavegacion>
+          <EnlaceNavegacion href="/ordenes-trabajo">
+            {usuario.rol === "CLIENTE" ? "Mis reparaciones" : "Órdenes de trabajo"}
+          </EnlaceNavegacion>
+          <EnlaceNavegacion href="/presupuestos">
+            {usuario.rol === "CLIENTE" ? "Mis presupuestos" : "Presupuestos"}
+          </EnlaceNavegacion>
+          <EnlaceNavegacion href="/sistema">Guía visual</EnlaceNavegacion>
         </nav>
       </div>
     </header>

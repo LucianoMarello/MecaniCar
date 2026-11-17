@@ -29,7 +29,7 @@ export default async function Presupuestos({ searchParams }: Props) {
         <ul className="space-y-3">{presupuestos.map((presupuesto) => (
           <li key={presupuesto.id} className="rounded-lg border bg-card p-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <div><p className="font-medium">{presupuesto.ordenTrabajo.vehiculo.patente} · Presupuesto {presupuesto.id}</p><p className="text-sm text-muted-foreground">Creado: {formatearFecha(presupuesto.fechaCreacion)} · Total: {formatearImporte(presupuesto.total)}</p></div>
+              <div><p className="font-medium">Presupuesto · {presupuesto.ordenTrabajo.vehiculo.patente}</p><p className="text-sm text-muted-foreground">Creado: {formatearFecha(presupuesto.fechaCreacion)} · Total: {formatearImporte(presupuesto.total)}</p></div>
               <EstadoTrabajo estado={presupuesto.estado} />
               <Button asChild variant="outline"><Link href={`/presupuestos/${presupuesto.id}`}>Ver presupuesto</Link></Button>
             </div>
