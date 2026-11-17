@@ -1,0 +1,34 @@
+﻿CLASE 14 - EXPERIMENTO CONTROLADO DE CONCURRENCIA
+
+FASE ROJA
+
+Implementación experimental sin transacción Serializable
+ni restricción UNIQUE sobre OrdenTrabajo.turnoId.
+
+Resultado de diez solicitudes concurrentes:
+HTTP 201: 2
+HTTP 409: 8
+
+Playwright:
+Expected length: 1
+Received length: 2
+Received array: [201, 201]
+1 failed
+
+Verificación en PostgreSQL:
+turnoId: cmwjz3l3z0003ud28ew33nqgu
+cantidad de órdenes: 2
+
+Conclusión:
+La implementación experimental vulnerable permitió
+crear dos órdenes para un mismo turno.
+
+FASE VERDE
+
+Se restauraron las protecciones originales.
+Resultado:
+HTTP 201: 1
+HTTP 409: 9
+1 passed (51.0s)
+
+La implementación protegida cumple la regla de unicidad.
